@@ -172,11 +172,11 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
 
   const SidebarContent = () => (
       <>
-        <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
-          <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center">
+        <div className="flex h-16 items-center gap-2 border-b border-white/5 px-6">
+          <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
             <Icons.Shield className="h-4 w-4 text-white" />
           </div>
-          <span className="font-archivo tracking-tight text-h6 font-medium">Student Portal</span>
+          <span className="font-archivo tracking-tight text-h6 font-medium text-white">Student Portal</span>
         </div>
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
           {navItems.map((item) => (
@@ -195,7 +195,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
             </Link>
           ))}
         </div>
-        <div className="border-t border-white/10 p-4">
+        <div className="border-t border-white/5 p-4">
           <div className="flex items-center gap-3 mb-4 px-2 py-2 rounded-lg bg-white/5 border border-white/5">
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-caption1 text-white shadow-inner">
               {currentUser?.firstName[0]}{currentUser?.lastName[0]}
@@ -217,9 +217,9 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
   );
 
   return (
-    <div className="min-h-screen flex bg-[#030712] text-gray-100">
+    <div className="min-h-screen flex bg-[#02040a] text-gray-100 font-sans">
       {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-white/10 bg-[#060a15] md:flex sticky top-0 h-screen z-40">
+      <aside className="hidden w-64 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
         <SidebarContent />
       </aside>
 
@@ -227,14 +227,19 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
       {isMobileMenuOpen && (
           <div className="fixed inset-0 z-50 flex md:hidden">
               <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-              <div className="relative w-64 h-full bg-[#060a15] border-r border-white/10 flex flex-col shadow-2xl animate-fade-in">
+              <div className="relative w-64 h-full bg-[#030712] border-r border-white/10 flex flex-col shadow-2xl animate-fade-in">
                   <SidebarContent />
               </div>
           </div>
       )}
 
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#060a15] sticky top-0 z-30">
+      <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
+        {/* Command Center Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#030712] via-[#050914] to-[#030712] z-0"></div>
+        <div className="absolute top-0 left-0 w-full h-96 bg-blue-900/5 blur-[120px] pointer-events-none z-0"></div>
+        <div className="absolute bottom-0 right-0 w-full h-96 bg-red-900/5 blur-[120px] pointer-events-none z-0"></div>
+
+        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#030712]/90 backdrop-blur-md sticky top-0 z-30 relative">
           <div className="flex items-center gap-2">
              <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center">
                 <Icons.Shield className="h-4 w-4 text-white" />
@@ -243,7 +248,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
           </div>
           <Button size="icon" variant="ghost" onClick={() => setIsMobileMenuOpen(true)}><Icons.Menu className="h-5 w-5" /></Button>
         </header>
-        <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-grid-pattern pb-20">
+        <div className="flex-1 p-6 md:p-12 overflow-y-auto pb-20 relative z-10">
           {children}
         </div>
       </main>
@@ -265,11 +270,11 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
 
   const SidebarContent = () => (
       <>
-        <div className="flex h-16 items-center gap-2 border-b border-red-900/20 px-6 bg-[#0f0404]">
-          <div className="h-6 w-6 rounded bg-red-800 flex items-center justify-center">
+        <div className="flex h-16 items-center gap-2 border-b border-red-900/20 px-6 bg-[#0a0505]">
+          <div className="h-6 w-6 rounded bg-red-800 flex items-center justify-center shadow-lg shadow-red-900/40">
             <Icons.Shield className="h-4 w-4 text-white" />
           </div>
-          <span className="font-archivo tracking-tight text-red-50 text-h6">ADMIN CONSOLE</span>
+          <span className="font-archivo tracking-tight text-red-50 text-h6 font-bold">ADMIN CONSOLE</span>
         </div>
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 bg-[#0a0505]">
           {navItems.map((item) => (
@@ -279,7 +284,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
               onClick={() => setIsMobileMenuOpen(false)}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-subtitle2 font-archivo transition-all ${
                 location.pathname.startsWith(item.path)
-                  ? 'bg-red-900/30 text-red-200 border border-red-900/30 shadow-sm'
+                  ? 'bg-red-900/20 text-red-200 border border-red-900/30 shadow-[0_0_10px_rgba(220,38,38,0.1)]'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent'
               }`}
             >
@@ -309,7 +314,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex bg-[#030712] text-gray-100">
       {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-red-900/20 bg-[#0f0404] md:flex sticky top-0 h-screen z-40">
+      <aside className="hidden w-64 flex-col border-r border-red-900/20 bg-[#0a0505] md:flex sticky top-0 h-screen z-40 shadow-2xl">
         <SidebarContent />
       </aside>
 
@@ -323,12 +328,16 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           </div>
       )}
 
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#0f0404] sticky top-0 z-30">
+      <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
+        {/* Admin Command Center Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0505] via-[#150505] to-[#0a0505] z-0"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent z-0"></div>
+
+        <header className="md:hidden flex h-16 items-center justify-between border-b border-red-900/20 px-4 bg-[#0a0505] sticky top-0 z-30 relative">
           <span className="font-bold text-red-500 font-archivo text-h6">Admin Console</span>
           <Button size="icon" variant="ghost" onClick={() => setIsMobileMenuOpen(true)}><Icons.Menu className="h-5 w-5" /></Button>
         </header>
-        <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-grid-pattern pb-20">
+        <div className="flex-1 p-6 md:p-12 overflow-y-auto pb-20 relative z-10">
           {children}
         </div>
       </main>
@@ -1193,52 +1202,65 @@ const StudentDashboard = () => {
     <div className="space-y-12 animate-fade-in max-w-7xl mx-auto">
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       
-      <div className="flex items-end justify-between border-b border-white/5 pb-8">
+      <div className="flex items-end justify-between border-b border-white/10 pb-6">
         <div>
-          <h1 className="text-h1 font-archivo tracking-tight text-white">Dashboard</h1>
-          <p className="text-gray-400 mt-2 text-h6 font-light">Track your progress and access new training modules.</p>
+          <h1 className="text-h2 font-archivo font-medium text-white tracking-wide">Command Center</h1>
+          <p className="text-gray-400 mt-1 text-body1 font-light">Welcome back, {currentUser?.firstName}. Ready for deployment.</p>
         </div>
         <div className="text-right hidden sm:block">
-          <Badge variant="success" className="px-4 py-1.5 text-caption1">Active Status: Clear</Badge>
+           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-caption1 uppercase tracking-widest">
+               <span className="relative flex h-2 w-2">
+                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+               </span>
+               Status: Active
+           </div>
         </div>
       </div>
 
       {/* Hero: Continue Learning */}
       {activeCourse && (
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0f1c] p-10 shadow-2xl group">
-              <div className="absolute top-0 right-0 -mt-16 -mr-16 h-80 w-80 rounded-full bg-red-600/10 blur-[100px]"></div>
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+          <div className="relative overflow-hidden border border-white/10 bg-[#0a0f1c]/80 p-0 shadow-2xl group transition-all duration-500 hover:border-red-500/30">
+              {/* Background with Gradient Overlay */}
+              <div className="absolute inset-0 z-0">
+                  <img src={activeCourse.image} alt="Background" className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1c] via-[#0a0f1c]/90 to-transparent"></div>
+              </div>
+              
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 p-10">
                   <div className="w-full md:w-auto flex-shrink-0">
-                    <div className="relative h-48 w-72 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
-                        <img src={activeCourse.image} alt={activeCourse.title} className="h-full w-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                <Icons.Play className="h-6 w-6 text-white fill-current ml-1" />
+                    <div className="relative h-48 w-72 rounded-sm overflow-hidden border border-white/10 shadow-2xl group-hover:border-red-500/40 transition-colors duration-500">
+                        <img src={activeCourse.image} alt={activeCourse.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="h-12 w-12 border border-white/20 bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                                <Icons.Play className="h-5 w-5 text-white fill-current ml-0.5" />
                             </div>
                         </div>
                     </div>
                   </div>
                   <div className="flex-1 text-center md:text-left">
                       <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-                        <Badge className="bg-red-500 text-white border-transparent px-3 py-1">In Progress</Badge>
-                        <span className="text-caption1 text-gray-400 font-mono uppercase tracking-wide">Last accessed 2h ago</span>
+                        <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">Priority Task</span>
+                        <div className="h-px w-10 bg-red-900/50"></div>
                       </div>
-                      <h2 className="text-h2 font-bold text-white mb-3">{activeCourse.title}</h2>
-                      <p className="text-gray-400 text-body1 mb-8 line-clamp-2 max-w-2xl">{activeCourse.description}</p>
+                      <h2 className="text-3xl font-archivo font-medium text-white mb-2">{activeCourse.title}</h2>
+                      <p className="text-gray-400 text-body1 mb-8 line-clamp-2 max-w-2xl font-light">{activeCourse.description}</p>
                       
                       <div className="max-w-xl">
-                          <div className="flex justify-between text-caption1 mb-2 font-semibold text-gray-300">
-                              <span>Course Progress</span>
-                              <span>{getCourseProgress(currentUser!.id, activeCourse.id)}%</span>
+                          <div className="flex justify-between text-caption1 mb-2 font-bold text-gray-500 uppercase tracking-widest">
+                              <span>Mission Progress</span>
+                              <span className="text-white">{getCourseProgress(currentUser!.id, activeCourse.id)}%</span>
                           </div>
-                          <div className="h-3 w-full bg-gray-800 rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full" style={{ width: `${getCourseProgress(currentUser!.id, activeCourse.id)}%` }}></div>
+                          <div className="h-1.5 w-full bg-gray-800 rounded-none overflow-hidden">
+                              <div className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" style={{ width: `${getCourseProgress(currentUser!.id, activeCourse.id)}%` }}></div>
                           </div>
                       </div>
                   </div>
                   <div className="flex-shrink-0">
                       <Link to={`/portal/course/${activeCourse.id}`}>
-                        <Button size="lg" className="shadow-lg shadow-red-900/20">Continue Learning</Button>
+                        <Button size="lg" className="rounded-none h-14 px-8 text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 border border-transparent hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all">
+                            Resume
+                        </Button>
                       </Link>
                   </div>
               </div>
@@ -1246,77 +1268,68 @@ const StudentDashboard = () => {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Card className="p-8 border-l-4 border-l-blue-500 bg-blue-950/5 hover:bg-blue-950/10 transition-colors">
-          <div className="flex items-center gap-6">
-            <div className="p-4 bg-blue-500/20 rounded-xl text-blue-400">
-              <Icons.BookOpen className="h-8 w-8" />
-            </div>
-            <div>
-              <p className="text-caption1 font-medium text-blue-200/70 uppercase tracking-wider">Enrolled Courses</p>
-              <p className="text-h2 font-archivo text-white mt-1">{enrolledCourses.length}</p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
+          <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Enrolled Modules</p>
+              <p className="text-3xl font-archivo text-white">{enrolledCourses.length}</p>
           </div>
-        </Card>
-        <Card className="p-8 border-l-4 border-l-red-500 bg-red-950/5 hover:bg-red-950/10 transition-colors">
-          <div className="flex items-center gap-6">
-            <div className="p-4 bg-red-500/20 rounded-xl text-red-400">
-              <Icons.Clock className="h-8 w-8" />
-            </div>
-            <div>
-              <p className="text-caption1 font-medium text-red-200/70 uppercase tracking-wider">Completed</p>
-              <p className="text-h2 font-archivo text-white mt-1">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
-            </div>
+          <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
+             <Icons.BookOpen className="h-5 w-5" />
           </div>
-        </Card>
-        <Card className="p-8 border-l-4 border-l-emerald-500 bg-emerald-950/5 hover:bg-emerald-950/10 transition-colors">
-          <div className="flex items-center gap-6">
-            <div className="p-4 bg-emerald-500/20 rounded-xl text-emerald-400">
-              <Icons.Award className="h-8 w-8" />
-            </div>
-            <div>
-              <p className="text-caption1 font-medium text-emerald-200/70 uppercase tracking-wider">Certifications</p>
-              <p className="text-h2 font-archivo text-white mt-1">0</p>
-            </div>
+        </div>
+        <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
+          <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Completed</p>
+              <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
           </div>
-        </Card>
+          <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
+             <Icons.Check className="h-5 w-5" />
+          </div>
+        </div>
+        <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
+          <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Certifications</p>
+              <p className="text-3xl font-archivo text-white">0</p>
+          </div>
+          <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
+             <Icons.Award className="h-5 w-5" />
+          </div>
+        </div>
       </div>
 
       {enrolledCourses.length > 0 && (
         <div>
-            <h2 className="text-h3 font-archivo mb-6 flex items-center gap-3">
-                <Icons.BookOpen className="h-6 w-6 text-red-500" />
-                My Training
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex items-center gap-3 mb-6">
+                <span className="h-px w-6 bg-red-600"></span>
+                <h2 className="text-lg font-archivo font-bold text-white uppercase tracking-widest">Active Training</h2>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enrolledCourses.map(course => {
                 const progress = getCourseProgress(currentUser!.id, course.id);
                 return (
                     <Link key={course.id} to={`/portal/course/${course.id}`} className="group h-full">
-                    <Card className="overflow-hidden hover:border-red-500/30 hover:shadow-2xl hover:shadow-red-900/10 transition-all h-full flex flex-col bg-[#111827]">
-                        <div className="relative h-56 w-full overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent z-10" />
-                            <img src={course.image} alt={course.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                            <Badge className="absolute top-4 right-4 z-20 backdrop-blur-md bg-black/60 border-white/10 text-white px-3 py-1">{course.level}</Badge>
+                    <div className="bg-[#0f121a] border border-white/5 hover:border-red-500/30 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
+                        <div className="relative h-48 w-full overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0f121a] to-transparent z-10" />
+                            <img src={course.image} alt={course.title} className="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                            <Badge className="absolute top-4 right-4 z-20 bg-black/80 border-white/10 text-white rounded-none text-xs uppercase tracking-widest px-2 py-1">{course.level}</Badge>
                         </div>
-                        <div className="p-8 flex-1 flex flex-col">
-                            <h3 className="font-archivo text-h5 mb-3 text-white group-hover:text-red-400 transition-colors line-clamp-1">{course.title}</h3>
-                            <p className="text-body2 text-gray-400 mb-8 line-clamp-2 leading-relaxed">{course.description}</p>
+                        <div className="p-6 flex-1 flex flex-col relative z-10">
+                            <h3 className="font-archivo text-xl font-medium mb-2 text-white group-hover:text-red-400 transition-colors line-clamp-1">{course.title}</h3>
+                            <p className="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed">{course.description}</p>
                             
-                            <div className="space-y-4 mt-auto">
-                                <div className="flex justify-between text-caption1 font-bold text-gray-300 uppercase tracking-wide">
+                            <div className="space-y-3 mt-auto">
+                                <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                                     <span>Progress</span>
                                     <span>{progress}%</span>
                                 </div>
-                                <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-600 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]" style={{ width: `${progress}%` }}></div>
+                                <div className="h-1 w-full bg-gray-800 overflow-hidden">
+                                    <div className="h-full bg-red-600" style={{ width: `${progress}%` }}></div>
                                 </div>
-                                <Button variant="outline" size="lg" className="w-full mt-4 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all">
-                                    {progress === 100 ? 'Review Course' : 'Continue Training'}
-                                </Button>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                     </Link>
                 );
             })}
@@ -1326,27 +1339,27 @@ const StudentDashboard = () => {
 
       {availableCourses.length > 0 && (
          <div>
-            <h2 className="text-h3 font-archivo mb-6 flex items-center gap-3">
-                <Icons.Plus className="h-6 w-6 text-gray-400" />
-                Available Courses
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex items-center gap-3 mb-6 mt-12">
+                <span className="h-px w-6 bg-gray-600"></span>
+                <h2 className="text-lg font-archivo font-bold text-gray-300 uppercase tracking-widest">Available Operations</h2>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {availableCourses.map(course => (
-                     <Card key={course.id} className="overflow-hidden border-dashed border-2 border-white/10 hover:border-red-500/30 hover:bg-[#111827] transition-all group flex flex-col bg-transparent">
-                        <div className="relative h-48 w-full overflow-hidden opacity-60 group-hover:opacity-100 transition-opacity duration-500">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent z-10" />
+                     <div key={course.id} className="border border-white/5 bg-transparent hover:bg-[#0f121a] hover:border-white/10 transition-all duration-300 group flex flex-col">
+                        <div className="relative h-40 w-full overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10" />
                             <img src={course.image} alt={course.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                         </div>
-                        <div className="p-8 flex-1 flex flex-col">
-                            <h3 className="font-archivo text-h5 mb-3 text-white group-hover:text-red-400 transition-colors">{course.title}</h3>
-                            <p className="text-body2 text-gray-500 group-hover:text-gray-400 line-clamp-2 mb-8 leading-relaxed">{course.description}</p>
+                        <div className="p-6 flex-1 flex flex-col">
+                            <h3 className="font-archivo text-lg font-medium mb-2 text-gray-300 group-hover:text-white transition-colors">{course.title}</h3>
+                            <p className="text-sm text-gray-600 group-hover:text-gray-400 line-clamp-2 mb-6 leading-relaxed">{course.description}</p>
                             <div className="mt-auto">
-                                <Button onClick={() => handleEnroll(course.id, course.title)} variant="ghost" size="lg" className="w-full border border-gray-700 hover:bg-red-600 hover:border-red-600 hover:text-white group-hover:bg-white/5">
-                                    Enroll Now
+                                <Button onClick={() => handleEnroll(course.id, course.title)} variant="ghost" size="lg" className="w-full border border-gray-800 hover:bg-white/5 text-gray-400 hover:text-white rounded-none uppercase tracking-widest text-xs h-10">
+                                    Initialize
                                 </Button>
                             </div>
                         </div>
-                     </Card>
+                     </div>
                 ))}
             </div>
          </div>
