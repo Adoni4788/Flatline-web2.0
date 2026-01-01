@@ -1482,7 +1482,15 @@ const AboutPage = () => {
                  ].map((inst, i) => (
                      <div key={i} className="group relative bg-[#0a0f1c] border border-white/5 overflow-hidden hover:border-red-500/30 transition-all duration-500">
                          <div className="h-96 overflow-hidden relative">
-                            <img src={inst.img} alt={inst.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                            <img 
+                                src={inst.img} 
+                                alt={inst.name} 
+                                className={`w-full h-full grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${
+                                    inst.name === "Major Alan Dutch" || inst.name === "John Matrix" 
+                                        ? "object-cover object-top" 
+                                        : "object-cover"
+                                }`}
+                            />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1c] via-transparent to-transparent opacity-90"></div>
                          </div>
                          <div className="absolute bottom-0 left-0 w-full p-8">
@@ -1504,7 +1512,7 @@ const AboutPage = () => {
             <h2 className="text-4xl md:text-5xl font-bold font-archivo text-white mb-8">Join the Ranks</h2>
             <p className="text-xl text-gray-400 font-light mb-12 max-w-2xl mx-auto">Experience the difference that professional training makes. Start your journey with Flatline Security today.</p>
             <Link to="/login">
-                  <Button size="lg" className="h-16 px-12 text-lg uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] transition-shadow">
+                  <Button size="lg" className="h-16 px-12 text-lg uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] transition-shadow rounded-none">
                     Get Started Now
                   </Button>
             </Link>
