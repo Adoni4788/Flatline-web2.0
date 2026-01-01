@@ -6,12 +6,14 @@ import { COURSES, MODULES, LESSONS, MOCK_USER, MOCK_ADMIN } from './mockData';
 const INITIAL_USERS: User[] = [
   MOCK_USER,
   MOCK_ADMIN,
-  { id: 'u2', firstName: 'Sarah', lastName: 'Connor', email: 'sarah@resistance.net', role: 'user', status: 'active' },
-  { id: 'u3', firstName: 'Jason', lastName: 'Bourne', email: 'jason@treadstone.cia', role: 'user', status: 'inactive' },
+  { id: 'u2', firstName: 'Sarah', lastName: 'Connor', email: 'sarah@resistance.net', role: 'user', status: 'active', source: 'Hawk Eye Security' },
+  { id: 'u3', firstName: 'Jason', lastName: 'Bourne', email: 'jason@treadstone.cia', role: 'user', status: 'inactive', source: 'Guardsman Security' },
 ];
 
 const INITIAL_ENROLLMENTS: Enrollment[] = [
-  { userId: 'u1', courseId: 'c1', progress: 35, completedLessons: ['l1'], status: 'active' },
+  { userId: 'u1', courseId: 'c1', progress: 35, completedLessons: ['l1'], status: 'active', id: 'e1' },
+  { userId: 'u2', courseId: 'c2', progress: 75, completedLessons: [], status: 'active', id: 'e2' },
+  { userId: 'u1', courseId: 'c3', progress: 100, completedLessons: [], status: 'completed', id: 'e3' },
 ];
 
 interface DataContextType {
@@ -21,13 +23,25 @@ interface DataContextType {
   lessons: Lesson[];
   enrollments: Enrollment[];
   currentUser: User | null;
-  // Actions
+  // User Actions
   login: (email: string) => Promise<boolean>;
   logout: () => void;
   addUser: (user: Omit<User, 'id' | 'status'>) => void;
   updateUser: (id: string, data: Partial<User>) => void;
   deleteUser: (id: string) => void;
+  // Course Actions
   addCourse: (course: Omit<Course, 'id'>) => void;
+  updateCourse: (id: string, data: Partial<Course>) => void;
+  deleteCourse: (id: string) => void;
+  // Module Actions
+  addModule: (module: Omit<Module, 'id'>) => void;
+  updateModule: (id: string, data: Partial<Module>) => void;
+  deleteModule: (id: string) => void;
+  // Lesson Actions
+  addLesson: (lesson: Omit<Lesson, 'id'>) => void;
+  updateLesson: (id: string, data: Partial<Lesson>) => void;
+  deleteLesson: (id: string) => void;
+  // Enrollment Actions
   enrollUser: (userId: string, courseId: string) => void;
   updateProgress: (userId: string, lessonId: string, courseId: string) => void;
   getCourseProgress: (userId: string, courseId: string) => number;
@@ -82,6 +96,8 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const deleteUser = (id: string) => {
     setUsers(users.filter(u => u.id !== id));
+    // Also delete user's enrollments
+    setEnrollments(enrollments.filter(e => e.userId !== id));
   };
 
   const addCourse = (courseData: Omit<Course, 'id'>) => {
@@ -92,9 +108,78 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     setCourses([...courses, newCourse]);
   };
 
+  const updateCourse = (id: string, data: Partial<Course>) => {
+    setCourses(courses.map(c => c.id === id ? { ...c, ...data } : c));
+  };
+
+  const deleteCourse = (id: string) => {
+    setCourses(courses.filter(c => c.id !== id));
+    // Also delete associated modules, lessons, and enrollments
+    const courseModules = modules.filter(m => m.courseId === id);
+    const moduleIds = courseModules.map(m => m.id);
+    setModules(modules.filter(m => m.courseId !== id));
+    setLessons(lessons.filter(l => !moduleIds.includes(l.moduleId)));
+    setEnrollments(enrollments.filter(e => e.courseId !== id));
+  };
+
+  const addModule = (moduleData: Omit<Module, 'id'>) => {
+    const newModule: Module = {
+      ...moduleData,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+    setModules([...modules, newModule]);
+    // Update course modules count
+    const courseModules = modules.filter(m => m.courseId === moduleData.courseId);
+    updateCourse(moduleData.courseId, { modules: courseModules.length + 1 });
+  };
+
+  const updateModule = (id: string, data: Partial<Module>) => {
+    setModules(modules.map(m => m.id === id ? { ...m, ...data } : m));
+  };
+
+  const deleteModule = (id: string) => {
+    const module = modules.find(m => m.id === id);
+    if (module) {
+      setModules(modules.filter(m => m.id !== id));
+      setLessons(lessons.filter(l => l.moduleId !== id));
+      // Update course modules count
+      const courseModules = modules.filter(m => m.courseId === module.courseId && m.id !== id);
+      updateCourse(module.courseId, { modules: courseModules.length });
+    }
+  };
+
+  const addLesson = (lessonData: Omit<Lesson, 'id'>) => {
+    const newLesson: Lesson = {
+      ...lessonData,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+    setLessons([...lessons, newLesson]);
+  };
+
+  const updateLesson = (id: string, data: Partial<Lesson>) => {
+    setLessons(lessons.map(l => l.id === id ? { ...l, ...data } : l));
+  };
+
+  const deleteLesson = (id: string) => {
+    setLessons(lessons.filter(l => l.id !== id));
+    // Remove from completed lessons in enrollments
+    setEnrollments(enrollments.map(e => ({
+      ...e,
+      completedLessons: e.completedLessons.filter(lessonId => lessonId !== id)
+    })));
+  };
+
   const enrollUser = (userId: string, courseId: string) => {
     if (enrollments.some(e => e.userId === userId && e.courseId === courseId)) return;
-    setEnrollments([...enrollments, { userId, courseId, progress: 0, completedLessons: [], status: 'active' }]);
+    const newEnrollment: Enrollment = {
+      id: Math.random().toString(36).substr(2, 9),
+      userId,
+      courseId,
+      progress: 0,
+      completedLessons: [],
+      status: 'active'
+    };
+    setEnrollments([...enrollments, newEnrollment]);
   };
 
   const updateProgress = (userId: string, lessonId: string, courseId: string) => {
@@ -128,7 +213,12 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   return (
     <DataContext.Provider value={{
       users, courses, modules, lessons, enrollments, currentUser,
-      login, logout, addUser, updateUser, deleteUser, addCourse, enrollUser, updateProgress, getCourseProgress
+      login, logout,
+      addUser, updateUser, deleteUser,
+      addCourse, updateCourse, deleteCourse,
+      addModule, updateModule, deleteModule,
+      addLesson, updateLesson, deleteLesson,
+      enrollUser, updateProgress, getCourseProgress
     }}>
       {children}
     </DataContext.Provider>

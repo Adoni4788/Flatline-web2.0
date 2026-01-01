@@ -6,6 +6,7 @@ export interface User {
   email: string;
   role: 'admin' | 'user';
   status: 'active' | 'inactive';
+  source?: string; // Security company source
 }
 
 export interface Course {
@@ -55,6 +56,7 @@ export interface Lesson {
 }
 
 export interface Enrollment {
+  id: string;
   userId: string;
   courseId: string;
   progress: number; // 0 - 100
