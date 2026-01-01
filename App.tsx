@@ -41,8 +41,12 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#030712] text-gray-100 font-sans selection:bg-red-500/30 selection:text-white">
+      {/* Preview Banner */}
+      <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100]">
+        ⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use
+      </div>
       <nav 
-        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        className={`fixed top-[34px] z-50 w-full transition-all duration-300 ${
           isScrolled 
             ? 'border-b border-white/10 bg-[#030712]/90 backdrop-blur-md py-4' 
             : 'border-b border-transparent bg-transparent py-8'
@@ -282,6 +286,10 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex bg-[#02040a] text-gray-100 font-sans">
+      {/* Preview Banner */}
+      <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100]">
+        ⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use
+      </div>
       {/* Desktop Sidebar */}
       <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
         <SidebarContent />
@@ -303,7 +311,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
         <div className="absolute top-0 left-0 w-full h-96 bg-blue-900/5 blur-[120px] pointer-events-none z-0"></div>
         <div className="absolute bottom-0 right-0 w-full h-96 bg-red-900/5 blur-[120px] pointer-events-none z-0"></div>
 
-        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#030712]/90 backdrop-blur-md sticky top-0 z-30 relative">
+        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#030712]/90 backdrop-blur-md sticky top-[34px] z-30 relative">
           <div className="flex items-center gap-2">
              <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center">
                 <Icons.Shield className="h-4 w-4 text-white" />
@@ -656,6 +664,10 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex bg-[#030712] text-gray-100">
+      {/* Preview Banner */}
+      <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100]">
+        ⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use
+      </div>
       {/* Desktop Sidebar */}
       <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
         <SidebarContent />
@@ -675,7 +687,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         {/* Admin Command Center Background */}
         <div className="absolute inset-0 bg-[#030712] z-0"></div>
 
-        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/5 px-4 bg-[#030712] sticky top-0 z-30 relative">
+        <header className="md:hidden flex h-16 items-center justify-between border-b border-white/5 px-4 bg-[#030712] sticky top-[34px] z-30 relative">
           <span className="font-bold text-white font-archivo text-h6">Admin Console</span>
           <Button size="icon" variant="ghost" onClick={() => setIsMobileMenuOpen(true)}><Icons.Menu className="h-5 w-5" /></Button>
         </header>
@@ -699,7 +711,6 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
                 </div>
                 <div className="flex-1">
                   <p className="text-subtitle1 font-medium text-white">Administrator</p>
-                  <p className="text-caption text-gray-400">admin@flatline.com</p>
                   <p className="text-caption text-gray-400 flex items-center gap-1 mt-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
                     System Control
@@ -1602,7 +1613,7 @@ const ContactPage = () => {
 };
 
 const LoginPage = () => {
-  const { login } = useData();
+  const { login, currentUser } = useData();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -1618,11 +1629,23 @@ const LoginPage = () => {
     setTimeout(async () => {
         const success = await login(email);
         if (success) {
-            if (email.includes('admin')) {
-                navigate('/admin/dashboard');
-            } else {
-                navigate('/portal/dashboard');
-            }
+            // Check the actual user role instead of email string
+            // Wait a moment for state to update, then check currentUser
+            setTimeout(() => {
+                // Get user from localStorage since state might not be updated yet
+                const stored = localStorage.getItem('flatline_user');
+                if (stored) {
+                    const user = JSON.parse(stored);
+                    if (user?.role === 'admin') {
+                        navigate('/admin/dashboard');
+                    } else {
+                        navigate('/portal/dashboard');
+                    }
+                } else {
+                    // Fallback to portal if we can't determine role
+                    navigate('/portal/dashboard');
+                }
+            }, 100);
         } else {
             setError('Invalid credentials.');
             setIsLoading(false);
@@ -1685,10 +1708,6 @@ const LoginPage = () => {
            <p className="text-body2 text-gray-500 max-w-xs mx-auto">
              Contact your administrator to request access credentials for the training portal.
            </p>
-           <a href="mailto:admin@flatline.com" className="inline-flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors text-caption1 font-medium">
-             <Icons.Mail className="h-4 w-4" />
-             admin@flatline.com
-           </a>
         </div>
       </Card>
     </div>
