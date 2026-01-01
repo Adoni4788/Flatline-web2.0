@@ -234,6 +234,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
   const [bannerVisible, setBannerVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
@@ -314,6 +315,8 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
   const navItems = [
     { icon: Icons.LayoutDashboard, label: 'Dashboard', path: '/portal/dashboard' },
     { icon: Icons.BookOpen, label: 'My Training', path: '/portal/courses' },
+    { icon: Icons.Video, label: 'Live Sessions', path: '/portal/live-sessions' },
+    { icon: Icons.Clipboard, label: 'Exams', path: '/portal/exams' },
     { icon: Icons.Award, label: 'Certifications', path: '/portal/certifications' },
   ];
 
@@ -347,7 +350,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
         <div className="p-4 pt-4">
           <button
             onClick={() => setShowUserModal(true)}
-            className="flex items-center gap-3 w-full px-2 py-2 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer"
+            className="flex items-center gap-3 w-full px-2 py-2 rounded-none bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer"
           >
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-caption1 text-white shadow-inner">
               {currentUser?.firstName[0]}{currentUser?.lastName[0]}
@@ -368,7 +371,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
     <div className="min-h-screen flex bg-[#02040a] text-gray-100 font-sans">
       <PreviewBanner />
       {/* Desktop Sidebar */}
-      <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
+      <aside className={`hidden flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl transition-all duration-300 ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
         <SidebarContent />
       </aside>
 
@@ -387,6 +390,18 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#030712] via-[#050914] to-[#030712] z-0"></div>
         <div className="absolute top-0 left-0 w-full h-96 bg-blue-900/5 blur-[120px] pointer-events-none z-0"></div>
         <div className="absolute bottom-0 right-0 w-full h-96 bg-red-900/5 blur-[120px] pointer-events-none z-0"></div>
+
+        {/* Hamburger Menu Button - Desktop */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={`hidden md:flex fixed top-4 z-50 h-8 w-8 items-center justify-center rounded-full bg-[#030712] border-2 border-red-600/50 hover:border-red-600 hover:bg-red-600/10 transition-all duration-300 shadow-lg shadow-red-900/20 ${
+            isSidebarOpen ? 'left-[270px] rotate-0' : 'left-12 rotate-180'
+          }`}
+          style={{ marginTop: bannerVisible ? '34px' : '0' }}
+          aria-label="Toggle sidebar"
+        >
+          <Icons.Menu className="h-4 w-4 text-red-600" />
+        </button>
 
         <header className={`md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#030712]/90 backdrop-blur-md sticky ${bannerVisible ? 'top-[34px]' : 'top-0'} z-30 relative transition-all duration-300`}>
           <div className="flex items-center gap-2">
@@ -663,6 +678,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
   const [bannerVisible, setBannerVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
@@ -706,6 +722,8 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
     { icon: Icons.LayoutDashboard, label: 'Overview', path: '/admin/dashboard' },
     { icon: Icons.BookOpen, label: 'Training Modules', path: '/admin/courses' },
     { icon: Icons.Users, label: 'Trainees', path: '/admin/users' },
+    { icon: Icons.Video, label: 'Live Sessions', path: '/admin/live-sessions' },
+    { icon: Icons.Clipboard, label: 'Exams', path: '/admin/exams' },
     { icon: Icons.Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
@@ -757,7 +775,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
     <div className="min-h-screen flex bg-[#030712] text-gray-100">
       <PreviewBanner />
       {/* Desktop Sidebar */}
-      <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
+      <aside className={`hidden flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl transition-all duration-300 ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
         <SidebarContent />
       </aside>
 
@@ -774,6 +792,18 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
       <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
         {/* Admin Command Center Background */}
         <div className="absolute inset-0 bg-[#030712] z-0"></div>
+
+        {/* Hamburger Menu Button - Desktop */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={`hidden md:flex fixed top-4 z-50 h-8 w-8 items-center justify-center rounded-full bg-[#030712] border-2 border-red-600/50 hover:border-red-600 hover:bg-red-600/10 transition-all duration-300 shadow-lg shadow-red-900/20 ${
+            isSidebarOpen ? 'left-[270px] rotate-0' : 'left-12 rotate-180'
+          }`}
+          style={{ marginTop: bannerVisible ? '34px' : '0' }}
+          aria-label="Toggle sidebar"
+        >
+          <Icons.Menu className="h-4 w-4 text-red-600" />
+        </button>
 
         <header className={`md:hidden flex h-16 items-center justify-between border-b border-white/5 px-4 bg-[#030712] sticky ${bannerVisible ? 'top-[34px]' : 'top-0'} z-30 relative transition-all duration-300`}>
           <span className="font-bold text-white font-archivo text-h6">Admin Console</span>
@@ -2129,18 +2159,55 @@ const StudentDashboard = () => {
 };
 
 // --- Protected Route Wrapper ---
-// Fix: Make children optional to resolve TS error
+// Rewritten to use useEffect instead of render-time Navigate to prevent infinite loops
 const ProtectedRoute = ({ children, role }: { children?: React.ReactNode; role: 'admin' | 'user' }) => {
   const { currentUser } = useData();
-  
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (currentUser.role !== role) {
-    return <Navigate to={currentUser.role === 'admin' ? '/admin/dashboard' : '/portal/dashboard'} replace />;
+  const navigate = useNavigate();
+  const hasNavigated = React.useRef(false);
+
+  useEffect(() => {
+    // Reset navigation flag when dependencies change
+    hasNavigated.current = false;
+  }, [currentUser, role]);
+
+  useEffect(() => {
+    // Prevent multiple navigations
+    if (hasNavigated.current) return;
+
+    // No user - redirect to login
+    if (!currentUser) {
+      hasNavigated.current = true;
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    // Invalid role - redirect to login
+    if (!currentUser.role || (currentUser.role !== 'admin' && currentUser.role !== 'user')) {
+      hasNavigated.current = true;
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    // Wrong role - redirect to appropriate dashboard
+    if (currentUser.role !== role) {
+      hasNavigated.current = true;
+      const targetPath = currentUser.role === 'admin' ? '/admin/dashboard' : '/portal/dashboard';
+      navigate(targetPath, { replace: true });
+      return;
+    }
+  }, [currentUser, role, navigate]);
+
+  // No user or invalid role - show nothing while redirecting
+  if (!currentUser || !currentUser.role || (currentUser.role !== 'admin' && currentUser.role !== 'user')) {
+    return null;
   }
 
+  // Wrong role - show nothing while redirecting
+  if (currentUser.role !== role) {
+    return null;
+  }
+
+  // Authorized - render children
   return <>{children}</>;
 };
 
@@ -2837,6 +2904,7 @@ const StudentTraining = () => {
 
 const StudentCertifications = () => {
   const { courses, enrollments, currentUser } = useData();
+  const navigate = useNavigate();
 
   const completedEnrollments = enrollments.filter(
     e => e.userId === currentUser?.id && e.status === 'completed'
@@ -2924,6 +2992,592 @@ const StudentCertifications = () => {
           </Button>
         </div>
       )}
+    </div>
+  );
+};
+
+// Student Live Sessions Page
+const StudentLiveSessions = () => {
+  const { liveSessions } = useData();
+  const navigate = useNavigate();
+
+  // Defensive check - ensure liveSessions is defined
+  if (!liveSessions || !Array.isArray(liveSessions)) {
+    return (
+      <div className="p-8">
+        <h1 className="text-h2 font-archivo text-white mb-4">Loading Live Sessions...</h1>
+      </div>
+    );
+  }
+
+  const now = new Date();
+  const upcomingSessions = liveSessions
+    .filter(session => {
+      const sessionDateTime = new Date(`${session.scheduledDate}T${session.scheduledTime}`);
+      return sessionDateTime >= now && session.status !== 'completed';
+    })
+    .sort((a, b) => {
+      const dateA = new Date(`${a.scheduledDate}T${a.scheduledTime}`);
+      const dateB = new Date(`${b.scheduledDate}T${b.scheduledTime}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+  const pastSessions = liveSessions
+    .filter(session => {
+      const sessionDateTime = new Date(`${session.scheduledDate}T${session.scheduledTime}`);
+      return sessionDateTime < now || session.status === 'completed';
+    })
+    .sort((a, b) => {
+      const dateA = new Date(`${a.scheduledDate}T${a.scheduledTime}`);
+      const dateB = new Date(`${b.scheduledDate}T${b.scheduledTime}`);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+  const formatDateTime = (date: string, time: string) => {
+    const dateObj = new Date(`${date}T${time}`);
+    return {
+      date: dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      time: dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+  };
+
+  const getTimeUntil = (date: string, time: string) => {
+    const sessionDateTime = new Date(`${date}T${time}`);
+    const diff = sessionDateTime.getTime() - now.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} remaining`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} remaining`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} remaining`;
+    return 'Starting now';
+  };
+
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-h2 font-archivo text-white mb-2">Live Sessions</h1>
+        <p className="text-gray-400">Join live training sessions and virtual classes.</p>
+      </div>
+
+      {/* Upcoming Sessions */}
+      {upcomingSessions.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-h4 font-archivo text-white mb-6 flex items-center gap-3">
+            <span className="h-1 w-8 bg-red-600"></span>
+            Upcoming Sessions
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {upcomingSessions.map(session => {
+              const { date, time } = formatDateTime(session.scheduledDate, session.scheduledTime);
+              return (
+                <Card key={session.id} className="p-6 border-white/10 hover:border-red-500/30 transition-all">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-red-600 rounded-lg p-3">
+                        <Icons.Video className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-h5 font-archivo text-white font-bold">{session.title}</h3>
+                        <Badge variant="outline" className="bg-green-500/20 border-green-500 text-green-300 mt-1">
+                          {getTimeUntil(session.scheduledDate, session.scheduledTime)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-400 text-body2 mb-4">{session.description}</p>
+
+                  <div className="border-t border-white/10 pt-4 mb-4 space-y-2">
+                    <div className="flex items-center gap-2 text-caption">
+                      <Icons.Calendar className="h-4 w-4 text-red-600" />
+                      <span className="text-gray-400">{date}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-caption">
+                      <Icons.Clock className="h-4 w-4 text-red-600" />
+                      <span className="text-gray-400">{time}</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => window.open(session.meetingLink, '_blank', 'noopener,noreferrer')}
+                  >
+                    <Icons.Video className="h-4 w-4 mr-2" />
+                    Join Session
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Past Sessions */}
+      {pastSessions.length > 0 && (
+        <div>
+          <h2 className="text-h4 font-archivo text-white mb-6 flex items-center gap-3">
+            <span className="h-1 w-8 bg-gray-600"></span>
+            Past Sessions
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {pastSessions.map(session => {
+              const { date, time } = formatDateTime(session.scheduledDate, session.scheduledTime);
+              return (
+                <Card key={session.id} className="p-6 border-white/10 opacity-75">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-gray-600 rounded-lg p-3">
+                        <Icons.Video className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-h5 font-archivo text-white font-bold">{session.title}</h3>
+                        <Badge variant="outline" className="bg-gray-500/20 border-gray-500 text-gray-400 mt-1">
+                          Completed
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-400 text-body2 mb-4">{session.description}</p>
+
+                  <div className="border-t border-white/10 pt-4 space-y-2">
+                    <div className="flex items-center gap-2 text-caption">
+                      <Icons.Calendar className="h-4 w-4 text-gray-600" />
+                      <span className="text-gray-500">{date}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-caption">
+                      <Icons.Clock className="h-4 w-4 text-gray-600" />
+                      <span className="text-gray-500">{time}</span>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {upcomingSessions.length === 0 && pastSessions.length === 0 && (
+        <div className="text-center py-20">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6">
+            <Icons.Video className="h-10 w-10 text-gray-500" />
+          </div>
+          <h3 className="text-h4 font-archivo text-white mb-3">No Live Sessions</h3>
+          <p className="text-gray-400 mb-8 max-w-md mx-auto">
+            There are no live sessions scheduled at this time. Check back later for upcoming sessions.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Student Exams Page
+const StudentExams = () => {
+  const { exams, examAttempts, currentUser } = useData();
+  const navigate = useNavigate();
+
+  // Defensive checks - ensure all required data is available
+  if (!currentUser) return null;
+
+  if (!exams || !Array.isArray(exams) || !examAttempts || !Array.isArray(examAttempts)) {
+    return (
+      <div className="p-8">
+        <h1 className="text-h2 font-archivo text-white mb-4">Loading Exams...</h1>
+      </div>
+    );
+  }
+
+  const availableExams = exams.filter(exam =>
+    exam.assignedTo.length === 0 || exam.assignedTo.includes(currentUser.id)
+  );
+
+  const userAttempts = examAttempts.filter(a => a.userId === currentUser.id);
+
+  const getExamStatus = (examId: string) => {
+    const attempts = userAttempts.filter(a => a.examId === examId);
+    if (attempts.length === 0) return { status: 'not_started', attempts: 0 };
+    const lastAttempt = attempts[attempts.length - 1];
+    const exam = exams.find(e => e.id === examId);
+    if (!exam) return { status: 'not_started', attempts: attempts.length };
+    
+    if (attempts.length >= exam.maxAttempts && lastAttempt.status !== 'submitted') {
+      return { status: 'max_attempts', attempts: attempts.length, lastScore: lastAttempt.score };
+    }
+    if (lastAttempt.status === 'submitted') {
+      return { status: 'completed', attempts: attempts.length, lastScore: lastAttempt.score, passed: lastAttempt.passed };
+    }
+    if (lastAttempt.status === 'in_progress') {
+      return { status: 'in_progress', attempts: attempts.length };
+    }
+    return { status: 'available', attempts: attempts.length };
+  };
+
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-h2 font-archivo text-white mb-2">Exams</h1>
+        <p className="text-gray-400">Take your assigned exams and assessments.</p>
+      </div>
+
+      {availableExams.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {availableExams.map(exam => {
+            const examStatus = getExamStatus(exam.id);
+            return (
+              <Card key={exam.id} className="p-6 border-white/10 hover:border-red-500/30 transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-red-600 rounded-lg p-3">
+                      <Icons.Clipboard className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-h5 font-archivo text-white font-bold">{exam.title}</h3>
+                      {examStatus.status === 'completed' && (
+                        <Badge variant={examStatus.passed ? 'success' : 'warning'} className="mt-1">
+                          {examStatus.passed ? 'Passed' : 'Failed'} - {examStatus.lastScore}%
+                        </Badge>
+                      )}
+                      {examStatus.status === 'in_progress' && (
+                        <Badge variant="outline" className="bg-blue-500/20 border-blue-500 text-blue-300 mt-1">
+                          In Progress
+                        </Badge>
+                      )}
+                      {examStatus.status === 'max_attempts' && (
+                        <Badge variant="outline" className="bg-gray-500/20 border-gray-500 text-gray-400 mt-1">
+                          Max Attempts Reached
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-gray-400 text-body2 mb-4">{exam.description}</p>
+
+                <div className="border-t border-white/10 pt-4 mb-4 space-y-2">
+                  <div className="flex items-center justify-between text-caption">
+                    <span className="text-gray-500">Duration</span>
+                    <span className="text-white">{exam.totalTimeMinutes} minutes</span>
+                  </div>
+                  <div className="flex items-center justify-between text-caption">
+                    <span className="text-gray-500">Passing Score</span>
+                    <span className="text-white">{exam.passingScore}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-caption">
+                    <span className="text-gray-500">Attempts</span>
+                    <span className="text-white">
+                      {examStatus.attempts} / {exam.maxAttempts === 999 ? '∞' : exam.maxAttempts}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-caption">
+                    <span className="text-gray-500">Questions</span>
+                    <span className="text-white">{exam.questions.length}</span>
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  disabled={examStatus.status === 'max_attempts' || examStatus.status === 'in_progress'}
+                  onClick={() => navigate(`/portal/exam/${exam.id}`)}
+                >
+                  {examStatus.status === 'completed' && 'Review Results'}
+                  {examStatus.status === 'not_started' && 'Start Exam'}
+                  {examStatus.status === 'available' && 'Retake Exam'}
+                  {examStatus.status === 'in_progress' && 'Continue Exam'}
+                  {examStatus.status === 'max_attempts' && 'Max Attempts Reached'}
+                </Button>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-20">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6">
+            <Icons.Clipboard className="h-10 w-10 text-gray-500" />
+          </div>
+          <h3 className="text-h4 font-archivo text-white mb-3">No Exams Available</h3>
+          <p className="text-gray-400 mb-8 max-w-md mx-auto">
+            There are no exams assigned to you at this time. Your instructor will assign exams as needed.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Exam Taking Interface
+const ExamTaking = () => {
+  const { examId } = useParams<{ examId: string }>();
+  const { exams, currentUser, startExamAttempt, submitExamAttempt, getExamAttempt } = useData();
+  const navigate = useNavigate();
+  const { showToast } = useNotification();
+
+  // Defensive check for exams array
+  const exam = exams && Array.isArray(exams) ? exams.find(e => e.id === examId) : undefined;
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [questionTimeRemaining, setQuestionTimeRemaining] = useState<number | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    // Prevent starting multiple attempts
+    if (hasStarted || attemptId) return;
+    if (!exam || !currentUser) return;
+
+    // Start exam attempt
+    try {
+      setHasStarted(true);
+      const newAttemptId = startExamAttempt(examId!, currentUser.id);
+      setAttemptId(newAttemptId);
+      setTimeRemaining(exam.totalTimeMinutes * 60);
+    } catch (error: any) {
+      showToast(error.message || 'Unable to start exam', 'error');
+      navigate('/portal/exams');
+    }
+  }, [examId, currentUser, exam, hasStarted, attemptId]);
+
+  useEffect(() => {
+    if (!attemptId || timeRemaining <= 0 || isSubmitted) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          handleAutoSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [attemptId, timeRemaining, isSubmitted]);
+
+  useEffect(() => {
+    if (!exam || !exam.timePerQuestionSeconds) return;
+    
+    const question = exam.questions[currentQuestionIndex];
+    if (!question) return;
+
+    setQuestionTimeRemaining(question.timeLimitSeconds || exam.timePerQuestionSeconds || null);
+  }, [currentQuestionIndex, exam]);
+
+  useEffect(() => {
+    if (questionTimeRemaining === null || questionTimeRemaining <= 0 || isSubmitted) return;
+
+    const timer = setInterval(() => {
+      setQuestionTimeRemaining(prev => {
+        if (prev === null || prev <= 1) {
+          handleNextQuestion();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [questionTimeRemaining, isSubmitted]);
+
+  const handleAutoSubmit = () => {
+    if (attemptId && !isSubmitted) {
+      submitExamAttempt(attemptId, answers);
+      setIsSubmitted(true);
+      showToast('Time expired. Exam submitted automatically.', 'info');
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (exam && currentQuestionIndex < exam.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const handleAnswerChange = (questionId: string, optionId: string, isMultiple: boolean) => {
+    setAnswers(prev => {
+      if (isMultiple) {
+        const current = prev[questionId] || [];
+        if (current.includes(optionId)) {
+          return { ...prev, [questionId]: current.filter(id => id !== optionId) };
+        } else {
+          return { ...prev, [questionId]: [...current, optionId] };
+        }
+      } else {
+        return { ...prev, [questionId]: [optionId] };
+      }
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!attemptId) return;
+    if (window.confirm('Are you sure you want to submit? You cannot change your answers after submission.')) {
+      submitExamAttempt(attemptId, answers);
+      setIsSubmitted(true);
+      showToast('Exam submitted successfully!', 'success');
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (!exam || !currentUser) {
+    return (
+      <div className="p-8">
+        <h1 className="text-h2 font-archivo text-white mb-4">Exam Not Found</h1>
+        <Button onClick={() => navigate('/portal/exams')}>Back to Exams</Button>
+      </div>
+    );
+  }
+
+  const currentQuestion = exam.questions[currentQuestionIndex];
+  const attempt = attemptId ? getExamAttempt(attemptId) : undefined;
+
+  if (isSubmitted && attempt) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <Card className="p-8">
+          <div className="text-center mb-8">
+            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${attempt.passed ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+              {attempt.passed ? (
+                <Icons.Check className="h-10 w-10 text-green-500" />
+              ) : (
+                <Icons.X className="h-10 w-10 text-red-500" />
+              )}
+            </div>
+            <h2 className="text-h3 font-archivo text-white mb-2">
+              {attempt.passed ? 'Exam Passed!' : 'Exam Failed'}
+            </h2>
+            <p className="text-4xl font-bold text-white mb-2">{attempt.score}%</p>
+            <p className="text-gray-400">Passing Score: {exam.passingScore}%</p>
+          </div>
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full"
+            onClick={() => navigate('/portal/exams')}
+          >
+            Back to Exams
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen flex flex-col bg-[#030712]">
+      {/* Header with Timer */}
+      <div className="bg-[#0a0f1c] border-b border-white/10 p-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-h4 font-archivo text-white">{exam.title}</h1>
+            <p className="text-gray-400 text-sm">Question {currentQuestionIndex + 1} of {exam.questions.length}</p>
+          </div>
+          <div className="flex items-center gap-6">
+            {questionTimeRemaining !== null && (
+              <div className="text-right">
+                <p className="text-caption text-gray-400">Question Time</p>
+                <p className={`text-h5 font-bold ${questionTimeRemaining < 10 ? 'text-red-500' : 'text-white'}`}>
+                  {formatTime(questionTimeRemaining)}
+                </p>
+              </div>
+            )}
+            <div className="text-right">
+              <p className="text-caption text-gray-400">Total Time</p>
+              <p className={`text-h5 font-bold ${timeRemaining < 60 ? 'text-red-500' : 'text-white'}`}>
+                {formatTime(timeRemaining)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Question Content */}
+      <div className="flex-1 overflow-y-auto p-8">
+        <div className="max-w-4xl mx-auto">
+          <Card className="p-8 mb-6">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <Badge variant="outline">{currentQuestion.type === 'single_choice' ? 'Single Choice' : 'Multiple Choice'}</Badge>
+                <span className="text-caption text-gray-400">{currentQuestion.points} points</span>
+              </div>
+              <h2 className="text-h4 font-archivo text-white mb-4">{currentQuestion.question}</h2>
+            </div>
+
+            <div className="space-y-3">
+              {currentQuestion.options.map(option => {
+                const isSelected = (answers[currentQuestion.id] || []).includes(option.id);
+                return (
+                  <label
+                    key={option.id}
+                    className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      isSelected
+                        ? 'border-red-600 bg-red-600/10'
+                        : 'border-white/10 hover:border-white/20 bg-white/5'
+                    }`}
+                  >
+                    <input
+                      type={currentQuestion.type === 'single_choice' ? 'radio' : 'checkbox'}
+                      checked={isSelected}
+                      onChange={() => handleAnswerChange(currentQuestion.id, option.id, currentQuestion.type === 'multiple_choice')}
+                      className="h-5 w-5 text-red-600"
+                    />
+                    <span className="text-white flex-1">{option.text}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* Navigation */}
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handlePreviousQuestion}
+              disabled={currentQuestionIndex === 0}
+            >
+              <Icons.ChevronLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+            {currentQuestionIndex < exam.questions.length - 1 ? (
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleNextQuestion}
+              >
+                Next
+                <Icons.ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleSubmit}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Submit Exam
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -4942,7 +5596,757 @@ const AdminCourseDetail = () => {
   );
 };
 
+// Admin Live Sessions Management
+const AdminLiveSessions = () => {
+  const { liveSessions, addLiveSession, updateLiveSession, deleteLiveSession } = useData();
+  const [showModal, setShowModal] = useState(false);
+  const [editingSession, setEditingSession] = useState<any | null>(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    meetingLink: '',
+    scheduledDate: '',
+    scheduledTime: '',
+    status: 'upcoming' as 'upcoming' | 'live' | 'completed'
+  });
+  const { showToast } = useNotification();
+
+  const handleOpenModal = (session?: any) => {
+    if (session) {
+      setEditingSession(session);
+      setFormData({
+        title: session.title,
+        description: session.description,
+        meetingLink: session.meetingLink,
+        scheduledDate: session.scheduledDate,
+        scheduledTime: session.scheduledTime,
+        status: session.status
+      });
+    } else {
+      setEditingSession(null);
+      setFormData({
+        title: '',
+        description: '',
+        meetingLink: '',
+        scheduledDate: '',
+        scheduledTime: '',
+        status: 'upcoming'
+      });
+    }
+    setShowModal(true);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.title || !formData.meetingLink || !formData.scheduledDate || !formData.scheduledTime) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    if (editingSession) {
+      updateLiveSession(editingSession.id, formData);
+      showToast('Live session updated successfully', 'success');
+    } else {
+      addLiveSession(formData);
+      showToast('Live session created successfully', 'success');
+    }
+    setShowModal(false);
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this live session?')) {
+      deleteLiveSession(id);
+      showToast('Live session deleted successfully', 'success');
+    }
+  };
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-h2 font-archivo text-white mb-2">Live Sessions</h1>
+          <p className="text-gray-400">Manage live training sessions and virtual classes.</p>
+        </div>
+        <Button variant="primary" onClick={() => handleOpenModal()} className="rounded-none">
+          <Icons.Plus className="h-4 w-4 mr-2" />
+          Create Session
+        </Button>
+      </div>
+
+      {liveSessions.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {liveSessions.map(session => (
+            <Card key={session.id} className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-600 rounded-lg p-3">
+                    <Icons.Video className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-h5 font-archivo text-white font-bold">{session.title}</h3>
+                    <Badge variant="outline" className="mt-1">
+                      {session.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleOpenModal(session)}>
+                    <Icons.Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(session.id)} className="text-red-400">
+                    <Icons.Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-gray-400 text-body2 mb-4">{session.description}</p>
+              <div className="space-y-2 text-caption text-gray-400">
+                <p><strong className="text-white">Date:</strong> {new Date(session.scheduledDate).toLocaleDateString()}</p>
+                <p><strong className="text-white">Time:</strong> {session.scheduledTime}</p>
+                <p><strong className="text-white">Link:</strong> <a href={session.meetingLink} target="_blank" rel="noopener noreferrer" className="text-red-400 hover:underline">{session.meetingLink}</a></p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-20">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6">
+            <Icons.Video className="h-10 w-10 text-gray-500" />
+          </div>
+          <h3 className="text-h4 font-archivo text-white mb-3">No Live Sessions</h3>
+          <p className="text-gray-400 mb-8">Create your first live session to get started.</p>
+          <Button variant="primary" onClick={() => handleOpenModal()} className="rounded-none">
+            Create Session
+          </Button>
+        </div>
+      )}
+
+      {/* Create/Edit Modal */}
+      {showModal && (
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingSession ? 'Edit Live Session' : 'Create Live Session'}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Title *</label>
+              <Input
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Session title"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Description</label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Session description"
+                rows={3}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Meeting Link *</label>
+              <Input
+                value={formData.meetingLink}
+                onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
+                placeholder="https://zoom.us/j/..."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Date *</label>
+                <Input
+                  type="date"
+                  value={formData.scheduledDate}
+                  onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Time *</label>
+                <Input
+                  type="time"
+                  value={formData.scheduledTime}
+                  onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Status</label>
+              <Select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'upcoming' | 'live' | 'completed' })}
+              >
+                <option value="upcoming">Upcoming</option>
+                <option value="live">Live</option>
+                <option value="completed">Completed</option>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1 rounded-none" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" className="flex-1 rounded-none" onClick={handleSubmit}>
+                {editingSession ? 'Update' : 'Create'}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+};
+
+// Admin Exams Management
+const AdminExams = () => {
+  const { exams, users, deleteExam } = useData();
+  const navigate = useNavigate();
+  const { showToast } = useNotification();
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this exam? All attempts will also be deleted.')) {
+      deleteExam(id);
+      showToast('Exam deleted successfully', 'success');
+    }
+  };
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-h2 font-archivo text-white mb-2">Exams</h1>
+          <p className="text-gray-400">Manage exams and assessments for trainees.</p>
+        </div>
+        <Button variant="primary" onClick={() => navigate('/admin/exams/create')} className="rounded-none">
+          <Icons.Plus className="h-4 w-4 mr-2" />
+          Create Exam
+        </Button>
+      </div>
+
+      {exams.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {exams.map(exam => (
+            <Card key={exam.id} className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-600 rounded-lg p-3">
+                    <Icons.Clipboard className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-h5 font-archivo text-white font-bold">{exam.title}</h3>
+                    <Badge variant="outline" className="mt-1">
+                      {exam.questions.length} questions
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/admin/exams/${exam.id}`)}>
+                    <Icons.Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(exam.id)} className="text-red-400">
+                    <Icons.Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-gray-400 text-body2 mb-4">{exam.description}</p>
+              <div className="grid grid-cols-2 gap-4 text-caption text-gray-400 mb-4">
+                <div>
+                  <strong className="text-white">Duration:</strong> {exam.totalTimeMinutes} min
+                </div>
+                <div>
+                  <strong className="text-white">Passing:</strong> {exam.passingScore}%
+                </div>
+                <div>
+                  <strong className="text-white">Max Attempts:</strong> {exam.maxAttempts === 999 ? '∞' : exam.maxAttempts}
+                </div>
+                <div>
+                  <strong className="text-white">Assigned To:</strong> {exam.assignedTo.length === 0 ? 'All' : exam.assignedTo.length}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-20">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6">
+            <Icons.Clipboard className="h-10 w-10 text-gray-500" />
+          </div>
+          <h3 className="text-h4 font-archivo text-white mb-3">No Exams</h3>
+          <p className="text-gray-400 mb-8">Create your first exam to get started.</p>
+          <Button variant="primary" onClick={() => navigate('/admin/exams/create')} className="rounded-none">
+            Create Exam
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AdminSettings = () => <PlaceholderPage title="System Settings" />;
+
+// Admin Exam Create/Edit Component
+const AdminExamCreate = () => {
+  const { examId } = useParams<{ examId: string }>();
+  const { exams, users, addExam, updateExam } = useData();
+  const navigate = useNavigate();
+  const { showToast } = useNotification();
+
+  const existingExam = examId ? exams.find(e => e.id === examId) : null;
+
+  const [formData, setFormData] = useState({
+    title: existingExam?.title || '',
+    description: existingExam?.description || '',
+    totalTimeMinutes: existingExam?.totalTimeMinutes || 30,
+    timePerQuestionSeconds: existingExam?.timePerQuestionSeconds || 60,
+    passingScore: existingExam?.passingScore || 70,
+    maxAttempts: existingExam?.maxAttempts || 3,
+    randomizeQuestions: existingExam?.randomizeQuestions || false,
+    randomizeAnswers: existingExam?.randomizeAnswers || false,
+    showAnswersAfter: existingExam?.showAnswersAfter || true,
+    assignedTo: existingExam?.assignedTo || [] as string[],
+  });
+
+  const [questions, setQuestions] = useState<Array<{
+    id: string;
+    question: string;
+    type: 'single_choice' | 'multiple_choice';
+    points: number;
+    timeLimitSeconds?: number;
+    options: Array<{ id: string; text: string; isCorrect: boolean }>;
+  }>>(existingExam?.questions || []);
+
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState({
+    question: '',
+    type: 'single_choice' as 'single_choice' | 'multiple_choice',
+    points: 10,
+    timeLimitSeconds: undefined as number | undefined,
+    options: [
+      { id: '1', text: '', isCorrect: false },
+      { id: '2', text: '', isCorrect: false },
+    ] as Array<{ id: string; text: string; isCorrect: boolean }>,
+  });
+
+  const handleAddQuestion = () => {
+    setEditingQuestionIndex(null);
+    setCurrentQuestion({
+      question: '',
+      type: 'single_choice',
+      points: 10,
+      timeLimitSeconds: undefined,
+      options: [
+        { id: Math.random().toString(36).substr(2, 9), text: '', isCorrect: false },
+        { id: Math.random().toString(36).substr(2, 9), text: '', isCorrect: false },
+      ],
+    });
+    setShowQuestionModal(true);
+  };
+
+  const handleEditQuestion = (index: number) => {
+    setEditingQuestionIndex(index);
+    const q = questions[index];
+    setCurrentQuestion({
+      question: q.question,
+      type: q.type,
+      points: q.points,
+      timeLimitSeconds: q.timeLimitSeconds,
+      options: q.options.map(opt => ({ ...opt })),
+    });
+    setShowQuestionModal(true);
+  };
+
+  const handleDeleteQuestion = (index: number) => {
+    if (window.confirm('Are you sure you want to delete this question?')) {
+      setQuestions(questions.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleSaveQuestion = () => {
+    if (!currentQuestion.question.trim()) {
+      showToast('Please enter a question', 'error');
+      return;
+    }
+    if (currentQuestion.options.some(opt => !opt.text.trim())) {
+      showToast('Please fill in all answer options', 'error');
+      return;
+    }
+    if (!currentQuestion.options.some(opt => opt.isCorrect)) {
+      showToast('Please mark at least one correct answer', 'error');
+      return;
+    }
+
+    const newQuestion = {
+      id: editingQuestionIndex !== null ? questions[editingQuestionIndex].id : Math.random().toString(36).substr(2, 9),
+      ...currentQuestion,
+    };
+
+    if (editingQuestionIndex !== null) {
+      const updated = [...questions];
+      updated[editingQuestionIndex] = newQuestion;
+      setQuestions(updated);
+    } else {
+      setQuestions([...questions, newQuestion]);
+    }
+    setShowQuestionModal(false);
+  };
+
+  const handleAddOption = () => {
+    if (currentQuestion.options.length >= 6) {
+      showToast('Maximum 6 options allowed', 'error');
+      return;
+    }
+    setCurrentQuestion({
+      ...currentQuestion,
+      options: [...currentQuestion.options, { id: Math.random().toString(36).substr(2, 9), text: '', isCorrect: false }],
+    });
+  };
+
+  const handleRemoveOption = (index: number) => {
+    if (currentQuestion.options.length <= 2) {
+      showToast('Minimum 2 options required', 'error');
+      return;
+    }
+    setCurrentQuestion({
+      ...currentQuestion,
+      options: currentQuestion.options.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleOptionChange = (index: number, field: 'text' | 'isCorrect', value: string | boolean) => {
+    const updated = [...currentQuestion.options];
+    if (field === 'isCorrect' && currentQuestion.type === 'single_choice') {
+      // For single choice, uncheck all others
+      updated.forEach((opt, i) => {
+        opt.isCorrect = i === index ? (value as boolean) : false;
+      });
+    } else {
+      (updated[index] as any)[field] = value;
+    }
+    setCurrentQuestion({ ...currentQuestion, options: updated });
+  };
+
+  const handleSubmit = () => {
+    if (!formData.title.trim()) {
+      showToast('Please enter an exam title', 'error');
+      return;
+    }
+    if (questions.length === 0) {
+      showToast('Please add at least one question', 'error');
+      return;
+    }
+
+    const examData = {
+      ...formData,
+      questions,
+    };
+
+    if (existingExam) {
+      updateExam(existingExam.id, examData);
+      showToast('Exam updated successfully', 'success');
+    } else {
+      addExam(examData);
+      showToast('Exam created successfully', 'success');
+    }
+    navigate('/admin/exams');
+  };
+
+  const trainees = users.filter(u => u.role === 'user');
+
+  return (
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="mb-8">
+        <button onClick={() => navigate('/admin/exams')} className="text-gray-400 hover:text-white flex items-center gap-2 mb-4">
+          <Icons.ArrowLeft className="h-4 w-4" />
+          Back to Exams
+        </button>
+        <h1 className="text-h2 font-archivo text-white mb-2">{existingExam ? 'Edit Exam' : 'Create New Exam'}</h1>
+        <p className="text-gray-400">Set up exam details, questions, and time limits for anti-cheating.</p>
+      </div>
+
+      {/* Basic Settings */}
+      <Card className="p-6 mb-6">
+        <h2 className="text-h5 font-archivo text-white mb-4 flex items-center gap-2">
+          <Icons.Settings className="h-5 w-5 text-red-600" />
+          Exam Settings
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Exam Title *</label>
+            <Input
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="e.g., Security Fundamentals Assessment"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Description</label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Brief description of the exam"
+              rows={3}
+            />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Total Time (min)</label>
+              <Input
+                type="number"
+                min={1}
+                value={formData.totalTimeMinutes}
+                onChange={(e) => setFormData({ ...formData, totalTimeMinutes: parseInt(e.target.value) || 30 })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Time/Question (sec)</label>
+              <Input
+                type="number"
+                min={10}
+                value={formData.timePerQuestionSeconds}
+                onChange={(e) => setFormData({ ...formData, timePerQuestionSeconds: parseInt(e.target.value) || 60 })}
+              />
+              <p className="text-xs text-gray-500 mt-1">Anti-cheat timer</p>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Passing Score (%)</label>
+              <Input
+                type="number"
+                min={1}
+                max={100}
+                value={formData.passingScore}
+                onChange={(e) => setFormData({ ...formData, passingScore: parseInt(e.target.value) || 70 })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Max Attempts</label>
+              <Input
+                type="number"
+                min={1}
+                value={formData.maxAttempts}
+                onChange={(e) => setFormData({ ...formData, maxAttempts: parseInt(e.target.value) || 3 })}
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-6 pt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.randomizeQuestions}
+                onChange={(e) => setFormData({ ...formData, randomizeQuestions: e.target.checked })}
+                className="rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-600"
+              />
+              <span className="text-sm text-gray-300">Randomize Questions</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.randomizeAnswers}
+                onChange={(e) => setFormData({ ...formData, randomizeAnswers: e.target.checked })}
+                className="rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-600"
+              />
+              <span className="text-sm text-gray-300">Randomize Answers</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.showAnswersAfter}
+                onChange={(e) => setFormData({ ...formData, showAnswersAfter: e.target.checked })}
+                className="rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-600"
+              />
+              <span className="text-sm text-gray-300">Show Answers After Submission</span>
+            </label>
+          </div>
+        </div>
+      </Card>
+
+      {/* Questions */}
+      <Card className="p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-h5 font-archivo text-white flex items-center gap-2">
+            <Icons.List className="h-5 w-5 text-red-600" />
+            Questions ({questions.length})
+          </h2>
+          <Button variant="outline" size="sm" onClick={handleAddQuestion} className="rounded-none">
+            <Icons.Plus className="h-4 w-4 mr-2" />
+            Add Question
+          </Button>
+        </div>
+
+        {questions.length > 0 ? (
+          <div className="space-y-3">
+            {questions.map((q, index) => (
+              <div key={q.id} className="flex items-start gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-600/20 flex items-center justify-center text-red-400 font-bold text-sm">
+                  {index + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium truncate">{q.question}</p>
+                  <div className="flex gap-3 mt-1 text-xs text-gray-500">
+                    <span>{q.type === 'single_choice' ? 'Single' : 'Multiple'} Choice</span>
+                    <span>{q.points} pts</span>
+                    {q.timeLimitSeconds && <span>{q.timeLimitSeconds}s limit</span>}
+                    <span>{q.options.length} options</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleEditQuestion(index)}>
+                    <Icons.Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteQuestion(index)} className="text-red-400">
+                    <Icons.Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Icons.HelpCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p>No questions added yet. Click "Add Question" to create your first question.</p>
+          </div>
+        )}
+      </Card>
+
+      {/* Assignment (Optional) */}
+      <Card className="p-6 mb-6">
+        <h2 className="text-h5 font-archivo text-white mb-4 flex items-center gap-2">
+          <Icons.Users className="h-5 w-5 text-red-600" />
+          Assignment (Optional)
+        </h2>
+        <p className="text-sm text-gray-400 mb-4">Leave empty to make exam available to all trainees.</p>
+        <div className="flex flex-wrap gap-2">
+          {trainees.map(user => (
+            <label key={user.id} className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+              <input
+                type="checkbox"
+                checked={formData.assignedTo.includes(user.id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setFormData({ ...formData, assignedTo: [...formData.assignedTo, user.id] });
+                  } else {
+                    setFormData({ ...formData, assignedTo: formData.assignedTo.filter(id => id !== user.id) });
+                  }
+                }}
+                className="rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-600"
+              />
+              <span className="text-sm text-gray-300">{user.firstName} {user.lastName}</span>
+            </label>
+          ))}
+          {trainees.length === 0 && (
+            <p className="text-gray-500 text-sm">No trainees available</p>
+          )}
+        </div>
+      </Card>
+
+      {/* Actions */}
+      <div className="flex gap-4">
+        <Button variant="outline" className="flex-1 rounded-none" onClick={() => navigate('/admin/exams')}>
+          Cancel
+        </Button>
+        <Button variant="primary" className="flex-1 rounded-none" onClick={handleSubmit}>
+          {existingExam ? 'Update Exam' : 'Create Exam'}
+        </Button>
+      </div>
+
+      {/* Question Modal */}
+      {showQuestionModal && (
+        <Modal
+          isOpen={showQuestionModal}
+          onClose={() => setShowQuestionModal(false)}
+          title={editingQuestionIndex !== null ? 'Edit Question' : 'Add Question'}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Question *</label>
+              <Textarea
+                value={currentQuestion.question}
+                onChange={(e) => setCurrentQuestion({ ...currentQuestion, question: e.target.value })}
+                placeholder="Enter your question"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Type</label>
+                <Select
+                  value={currentQuestion.type}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, type: e.target.value as 'single_choice' | 'multiple_choice' })}
+                >
+                  <option value="single_choice">Single Choice</option>
+                  <option value="multiple_choice">Multiple Choice</option>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Points</label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={currentQuestion.points}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, points: parseInt(e.target.value) || 10 })}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Time Limit (seconds) - Optional</label>
+              <Input
+                type="number"
+                min={0}
+                value={currentQuestion.timeLimitSeconds || ''}
+                onChange={(e) => setCurrentQuestion({ ...currentQuestion, timeLimitSeconds: e.target.value ? parseInt(e.target.value) : undefined })}
+                placeholder="Leave empty to use exam default"
+              />
+              <p className="text-xs text-gray-500 mt-1">Override the default time per question for this specific question</p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm text-gray-400">Answer Options *</label>
+                <Button variant="ghost" size="sm" onClick={handleAddOption} className="rounded-none">
+                  <Icons.Plus className="h-3 w-3 mr-1" />
+                  Add Option
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {currentQuestion.options.map((option, index) => (
+                  <div key={option.id} className="flex items-center gap-2">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type={currentQuestion.type === 'single_choice' ? 'radio' : 'checkbox'}
+                        name="correctAnswer"
+                        checked={option.isCorrect}
+                        onChange={(e) => handleOptionChange(index, 'isCorrect', e.target.checked)}
+                        className="mr-2 text-green-500 focus:ring-green-500"
+                      />
+                    </label>
+                    <Input
+                      value={option.text}
+                      onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
+                      placeholder={`Option ${index + 1}`}
+                      className="flex-1"
+                    />
+                    <Button variant="ghost" size="sm" onClick={() => handleRemoveOption(index)} className="text-red-400">
+                      <Icons.X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Check the box/radio next to the correct answer(s)</p>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1 rounded-none" onClick={() => setShowQuestionModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" className="flex-1 rounded-none" onClick={handleSaveQuestion}>
+                {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+};
 
 // --- Main App Component ---
 const App = () => {
@@ -4965,14 +6369,17 @@ const App = () => {
                 <Routes>
                   <Route path="dashboard" element={<StudentDashboard />} />
                   <Route path="courses" element={<StudentTraining />} />
+                  <Route path="live-sessions" element={<StudentLiveSessions />} />
+                  <Route path="exams" element={<StudentExams />} />
+                  <Route path="exam/:examId" element={<ExamTaking />} />
                   <Route path="certifications" element={<StudentCertifications />} />
                   <Route path="course/:courseId" element={<CoursePlayer />} />
-                  <Route path="*" element={<Navigate to="dashboard" replace />} />
+                  <Route path="*" element={<Navigate to="/portal/dashboard" replace />} />
                 </Routes>
               </StudentLayout>
             </ProtectedRoute>
           } />
-          
+
           {/* Admin Portal */}
           <Route path="/admin/*" element={
             <ProtectedRoute role="admin">
@@ -4982,8 +6389,12 @@ const App = () => {
                   <Route path="courses/:courseId" element={<AdminCourseDetail />} />
                   <Route path="courses" element={<AdminCourses />} />
                   <Route path="users" element={<AdminUsers />} />
+                  <Route path="live-sessions" element={<AdminLiveSessions />} />
+                  <Route path="exams/create" element={<AdminExamCreate />} />
+                  <Route path="exams/:examId" element={<AdminExamCreate />} />
+                  <Route path="exams" element={<AdminExams />} />
                   <Route path="settings" element={<AdminSettings />} />
-                  <Route path="*" element={<Navigate to="dashboard" replace />} />
+                  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Routes>
               </AdminLayout>
             </ProtectedRoute>

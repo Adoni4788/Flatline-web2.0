@@ -63,3 +63,51 @@ export interface Enrollment {
   completedLessons: string[]; // array of lesson IDs
   status: 'active' | 'completed';
 }
+
+export interface LiveSession {
+  id: string;
+  title: string;
+  description: string;
+  meetingLink: string;
+  scheduledDate: string; // ISO date string
+  scheduledTime: string; // Time string
+  status: 'upcoming' | 'live' | 'completed';
+  createdAt: string;
+}
+
+export interface ExamQuestion {
+  id: string;
+  question: string;
+  type: 'single_choice' | 'multiple_choice';
+  options: QuestionOption[];
+  points: number;
+  timeLimitSeconds?: number;
+}
+
+export interface Exam {
+  id: string;
+  title: string;
+  description: string;
+  totalTimeMinutes: number;
+  timePerQuestionSeconds?: number;
+  passingScore: number;
+  maxAttempts: number;
+  randomizeQuestions: boolean;
+  randomizeAnswers: boolean;
+  showAnswersAfter: boolean;
+  questions: ExamQuestion[];
+  assignedTo: string[]; // User IDs
+  createdAt: string;
+}
+
+export interface ExamAttempt {
+  id: string;
+  examId: string;
+  userId: string;
+  startedAt: string;
+  submittedAt?: string;
+  answers: Record<string, string[]>; // questionId -> selected optionIds
+  score?: number;
+  passed?: boolean;
+  status: 'in_progress' | 'submitted' | 'expired';
+}

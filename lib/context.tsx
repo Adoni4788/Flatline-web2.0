@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Course, Module, Lesson, Enrollment } from './types';
+import { User, Course, Module, Lesson, Enrollment, LiveSession, Exam, ExamAttempt } from './types';
 import { COURSES, MODULES, LESSONS, MOCK_USER, MOCK_ADMIN } from './mockData';
 
 // Extended initial state
@@ -22,6 +22,9 @@ interface DataContextType {
   modules: Module[];
   lessons: Lesson[];
   enrollments: Enrollment[];
+  liveSessions: LiveSession[];
+  exams: Exam[];
+  examAttempts: ExamAttempt[];
   currentUser: User | null;
   // User Actions
   login: (email: string) => Promise<boolean>;
@@ -45,6 +48,18 @@ interface DataContextType {
   enrollUser: (userId: string, courseId: string) => void;
   updateProgress: (userId: string, lessonId: string, courseId: string) => void;
   getCourseProgress: (userId: string, courseId: string) => number;
+  // Live Session Actions
+  addLiveSession: (session: Omit<LiveSession, 'id' | 'createdAt'>) => void;
+  updateLiveSession: (id: string, data: Partial<LiveSession>) => void;
+  deleteLiveSession: (id: string) => void;
+  // Exam Actions
+  addExam: (exam: Omit<Exam, 'id' | 'createdAt'>) => void;
+  updateExam: (id: string, data: Partial<Exam>) => void;
+  deleteExam: (id: string) => void;
+  startExamAttempt: (examId: string, userId: string) => string; // Returns attemptId
+  submitExamAttempt: (attemptId: string, answers: Record<string, string[]>) => void;
+  getExamAttempts: (userId: string) => ExamAttempt[];
+  getExamAttempt: (attemptId: string) => ExamAttempt | undefined;
 }
 
 const DataContext = createContext<DataContextType>(null!);
@@ -56,6 +71,9 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   const [modules, setModules] = useState<Module[]>(MODULES);
   const [lessons, setLessons] = useState<Lesson[]>(LESSONS);
   const [enrollments, setEnrollments] = useState<Enrollment[]>(INITIAL_ENROLLMENTS);
+  const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Restore session
@@ -210,15 +228,123 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     return enrollment ? enrollment.progress : 0;
   };
 
+  // Live Session Actions
+  const addLiveSession = (sessionData: Omit<LiveSession, 'id' | 'createdAt'>) => {
+    const newSession: LiveSession = {
+      ...sessionData,
+      id: Math.random().toString(36).substr(2, 9),
+      createdAt: new Date().toISOString()
+    };
+    setLiveSessions(prev => [...prev, newSession]);
+  };
+
+  const updateLiveSession = (id: string, data: Partial<LiveSession>) => {
+    setLiveSessions(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+  };
+
+  const deleteLiveSession = (id: string) => {
+    setLiveSessions(prev => prev.filter(s => s.id !== id));
+  };
+
+  // Exam Actions
+  const addExam = (examData: Omit<Exam, 'id' | 'createdAt'>) => {
+    const newExam: Exam = {
+      ...examData,
+      id: Math.random().toString(36).substr(2, 9),
+      createdAt: new Date().toISOString()
+    };
+    setExams(prev => [...prev, newExam]);
+  };
+
+  const updateExam = (id: string, data: Partial<Exam>) => {
+    setExams(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
+  };
+
+  const deleteExam = (id: string) => {
+    setExams(prev => prev.filter(e => e.id !== id));
+    setExamAttempts(prev => prev.filter(a => a.examId !== id));
+  };
+
+  const startExamAttempt = (examId: string, userId: string): string => {
+    const exam = exams.find(e => e.id === examId);
+    if (!exam) throw new Error('Exam not found');
+
+    const existingAttempts = examAttempts.filter(a => a.examId === examId && a.userId === userId);
+    if (existingAttempts.length >= exam.maxAttempts) {
+      throw new Error('Maximum attempts reached');
+    }
+
+    const attemptId = Math.random().toString(36).substr(2, 9);
+    const newAttempt: ExamAttempt = {
+      id: attemptId,
+      examId,
+      userId,
+      startedAt: new Date().toISOString(),
+      answers: {},
+      status: 'in_progress'
+    };
+    setExamAttempts(prev => [...prev, newAttempt]);
+    return attemptId;
+  };
+
+  const submitExamAttempt = (attemptId: string, answers: Record<string, string[]>) => {
+    const attempt = examAttempts.find(a => a.id === attemptId);
+    if (!attempt) return;
+
+    const exam = exams.find(e => e.id === attempt.examId);
+    if (!exam) return;
+
+    let score = 0;
+    let totalPoints = 0;
+
+    exam.questions.forEach(question => {
+      totalPoints += question.points;
+      const userAnswers = answers[question.id] || [];
+      const correctAnswers = question.options.filter(opt => opt.isCorrect).map(opt => opt.id);
+
+      if (question.type === 'single_choice') {
+        if (userAnswers.length === 1 && correctAnswers.includes(userAnswers[0])) {
+          score += question.points;
+        }
+      } else {
+        const isCorrect =
+          userAnswers.length === correctAnswers.length &&
+          userAnswers.every(ans => correctAnswers.includes(ans));
+        if (isCorrect) {
+          score += question.points;
+        }
+      }
+    });
+
+    const percentage = Math.round((score / totalPoints) * 100);
+    const passed = percentage >= exam.passingScore;
+
+    setExamAttempts(prev => prev.map(a => 
+      a.id === attemptId 
+        ? { ...a, submittedAt: new Date().toISOString(), answers, score: percentage, passed, status: 'submitted' }
+        : a
+    ));
+  };
+
+  const getExamAttempts = (userId: string) => {
+    return examAttempts.filter(a => a.userId === userId);
+  };
+
+  const getExamAttempt = (attemptId: string) => {
+    return examAttempts.find(a => a.id === attemptId);
+  };
+
   return (
     <DataContext.Provider value={{
-      users, courses, modules, lessons, enrollments, currentUser,
+      users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser,
       login, logout,
       addUser, updateUser, deleteUser,
       addCourse, updateCourse, deleteCourse,
       addModule, updateModule, deleteModule,
       addLesson, updateLesson, deleteLesson,
-      enrollUser, updateProgress, getCourseProgress
+      enrollUser, updateProgress, getCourseProgress,
+      addLiveSession, updateLiveSession, deleteLiveSession,
+      addExam, updateExam, deleteExam, startExamAttempt, submitExamAttempt, getExamAttempts, getExamAttempt
     }}>
       {children}
     </DataContext.Provider>
