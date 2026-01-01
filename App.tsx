@@ -1476,9 +1476,9 @@ const AboutPage = () => {
              </div>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                  {[
-                     { name: "Major Alan Dutch", role: "Head Instructor", bio: "Former Special Forces operative with 20 years of field experience in counter-terrorism.", img: "https://images.unsplash.com/photo-1531891437567-31b44368cc76?q=80&w=1000&auto=format&fit=crop" },
-                     { name: "Sarah Connor", role: "Tactical Evasion", bio: "Specialist in defensive driving and urban evasion tactics for high-risk assets.", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop" },
-                     { name: "John Matrix", role: "CQC Expert", bio: "Master of close-quarters combat and hand-to-hand defense techniques.", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop" }
+                     { name: "Major Alan Dutch", role: "Head Instructor", bio: "Former Special Forces operative with 20 years of field experience in counter-terrorism.", img: "/images/instructor-alan-dutch.png" },
+                     { name: "Sarah Connor", role: "Tactical Evasion", bio: "Specialist in defensive driving and urban evasion tactics for high-risk assets.", img: "/images/instructor-sarah-connor.png" },
+                     { name: "John Matrix", role: "CQC Expert", bio: "Master of close-quarters combat and hand-to-hand defense techniques.", img: "/images/instructor-john-matrix.png" }
                  ].map((inst, i) => (
                      <div key={i} className="group relative bg-[#0a0f1c] border border-white/5 overflow-hidden hover:border-red-500/30 transition-all duration-500">
                          <div className="h-96 overflow-hidden relative">
