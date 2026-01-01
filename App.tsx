@@ -23,6 +23,40 @@ const useNotification = () => {
     return { toast, showToast, closeToast };
 };
 
+// --- Preview Banner Component ---
+const PreviewBanner = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    // Check if banner was previously dismissed
+    const dismissed = localStorage.getItem('preview_banner_dismissed');
+    if (dismissed === 'true') {
+      setIsVisible(false);
+    }
+  }, []);
+
+  const handleClose = () => {
+    localStorage.setItem('preview_banner_dismissed', 'true');
+    setIsVisible(false);
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100] flex items-center justify-center relative">
+      <span>⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use</span>
+      <button
+        onClick={handleClose}
+        className="absolute right-4 hover:bg-black/10 rounded-full p-1 transition-colors"
+        aria-label="Close preview banner"
+        title="Close banner"
+      >
+        <Icons.X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+};
+
 // --- Layouts ---
 
 const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
@@ -41,10 +75,7 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#030712] text-gray-100 font-sans selection:bg-red-500/30 selection:text-white">
-      {/* Preview Banner */}
-      <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100]">
-        ⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use
-      </div>
+      <PreviewBanner />
       <nav 
         className={`fixed top-[34px] z-50 w-full transition-all duration-300 ${
           isScrolled 
@@ -286,10 +317,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex bg-[#02040a] text-gray-100 font-sans">
-      {/* Preview Banner */}
-      <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100]">
-        ⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use
-      </div>
+      <PreviewBanner />
       {/* Desktop Sidebar */}
       <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
         <SidebarContent />
@@ -664,10 +692,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex bg-[#030712] text-gray-100">
-      {/* Preview Banner */}
-      <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100]">
-        ⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use
-      </div>
+      <PreviewBanner />
       {/* Desktop Sidebar */}
       <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#030712] md:flex sticky top-0 h-screen z-40 shadow-2xl">
         <SidebarContent />
@@ -1246,7 +1271,7 @@ const AboutPage = () => {
                <div className="relative group">
                    <div className="relative z-10 rounded-sm overflow-hidden border border-white/10 shadow-2xl bg-[#0a0f1c]">
                        <div className="absolute inset-0 bg-red-900/10 mix-blend-overlay z-10"></div>
-                       <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop" className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Team" />
+                       <img src="/images/flatline-team-origins.png" className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Flatline Security Leadership Team - Origins of Excellence" />
                    </div>
                    {/* Decorative Offset Border */}
                    <div className="absolute top-6 -left-6 w-full h-full border border-red-900/30 rounded-sm -z-0 hidden md:block transition-all duration-500 group-hover:top-4 group-hover:-left-4 group-hover:border-red-600/50"></div>
