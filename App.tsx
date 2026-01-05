@@ -107,9 +107,22 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
         }`}
       >
         <div className="container mx-auto max-w-7xl flex items-center justify-between px-4 md:px-8">
-          <Link to="/" className="flex items-center gap-2 font-bold font-archivo text-h5 tracking-tighter text-white group">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all duration-500">
-              <Icons.Shield className="h-6 w-6 text-white" />
+          <Link to="/" className="flex items-center gap-3 font-bold font-archivo text-h5 tracking-tighter text-white group relative z-10">
+            <div className="h-10 w-12 md:h-12 md:w-16 flex items-center justify-center">
+              <div 
+                className="w-full h-full opacity-100"
+                style={{
+                  background: 'linear-gradient(to bottom, rgb(248, 113, 113) 0%, rgb(239, 68, 68) 50%, rgb(3, 7, 18) 100%)',
+                  maskImage: 'url(/images/fst.logo-01.svg)',
+                  WebkitMaskImage: 'url(/images/fst.logo-01.svg)',
+                  maskSize: 'contain',
+                  WebkitMaskSize: 'contain',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskPosition: 'center',
+                  WebkitMaskPosition: 'center'
+                }}
+              />
             </div>
             <span className="tracking-tight">FLATLINE<span className="text-red-500">SECURITY</span></span>
           </Link>
