@@ -23,54 +23,10 @@ const useNotification = () => {
     return { toast, showToast, closeToast };
 };
 
-// --- Preview Banner Hook ---
-const usePreviewBanner = () => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    // Check if banner was previously dismissed
-    const dismissed = localStorage.getItem('preview_banner_dismissed');
-    if (dismissed === 'true') {
-      setIsVisible(false);
-    }
-  }, []);
-
-  const handleClose = () => {
-    localStorage.setItem('preview_banner_dismissed', 'true');
-    setIsVisible(false);
-    // Trigger a custom event to notify other components
-    window.dispatchEvent(new Event('previewBannerClosed'));
-  };
-
-  return { isVisible, handleClose };
-};
-
-// --- Preview Banner Component ---
-const PreviewBanner = () => {
-  const { isVisible, handleClose } = usePreviewBanner();
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 px-4 text-sm font-medium z-[100] flex items-center justify-center relative">
-      <span>⚠️ PREVIEW MODE - For Client Review Only - Not for Production Use</span>
-      <button
-        onClick={handleClose}
-        className="absolute right-4 hover:bg-black/10 rounded-full p-1 transition-colors"
-        aria-label="Close preview banner"
-        title="Close banner"
-      >
-        <Icons.X className="h-4 w-4" />
-      </button>
-    </div>
-  );
-};
-
 // --- Layouts ---
 
 const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [bannerVisible, setBannerVisible] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
@@ -81,50 +37,38 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    // Check initial banner state
-    const dismissed = localStorage.getItem('preview_banner_dismissed');
-    setBannerVisible(dismissed !== 'true');
-
-    // Listen for banner close event
-    const handleBannerClose = () => {
-      setBannerVisible(false);
-    };
-    window.addEventListener('previewBannerClosed', handleBannerClose);
-    return () => window.removeEventListener('previewBannerClosed', handleBannerClose);
-  }, []);
-
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#030712] text-gray-100 font-sans selection:bg-red-500/30 selection:text-white">
-      <PreviewBanner />
-      <nav 
-        className={`fixed ${bannerVisible ? 'top-[34px]' : 'top-0'} z-50 w-full transition-all duration-300 ${
-          isScrolled 
-            ? 'border-b border-white/10 bg-[#030712]/90 backdrop-blur-md py-4' 
+      <nav
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+          isScrolled
+            ? 'border-b border-white/10 bg-[#030712]/90 backdrop-blur-md py-4'
             : 'border-b border-transparent bg-transparent py-8'
         }`}
       >
         <div className="container mx-auto max-w-7xl flex items-center justify-between px-4 md:px-8">
-          <Link to="/" className="flex items-center gap-3 font-bold font-archivo text-h5 tracking-tighter text-white group relative z-10">
-            <div className="h-10 w-12 md:h-12 md:w-16 flex items-center justify-center">
-              <div 
-                className="w-full h-full opacity-100"
-                style={{
-                  background: 'linear-gradient(to bottom, rgb(248, 113, 113) 0%, rgb(239, 68, 68) 50%, rgb(3, 7, 18) 100%)',
-                  maskImage: 'url(/images/fst.logo-01.svg)',
-                  WebkitMaskImage: 'url(/images/fst.logo-01.svg)',
-                  maskSize: 'contain',
-                  WebkitMaskSize: 'contain',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center'
-                }}
-              />
+          <Link to="/" className="flex items-center gap-3 font-archivo text-white group relative z-10">
+            <div
+              className="h-10 w-10 md:h-12 md:w-12"
+              style={{
+                background: 'rgb(220, 38, 38)',
+                maskImage: 'url(/images/fst-logo-02-01.svg)',
+                WebkitMaskImage: 'url(/images/fst-logo-02-01.svg)',
+                maskSize: 'contain',
+                WebkitMaskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                WebkitMaskRepeat: 'no-repeat',
+                maskPosition: 'center',
+                WebkitMaskPosition: 'center'
+              }}
+            />
+            <div className="h-8 md:h-10 w-px bg-white/20"></div>
+            <div className="flex flex-col">
+              <span className="text-h5 font-semibold tracking-normal leading-none">FLATLINE<span className="text-red-500">SECURITY</span></span>
+              <span className="text-[10px] md:text-xs text-gray-400 font-normal tracking-wide uppercase">AND TRAINING SOLUTIONS LIMITED</span>
             </div>
-            <span className="tracking-tight">FLATLINE<span className="text-red-500">SECURITY</span></span>
           </Link>
           <div className="hidden md:flex items-center gap-10 text-subtitle2 font-archivo text-gray-300">
             <Link 
@@ -153,7 +97,7 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
             </Link>
           </div>
           <Link to="/login">
-            <Button variant="primary" size="lg" className="hidden sm:inline-flex shadow-lg shadow-red-900/20 hover:scale-105 transition-transform border border-red-500/20 rounded-none">Access Portal</Button>
+            <Button variant="primary" size="lg" className="hidden sm:inline-flex shadow-lg shadow-red-900/20 hover:scale-105 transition-transform border border-red-500/20">Access Portal</Button>
           </Link>
         </div>
       </nav>
@@ -1056,6 +1000,9 @@ const LandingPage = () => {
              FLATLINE<br />
              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600">
                SECURITY
+             </span>
+             <span className="block text-xl md:text-2xl lg:text-3xl font-light tracking-widest text-gray-400 mt-4 uppercase">
+               and Training Solutions Limited
              </span>
            </h1>
            
