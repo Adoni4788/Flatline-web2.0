@@ -139,11 +139,30 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
           })));
         }
 
+        // Fetch users
+        const { data: usersData, error: usersError } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (usersError) throw usersError;
+        if (usersData) {
+          setUsers(usersData.map((u: any) => ({
+            id: u.id,
+            firstName: u.first_name,
+            lastName: u.last_name,
+            email: u.email,
+            role: u.role,
+            status: u.status,
+            source: u.source
+          })));
+        }
+
         // Fetch enrollments
         const { data: enrollmentsData, error: enrollmentsError } = await supabase
           .from('enrollments')
           .select('*')
-          .order('enrolled_at', { ascending: false });
+          .order('created_at', { ascending: false });
 
         if (enrollmentsError) throw enrollmentsError;
         if (enrollmentsData) {
@@ -161,6 +180,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
           courses: coursesData?.length,
           modules: modulesData?.length,
           lessons: lessonsData?.length,
+          users: usersData?.length,
           enrollments: enrollmentsData?.length
         });
       } catch (error) {
