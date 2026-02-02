@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Course, Module, Lesson, Enrollment, LiveSession, Exam, ExamAttempt } from './types';
 import { COURSES, MODULES, LESSONS, MOCK_USER, MOCK_ADMIN } from './mockData';
+import { supabase } from './supabase';
 
 // Extended initial state
 const INITIAL_USERS: User[] = [
@@ -26,8 +27,9 @@ interface DataContextType {
   exams: Exam[];
   examAttempts: ExamAttempt[];
   currentUser: User | null;
+  sessionChecked: boolean;
   // User Actions
-  login: (email: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   addUser: (user: Omit<User, 'id' | 'status'>) => void;
   updateUser: (id: string, data: Partial<User>) => void;
@@ -64,34 +66,153 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType>(null!);
 
-// Fix: Make children optional to resolve TS error
 export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [courses, setCourses] = useState<Course[]>(COURSES);
-  const [modules, setModules] = useState<Module[]>(MODULES);
-  const [lessons, setLessons] = useState<Lesson[]>(LESSONS);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>(INITIAL_ENROLLMENTS);
   const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
-  // Restore session
+  // Load data from Supabase on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Fetch courses
+        const { data: coursesData, error: coursesError } = await supabase
+          .from('courses')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (coursesError) throw coursesError;
+        if (coursesData) {
+          setCourses(coursesData.map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            description: c.description,
+            level: c.level,
+            duration: c.duration,
+            modules: c.modules,
+            image: c.image
+          })));
+        }
+
+        // Fetch modules
+        const { data: modulesData, error: modulesError } = await supabase
+          .from('modules')
+          .select('*')
+          .order('order_number', { ascending: true });
+
+        if (modulesError) throw modulesError;
+        if (modulesData) {
+          setModules(modulesData.map((m: any) => ({
+            id: m.id,
+            courseId: m.course_id,
+            title: m.title,
+            description: m.description,
+            orderNumber: m.order_number
+          })));
+        }
+
+        // Fetch lessons
+        const { data: lessonsData, error: lessonsError } = await supabase
+          .from('lessons')
+          .select('*')
+          .order('order_number', { ascending: true });
+
+        if (lessonsError) throw lessonsError;
+        if (lessonsData) {
+          setLessons(lessonsData.map((l: any) => ({
+            id: l.id,
+            moduleId: l.module_id,
+            title: l.title,
+            type: l.type,
+            orderNumber: l.order_number,
+            content: l.content,
+            videoUrl: l.video_url,
+            passingScore: l.passing_score,
+            questions: l.questions
+          })));
+        }
+
+        console.log('✅ Data loaded from Supabase:', {
+          courses: coursesData?.length,
+          modules: modulesData?.length,
+          lessons: lessonsData?.length
+        });
+      } catch (error) {
+        console.error('Error loading data from Supabase:', error);
+        // Fallback to mock data if Supabase fails
+        setCourses(COURSES);
+        setModules(MODULES);
+        setLessons(LESSONS);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Restore session from localStorage (temporary - will use Supabase Auth later)
   useEffect(() => {
     const stored = localStorage.getItem('flatline_user');
     if (stored) {
       setCurrentUser(JSON.parse(stored));
     }
+    // Mark session as checked even if no user found
+    setSessionChecked(true);
   }, []);
 
-  const login = async (email: string) => {
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (user) {
+  // Login function - now uses Supabase Auth with password
+  const login = async (email: string, password: string) => {
+    try {
+      // Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase(),
+        password: password
+      });
+
+      if (authError || !authData.user) {
+        console.error('Auth error:', authError);
+        return false;
+      }
+
+      // Get user profile from users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (userError || !userData) {
+        console.error('User profile error:', userError);
+        // Sign out if we can't find the user profile
+        await supabase.auth.signOut();
+        return false;
+      }
+
+      // Map database user to app user
+      const user: User = {
+        id: userData.id,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        email: userData.email,
+        role: userData.role,
+        status: userData.status,
+        source: userData.source
+      };
+
       setCurrentUser(user);
       localStorage.setItem('flatline_user', JSON.stringify(user));
       return true;
+    } catch (err) {
+      console.error('Login exception:', err);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
@@ -118,73 +239,267 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     setEnrollments(enrollments.filter(e => e.userId !== id));
   };
 
-  const addCourse = (courseData: Omit<Course, 'id'>) => {
-    const newCourse: Course = {
-      ...courseData,
-      id: Math.random().toString(36).substr(2, 9)
-    };
-    setCourses([...courses, newCourse]);
-  };
+  const addCourse = async (courseData: Omit<Course, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .insert([{
+          title: courseData.title,
+          description: courseData.description,
+          level: courseData.level,
+          duration: courseData.duration,
+          modules: courseData.modules,
+          image: courseData.image
+        }])
+        .select()
+        .single();
 
-  const updateCourse = (id: string, data: Partial<Course>) => {
-    setCourses(courses.map(c => c.id === id ? { ...c, ...data } : c));
-  };
+      if (error) throw error;
 
-  const deleteCourse = (id: string) => {
-    setCourses(courses.filter(c => c.id !== id));
-    // Also delete associated modules, lessons, and enrollments
-    const courseModules = modules.filter(m => m.courseId === id);
-    const moduleIds = courseModules.map(m => m.id);
-    setModules(modules.filter(m => m.courseId !== id));
-    setLessons(lessons.filter(l => !moduleIds.includes(l.moduleId)));
-    setEnrollments(enrollments.filter(e => e.courseId !== id));
-  };
+      // Map response to Course type
+      const newCourse: Course = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        level: data.level,
+        duration: data.duration,
+        modules: data.modules,
+        image: data.image
+      };
 
-  const addModule = (moduleData: Omit<Module, 'id'>) => {
-    const newModule: Module = {
-      ...moduleData,
-      id: Math.random().toString(36).substr(2, 9)
-    };
-    setModules([...modules, newModule]);
-    // Update course modules count
-    const courseModules = modules.filter(m => m.courseId === moduleData.courseId);
-    updateCourse(moduleData.courseId, { modules: courseModules.length + 1 });
-  };
-
-  const updateModule = (id: string, data: Partial<Module>) => {
-    setModules(modules.map(m => m.id === id ? { ...m, ...data } : m));
-  };
-
-  const deleteModule = (id: string) => {
-    const module = modules.find(m => m.id === id);
-    if (module) {
-      setModules(modules.filter(m => m.id !== id));
-      setLessons(lessons.filter(l => l.moduleId !== id));
-      // Update course modules count
-      const courseModules = modules.filter(m => m.courseId === module.courseId && m.id !== id);
-      updateCourse(module.courseId, { modules: courseModules.length });
+      setCourses([...courses, newCourse]);
+      console.log('✅ Course added:', newCourse.title);
+    } catch (error) {
+      console.error('Error adding course:', error);
+      throw error;
     }
   };
 
-  const addLesson = (lessonData: Omit<Lesson, 'id'>) => {
-    const newLesson: Lesson = {
-      ...lessonData,
-      id: Math.random().toString(36).substr(2, 9)
-    };
-    setLessons([...lessons, newLesson]);
+  const updateCourse = async (id: string, data: Partial<Course>) => {
+    try {
+      const updateData: any = {};
+      if (data.title !== undefined) updateData.title = data.title;
+      if (data.description !== undefined) updateData.description = data.description;
+      if (data.level !== undefined) updateData.level = data.level;
+      if (data.duration !== undefined) updateData.duration = data.duration;
+      if (data.modules !== undefined) updateData.modules = data.modules;
+      if (data.image !== undefined) updateData.image = data.image;
+
+      const { error } = await supabase
+        .from('courses')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setCourses(courses.map(c => c.id === id ? { ...c, ...data } : c));
+      console.log('✅ Course updated');
+    } catch (error) {
+      console.error('Error updating course:', error);
+      throw error;
+    }
   };
 
-  const updateLesson = (id: string, data: Partial<Lesson>) => {
-    setLessons(lessons.map(l => l.id === id ? { ...l, ...data } : l));
+  const deleteCourse = async (id: string) => {
+    try {
+      // Delete associated lessons first
+      const courseModules = modules.filter(m => m.courseId === id);
+      const moduleIds = courseModules.map(m => m.id);
+
+      if (moduleIds.length > 0) {
+        await supabase.from('lessons').delete().in('module_id', moduleIds);
+      }
+
+      // Delete associated modules
+      await supabase.from('modules').delete().eq('course_id', id);
+
+      // Delete the course
+      const { error } = await supabase.from('courses').delete().eq('id', id);
+      if (error) throw error;
+
+      // Update local state
+      setCourses(courses.filter(c => c.id !== id));
+      setModules(modules.filter(m => m.courseId !== id));
+      setLessons(lessons.filter(l => !moduleIds.includes(l.moduleId)));
+      setEnrollments(enrollments.filter(e => e.courseId !== id));
+
+      console.log('✅ Course deleted');
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      throw error;
+    }
   };
 
-  const deleteLesson = (id: string) => {
-    setLessons(lessons.filter(l => l.id !== id));
-    // Remove from completed lessons in enrollments
-    setEnrollments(enrollments.map(e => ({
-      ...e,
-      completedLessons: e.completedLessons.filter(lessonId => lessonId !== id)
-    })));
+  const addModule = async (moduleData: Omit<Module, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('modules')
+        .insert([{
+          course_id: moduleData.courseId,
+          title: moduleData.title,
+          description: moduleData.description,
+          order_number: moduleData.orderNumber
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newModule: Module = {
+        id: data.id,
+        courseId: data.course_id,
+        title: data.title,
+        description: data.description,
+        orderNumber: data.order_number
+      };
+
+      setModules([...modules, newModule]);
+
+      // Update course modules count
+      const courseModules = modules.filter(m => m.courseId === moduleData.courseId);
+      await updateCourse(moduleData.courseId, { modules: courseModules.length + 1 });
+
+      console.log('✅ Module added:', newModule.title);
+    } catch (error) {
+      console.error('Error adding module:', error);
+      throw error;
+    }
+  };
+
+  const updateModule = async (id: string, data: Partial<Module>) => {
+    try {
+      const updateData: any = {};
+      if (data.title !== undefined) updateData.title = data.title;
+      if (data.description !== undefined) updateData.description = data.description;
+      if (data.orderNumber !== undefined) updateData.order_number = data.orderNumber;
+      if (data.courseId !== undefined) updateData.course_id = data.courseId;
+
+      const { error } = await supabase
+        .from('modules')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setModules(modules.map(m => m.id === id ? { ...m, ...data } : m));
+      console.log('✅ Module updated');
+    } catch (error) {
+      console.error('Error updating module:', error);
+      throw error;
+    }
+  };
+
+  const deleteModule = async (id: string) => {
+    try {
+      const module = modules.find(m => m.id === id);
+      if (!module) return;
+
+      // Delete associated lessons
+      await supabase.from('lessons').delete().eq('module_id', id);
+
+      // Delete the module
+      const { error } = await supabase.from('modules').delete().eq('id', id);
+      if (error) throw error;
+
+      // Update local state
+      setModules(modules.filter(m => m.id !== id));
+      setLessons(lessons.filter(l => l.moduleId !== id));
+
+      // Update course modules count
+      const courseModules = modules.filter(m => m.courseId === module.courseId && m.id !== id);
+      await updateCourse(module.courseId, { modules: courseModules.length });
+
+      console.log('✅ Module deleted');
+    } catch (error) {
+      console.error('Error deleting module:', error);
+      throw error;
+    }
+  };
+
+  const addLesson = async (lessonData: Omit<Lesson, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('lessons')
+        .insert([{
+          module_id: lessonData.moduleId,
+          title: lessonData.title,
+          type: lessonData.type,
+          order_number: lessonData.orderNumber,
+          content: lessonData.content,
+          video_url: lessonData.videoUrl,
+          passing_score: lessonData.passingScore,
+          questions: lessonData.questions
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newLesson: Lesson = {
+        id: data.id,
+        moduleId: data.module_id,
+        title: data.title,
+        type: data.type,
+        orderNumber: data.order_number,
+        content: data.content,
+        videoUrl: data.video_url,
+        passingScore: data.passing_score,
+        questions: data.questions
+      };
+
+      setLessons([...lessons, newLesson]);
+      console.log('✅ Lesson added:', newLesson.title);
+    } catch (error) {
+      console.error('Error adding lesson:', error);
+      throw error;
+    }
+  };
+
+  const updateLesson = async (id: string, data: Partial<Lesson>) => {
+    try {
+      const updateData: any = {};
+      if (data.title !== undefined) updateData.title = data.title;
+      if (data.type !== undefined) updateData.type = data.type;
+      if (data.orderNumber !== undefined) updateData.order_number = data.orderNumber;
+      if (data.content !== undefined) updateData.content = data.content;
+      if (data.videoUrl !== undefined) updateData.video_url = data.videoUrl;
+      if (data.passingScore !== undefined) updateData.passing_score = data.passingScore;
+      if (data.questions !== undefined) updateData.questions = data.questions;
+      if (data.moduleId !== undefined) updateData.module_id = data.moduleId;
+
+      const { error } = await supabase
+        .from('lessons')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setLessons(lessons.map(l => l.id === id ? { ...l, ...data } : l));
+      console.log('✅ Lesson updated');
+    } catch (error) {
+      console.error('Error updating lesson:', error);
+      throw error;
+    }
+  };
+
+  const deleteLesson = async (id: string) => {
+    try {
+      const { error } = await supabase.from('lessons').delete().eq('id', id);
+      if (error) throw error;
+
+      setLessons(lessons.filter(l => l.id !== id));
+
+      // Remove from completed lessons in enrollments
+      setEnrollments(enrollments.map(e => ({
+        ...e,
+        completedLessons: e.completedLessons.filter(lessonId => lessonId !== id)
+      })));
+
+      console.log('✅ Lesson deleted');
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      throw error;
+    }
   };
 
   const enrollUser = (userId: string, courseId: string) => {
@@ -204,14 +519,14 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     setEnrollments(prev => prev.map(e => {
       if (e.userId === userId && e.courseId === courseId) {
         if (e.completedLessons.includes(lessonId)) return e;
-        
+
         const newCompleted = [...e.completedLessons, lessonId];
         // Calculate simplistic progress
         const courseModules = modules.filter(m => m.courseId === courseId);
         const moduleIds = courseModules.map(m => m.id);
         const totalLessons = lessons.filter(l => moduleIds.includes(l.moduleId)).length;
         const newProgress = Math.round((newCompleted.length / totalLessons) * 100);
-        
+
         return {
           ...e,
           completedLessons: newCompleted,
@@ -319,8 +634,8 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     const percentage = Math.round((score / totalPoints) * 100);
     const passed = percentage >= exam.passingScore;
 
-    setExamAttempts(prev => prev.map(a => 
-      a.id === attemptId 
+    setExamAttempts(prev => prev.map(a =>
+      a.id === attemptId
         ? { ...a, submittedAt: new Date().toISOString(), answers, score: percentage, passed, status: 'submitted' }
         : a
     ));
@@ -336,7 +651,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <DataContext.Provider value={{
-      users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser,
+      users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser, sessionChecked,
       login, logout,
       addUser, updateUser, deleteUser,
       addCourse, updateCourse, deleteCourse,

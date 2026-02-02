@@ -48,6 +48,7 @@ export interface Lesson {
   title: string;
   type: 'content' | 'quiz';
   content?: string; // HTML/Markdown
+  videoUrl?: string; // Video URL for video lessons
   orderNumber: number;
   // Quiz specific
   questions?: Question[];

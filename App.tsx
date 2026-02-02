@@ -15,13 +15,19 @@ const ScrollToTop = () => {
 
 // --- Notification Hook ---
 const useNotification = () => {
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-        setToast({ message, type });
-    };
-    const closeToast = () => setToast(null);
-    return { toast, showToast, closeToast };
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+  };
+  const closeToast = () => setToast(null);
+  return { toast, showToast, closeToast };
 };
+
+// --- Preview Banner Component ---
+const PreviewBanner = () => {
+  return null; // Placeholder - can be customized later
+};
+
 
 // --- Layouts ---
 
@@ -42,27 +48,17 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col bg-[#030712] text-gray-100 font-sans selection:bg-red-500/30 selection:text-white">
       <nav
-        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-          isScrolled
-            ? 'border-b border-white/10 bg-[#030712]/90 backdrop-blur-md py-4'
-            : 'border-b border-transparent bg-transparent py-8'
-        }`}
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${isScrolled
+          ? 'border-b border-white/10 bg-[#030712]/90 backdrop-blur-md py-4'
+          : 'border-b border-transparent bg-transparent py-8'
+          }`}
       >
         <div className="container mx-auto max-w-7xl flex items-center justify-between px-4 md:px-8">
           <Link to="/" className="flex items-center gap-3 font-archivo text-white group relative z-10">
-            <div
-              className="h-10 w-10 md:h-12 md:w-12"
-              style={{
-                background: 'rgb(220, 38, 38)',
-                maskImage: 'url(/images/fst-logo-02-01.svg)',
-                WebkitMaskImage: 'url(/images/fst-logo-02-01.svg)',
-                maskSize: 'contain',
-                WebkitMaskSize: 'contain',
-                maskRepeat: 'no-repeat',
-                WebkitMaskRepeat: 'no-repeat',
-                maskPosition: 'center',
-                WebkitMaskPosition: 'center'
-              }}
+            <img
+              src="/images/flatline-svg-logo.svg"
+              alt="Flatline Security Logo"
+              className="h-14 w-14 md:h-16 md:w-16 object-contain"
             />
             <div className="h-8 md:h-10 w-px bg-white/20"></div>
             <div className="flex flex-col">
@@ -71,26 +67,26 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-10 text-subtitle2 font-archivo text-gray-300">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`hover:text-white transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-red-600 after:transition-all hover:after:w-full ${isActive('/') ? 'text-white after:w-full' : 'after:w-0'}`}
             >
               Home
             </Link>
-            <Link 
-              to="/about" 
+            <Link
+              to="/about"
               className={`hover:text-white transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-red-600 after:transition-all hover:after:w-full ${isActive('/about') ? 'text-white after:w-full' : 'after:w-0'}`}
             >
               About
             </Link>
-            <Link 
-              to="/services" 
+            <Link
+              to="/services"
               className={`hover:text-white transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-red-600 after:transition-all hover:after:w-full ${isActive('/services') ? 'text-white after:w-full' : 'after:w-0'}`}
             >
               Services
             </Link>
-            <Link 
-              to="/contact" 
+            <Link
+              to="/contact"
               className={`hover:text-white transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-red-600 after:transition-all hover:after:w-full ${isActive('/contact') ? 'text-white after:w-full' : 'after:w-0'}`}
             >
               Contact
@@ -111,23 +107,23 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
             </div>
             <p className="text-gray-400 leading-relaxed text-body1">Setting the standard in professional security services and comprehensive training solutions for a safer world.</p>
             <div className="flex gap-4 pt-2">
-               {[
-                   { name: 'Facebook', icon: Icons.Facebook, url: '#' },
-                   { name: 'Instagram', icon: Icons.Instagram, url: '#' },
-                   { name: 'LinkedIn', icon: Icons.LinkedIn, url: '#' },
-                   { name: 'Twitter', icon: Icons.Twitter, url: '#' }
-               ].map((social) => (
-                   <a 
-                       key={social.name}
-                       href={social.url}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="h-10 w-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-red-600 hover:text-white transition-all cursor-pointer border border-white/5 hover:border-red-500"
-                       aria-label={social.name}
-                   >
-                       <social.icon className="h-5 w-5" />
-                   </a>
-               ))}
+              {[
+                { name: 'Facebook', icon: Icons.Facebook, url: '#' },
+                { name: 'Instagram', icon: Icons.Instagram, url: '#' },
+                { name: 'LinkedIn', icon: Icons.LinkedIn, url: '#' },
+                { name: 'Twitter', icon: Icons.Twitter, url: '#' }
+              ].map((social) => (
+                <a
+                  key={social.name}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-red-600 hover:text-white transition-all cursor-pointer border border-white/5 hover:border-red-500"
+                  aria-label={social.name}
+                >
+                  <social.icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
           <div>
@@ -139,12 +135,12 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
                 { name: 'Services', path: '/services' },
                 { name: 'Contact', path: '/contact' }
               ].map(item => (
-                  <li key={item.name}>
-                      <Link to={item.path} className="hover:text-red-500 transition-colors flex items-center gap-2 group">
-                          <Icons.ChevronRight className="h-3 w-3 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          {item.name}
-                      </Link>
-                  </li>
+                <li key={item.name}>
+                  <Link to={item.path} className="hover:text-red-500 transition-colors flex items-center gap-2 group">
+                    <Icons.ChevronRight className="h-3 w-3 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {item.name}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
@@ -166,19 +162,19 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
             </ul>
           </div>
           <div>
-             <h3 className="font-archivo text-white text-h6 mb-8">Newsletter</h3>
-             <p className="mb-6 text-gray-400 text-body1">Subscribe for safety tips and updates.</p>
-             <div className="flex gap-2">
-               <Input placeholder="Email" className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-red-600 h-12" />
-               <Button size="icon" className="bg-red-600 hover:bg-red-700 shrink-0 h-12 w-12"><Icons.ChevronRight className="h-5 w-5" /></Button>
-             </div>
+            <h3 className="font-archivo text-white text-h6 mb-8">Newsletter</h3>
+            <p className="mb-6 text-gray-400 text-body1">Subscribe for safety tips and updates.</p>
+            <div className="flex gap-2">
+              <Input placeholder="Email" className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-red-600 h-12" />
+              <Button size="icon" className="bg-red-600 hover:bg-red-700 shrink-0 h-12 w-12"><Icons.ChevronRight className="h-5 w-5" /></Button>
+            </div>
           </div>
         </div>
         <div className="container mx-auto max-w-7xl px-4 md:px-8 mt-20 pt-8 border-t border-white/5 text-center text-gray-600 flex flex-col md:flex-row justify-between items-center gap-6 text-caption">
           <p>&copy; 2025 Flatline Security. All rights reserved.</p>
           <div className="flex gap-8">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
           </div>
         </div>
       </footer>
@@ -278,50 +274,49 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
   ];
 
   const SidebarContent = () => (
-      <>
-        <div className="flex h-16 items-center gap-2 px-6">
-          <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
-            <Icons.Shield className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-archivo tracking-tight text-h6 font-medium text-white">Student Portal</span>
+    <>
+      <div className="flex h-16 items-center gap-2 px-6">
+        <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
+          <Icons.Shield className="h-4 w-4 text-white" />
         </div>
-        <div className="mx-6 border-b border-white/5"></div>
-        <div className="flex-1 overflow-y-auto py-6 px-0 space-y-0">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-6 py-3 mx-4 text-subtitle2 font-archivo transition-all border-l-4 ${
-                location.pathname.startsWith(item.path)
-                  ? 'bg-red-500/10 text-red-400 border-l-red-500'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-transparent'
+        <span className="font-archivo tracking-tight text-h6 font-medium text-white">Student Portal</span>
+      </div>
+      <div className="mx-6 border-b border-white/5"></div>
+      <div className="flex-1 overflow-y-auto py-6 px-0 space-y-0">
+        {navItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`flex items-center gap-3 px-6 py-3 mx-4 text-subtitle2 font-archivo transition-all border-l-4 ${location.pathname.startsWith(item.path)
+              ? 'bg-red-500/10 text-red-400 border-l-red-500'
+              : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-transparent'
               }`}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
-        </div>
-        <div className="mx-6 border-t border-white/5"></div>
-        <div className="p-4 pt-4">
-          <button
-            onClick={() => setShowUserModal(true)}
-            className="flex items-center gap-3 w-full px-2 py-2 rounded-none bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer"
           >
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-caption1 text-white shadow-inner">
-              {currentUser?.firstName[0]}{currentUser?.lastName[0]}
-            </div>
-            <div className="flex-1 overflow-hidden text-left">
-              <p className="truncate text-subtitle2 font-medium text-white">{currentUser?.firstName} {currentUser?.lastName}</p>
-              <p className="truncate text-caption text-green-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                  Active Trainee
-              </p>
-            </div>
-          </button>
-        </div>
-      </>
+            <item.icon className="h-4 w-4" />
+            {item.label}
+          </Link>
+        ))}
+      </div>
+      <div className="mx-6 border-t border-white/5"></div>
+      <div className="p-4 pt-4">
+        <button
+          onClick={() => setShowUserModal(true)}
+          className="flex items-center gap-3 w-full px-2 py-2 rounded-none bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer"
+        >
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-caption1 text-white shadow-inner">
+            {currentUser?.firstName[0]}{currentUser?.lastName[0]}
+          </div>
+          <div className="flex-1 overflow-hidden text-left">
+            <p className="truncate text-subtitle2 font-medium text-white">{currentUser?.firstName} {currentUser?.lastName}</p>
+            <p className="truncate text-caption text-green-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+              Active Trainee
+            </p>
+          </div>
+        </button>
+      </div>
+    </>
   );
 
   return (
@@ -334,12 +329,12 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
 
       {/* Mobile Sidebar */}
       {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-              <div className="relative w-72 h-full bg-[#030712] border-r border-white/10 flex flex-col shadow-2xl animate-fade-in">
-                  <SidebarContent />
-              </div>
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="relative w-72 h-full bg-[#030712] border-r border-white/10 flex flex-col shadow-2xl animate-fade-in">
+            <SidebarContent />
           </div>
+        </div>
       )}
 
       <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
@@ -351,9 +346,8 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
         {/* Hamburger Menu Button - Desktop */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`hidden md:flex fixed top-4 z-50 h-8 w-8 items-center justify-center rounded-full bg-[#030712] border-2 border-red-600/50 hover:border-red-600 hover:bg-red-600/10 transition-all duration-300 shadow-lg shadow-red-900/20 ${
-            isSidebarOpen ? 'left-[270px] rotate-0' : 'left-12 rotate-180'
-          }`}
+          className={`hidden md:flex fixed top-4 z-50 h-8 w-8 items-center justify-center rounded-full bg-[#030712] border-2 border-red-600/50 hover:border-red-600 hover:bg-red-600/10 transition-all duration-300 shadow-lg shadow-red-900/20 ${isSidebarOpen ? 'left-[270px] rotate-0' : 'left-12 rotate-180'
+            }`}
           style={{ marginTop: bannerVisible ? '34px' : '0' }}
           aria-label="Toggle sidebar"
         >
@@ -362,10 +356,10 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
 
         <header className={`md:hidden flex h-16 items-center justify-between border-b border-white/10 px-4 bg-[#030712]/90 backdrop-blur-md sticky ${bannerVisible ? 'top-[34px]' : 'top-0'} z-30 relative transition-all duration-300`}>
           <div className="flex items-center gap-2">
-             <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center">
-                <Icons.Shield className="h-4 w-4 text-white" />
-             </div>
-             <span className="font-archivo font-medium">Student Portal</span>
+            <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center">
+              <Icons.Shield className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-archivo font-medium">Student Portal</span>
           </div>
           <Button size="icon" variant="ghost" onClick={() => setIsMobileMenuOpen(true)}><Icons.Menu className="h-5 w-5" /></Button>
         </header>
@@ -685,47 +679,46 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   ];
 
   const SidebarContent = () => (
-      <>
-        <div className="flex h-16 items-center gap-2 px-6">
-          <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
-            <Icons.Shield className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-archivo tracking-tight text-white text-h6 font-medium">Admin Console</span>
+    <>
+      <div className="flex h-16 items-center gap-2 px-6">
+        <div className="h-6 w-6 rounded bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
+          <Icons.Shield className="h-4 w-4 text-white" />
         </div>
-        <div className="mx-6 border-b border-white/5"></div>
-        <div className="flex-1 overflow-y-auto py-6 px-0 space-y-0">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-6 py-3 mx-4 text-subtitle2 font-archivo transition-all border-l-4 ${
-                location.pathname.startsWith(item.path)
-                  ? 'bg-red-500/10 text-red-400 border-l-red-500'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-transparent'
+        <span className="font-archivo tracking-tight text-white text-h6 font-medium">Admin Console</span>
+      </div>
+      <div className="mx-6 border-b border-white/5"></div>
+      <div className="flex-1 overflow-y-auto py-6 px-0 space-y-0">
+        {navItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`flex items-center gap-3 px-6 py-3 mx-4 text-subtitle2 font-archivo transition-all border-l-4 ${location.pathname.startsWith(item.path)
+              ? 'bg-red-500/10 text-red-400 border-l-red-500'
+              : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-transparent'
               }`}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
-        </div>
-        <div className="mx-6 border-t border-white/5"></div>
-        <div className="p-4 pt-4">
-          <button
-            onClick={() => setShowUserModal(true)}
-            className="flex items-center gap-3 w-full px-2 py-2 bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
           >
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-caption1 text-white shadow-inner">
-              A
-            </div>
-            <div className="flex-1 overflow-hidden text-left">
-              <p className="truncate text-subtitle2 font-medium text-white">Administrator</p>
-              <p className="truncate text-caption text-gray-400">System Control</p>
-            </div>
-          </button>
-        </div>
-      </>
+            <item.icon className="h-4 w-4" />
+            {item.label}
+          </Link>
+        ))}
+      </div>
+      <div className="mx-6 border-t border-white/5"></div>
+      <div className="p-4 pt-4">
+        <button
+          onClick={() => setShowUserModal(true)}
+          className="flex items-center gap-3 w-full px-2 py-2 bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
+        >
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-caption1 text-white shadow-inner">
+            A
+          </div>
+          <div className="flex-1 overflow-hidden text-left">
+            <p className="truncate text-subtitle2 font-medium text-white">Administrator</p>
+            <p className="truncate text-caption text-gray-400">System Control</p>
+          </div>
+        </button>
+      </div>
+    </>
   );
 
   return (
@@ -738,12 +731,12 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
 
       {/* Mobile Sidebar */}
       {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-              <div className="relative w-72 h-full bg-[#030712] border-r border-white/5 flex flex-col shadow-2xl animate-fade-in">
-                  <SidebarContent />
-              </div>
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="relative w-72 h-full bg-[#030712] border-r border-white/5 flex flex-col shadow-2xl animate-fade-in">
+            <SidebarContent />
           </div>
+        </div>
       )}
 
       <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
@@ -753,9 +746,8 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         {/* Hamburger Menu Button - Desktop */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`hidden md:flex fixed top-4 z-50 h-8 w-8 items-center justify-center rounded-full bg-[#030712] border-2 border-red-600/50 hover:border-red-600 hover:bg-red-600/10 transition-all duration-300 shadow-lg shadow-red-900/20 ${
-            isSidebarOpen ? 'left-[270px] rotate-0' : 'left-12 rotate-180'
-          }`}
+          className={`hidden md:flex fixed top-4 z-50 h-8 w-8 items-center justify-center rounded-full bg-[#030712] border-2 border-red-600/50 hover:border-red-600 hover:bg-red-600/10 transition-all duration-300 shadow-lg shadow-red-900/20 ${isSidebarOpen ? 'left-[270px] rotate-0' : 'left-12 rotate-180'
+            }`}
           style={{ marginTop: bannerVisible ? '34px' : '0' }}
           aria-label="Toggle sidebar"
         >
@@ -940,95 +932,95 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
 
 const LandingPage = () => {
   const galleryItems = [
-      {
-          title: "Tactical Response",
-          category: "Advanced",
-          img: "/images/fst-tactical-image.png",
-          className: "md:col-span-2 md:row-span-2"
-      },
-      {
-          title: "Range Safety",
-          category: "Fundamentals",
-          img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?w=600&h=400&fit=crop",
-          className: "md:col-span-1 md:row-span-1"
-      },
-      {
-          title: "Cyber Warfare",
-          category: "Intelligence",
-          img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&h=800&fit=crop",
-          className: "md:col-span-1 md:row-span-2"
-      },
-      {
-          title: "Team Briefing",
-          category: "Leadership",
-          img: "/images/fst-securityimg.png",
-          className: "md:col-span-1 md:row-span-1"
-      }
+    {
+      title: "Tactical Response",
+      category: "Advanced",
+      img: "/images/fst-tactical-image.png",
+      className: "md:col-span-2 md:row-span-2"
+    },
+    {
+      title: "Range Safety",
+      category: "Fundamentals",
+      img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?w=600&h=400&fit=crop",
+      className: "md:col-span-1 md:row-span-1"
+    },
+    {
+      title: "Cyber Warfare",
+      category: "Intelligence",
+      img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&h=800&fit=crop",
+      className: "md:col-span-1 md:row-span-2"
+    },
+    {
+      title: "Team Briefing",
+      category: "Leadership",
+      img: "/images/fst-securityimg.png",
+      className: "md:col-span-1 md:row-span-1"
+    }
   ];
 
   return (
     <div className="space-y-0 pb-0 bg-[#030712]">
       {/* Hero Section - Elite Standard */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-32">
-         <div className="absolute inset-0 z-0">
-           <img
-             src="https://images.unsplash.com/photo-1551817958-c9c450974b7c?q=80&w=2070&auto=format&fit=crop"
-             alt="Security Background"
-             className="w-full h-full object-cover opacity-20 grayscale"
-           />
-           <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/80 to-[#030712]" />
-           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1551817958-c9c450974b7c?q=80&w=2070&auto=format&fit=crop"
+            alt="Security Background"
+            className="w-full h-full object-cover opacity-20 grayscale"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/80 to-[#030712]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent" />
 
-           {/* Shield Background Element */}
-           <img
-             src="/images/hero-image-shield.png"
-             alt=""
-             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[500px] lg:w-[600px] pointer-events-none animate-pulse-slow"
-           />
-         </div>
+          {/* Shield Background Element */}
+          <img
+            src="/images/hero-image-shield.png"
+            alt=""
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[500px] lg:w-[600px] pointer-events-none animate-pulse-slow"
+          />
+        </div>
 
-         <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10 text-center mt-8">
-           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white text-caption1 font-archivo mb-8 animate-fade-in backdrop-blur-md">
-             <span className="relative flex h-2 w-2">
-               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-               <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-             </span>
-             Elite Security & Intelligence Training
-           </div>
-           
-           <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-archivo tracking-tighter text-white mb-8 animate-fade-in drop-shadow-2xl leading-[0.9]">
-             FLATLINE<br />
-             <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600">
-               SECURITY
-             </span>
-             <span className="block text-xl md:text-2xl lg:text-3xl font-light tracking-widest text-gray-400 mt-4 uppercase">
-               and Training Solutions Limited
-             </span>
-           </h1>
-           
-           <p className="text-h5 text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in font-light border-l-2 border-red-600 pl-6 text-left md:text-center md:border-l-0 md:pl-0">
-             Forging the next generation of operators through military-grade discipline and real-world tactical scenarios.
-           </p>
-           
-           <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in items-center">
-             <Link to="/login">
-               <Button size="lg" className="rounded-none h-14 px-10 text-subtitle1 tracking-widest uppercase hover:bg-red-700 bg-red-600 border border-red-500 transition-all duration-300 shadow-[0_0_30px_rgba(220,38,38,0.3)] hover:shadow-[0_0_50px_rgba(220,38,38,0.5)]">
-                 Start Training
-               </Button>
-             </Link>
-             <Link to="/services">
-               <Button variant="ghost" size="lg" className="rounded-none h-14 px-10 text-subtitle1 tracking-widest uppercase text-gray-300 hover:text-white hover:bg-white/5 border-b border-white/20 hover:border-white transition-all duration-300">
-                 Our Services
-               </Button>
-             </Link>
-           </div>
-         </div>
-         
-         {/* Scroll Indicator */}
-         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gray-500 flex flex-col items-center gap-2">
-            <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
-            <Icons.ChevronRight className="h-4 w-4 rotate-90" />
-         </div>
+        <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10 text-center mt-8">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white text-caption1 font-archivo mb-8 animate-fade-in backdrop-blur-md">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            Elite Security & Intelligence Training
+          </div>
+
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-archivo tracking-tighter text-white mb-8 animate-fade-in drop-shadow-2xl leading-[0.9]">
+            FLATLINE<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600">
+              SECURITY
+            </span>
+            <span className="block text-xl md:text-2xl lg:text-3xl font-light tracking-widest text-gray-400 mt-4 uppercase">
+              and Training Solutions Limited
+            </span>
+          </h1>
+
+          <p className="text-h5 text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in font-light border-l-2 border-red-600 pl-6 text-left md:text-center md:border-l-0 md:pl-0">
+            Forging the next generation of operators through military-grade discipline and real-world tactical scenarios.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in items-center">
+            <Link to="/login">
+              <Button size="lg" className="rounded-none h-14 px-10 text-subtitle1 tracking-widest uppercase hover:bg-red-700 bg-red-600 border border-red-500 transition-all duration-300 shadow-[0_0_30px_rgba(220,38,38,0.3)] hover:shadow-[0_0_50px_rgba(220,38,38,0.5)]">
+                Start Training
+              </Button>
+            </Link>
+            <Link to="/services">
+              <Button variant="ghost" size="lg" className="rounded-none h-14 px-10 text-subtitle1 tracking-widest uppercase text-gray-300 hover:text-white hover:bg-white/5 border-b border-white/20 hover:border-white transition-all duration-300">
+                Our Services
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gray-500 flex flex-col items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
+          <Icons.ChevronRight className="h-4 w-4 rotate-90" />
+        </div>
       </section>
 
       {/* Who We Are Section (The Standard) */}
@@ -1038,104 +1030,104 @@ const LandingPage = () => {
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-blue-900/5 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                
-                {/* Image Side - Composition */}
-                <div className="relative group">
-                    <div className="relative z-10 rounded-sm overflow-hidden border border-white/10 shadow-2xl bg-[#0a0f1c]">
-                        <div className="absolute inset-0 bg-red-900/10 mix-blend-overlay z-10"></div>
-                        <img
-                            src="/images/professional corporate-amage.png"
-                            alt="Professional Flatline Security Team"
-                            className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
-                        />
-                    </div>
-                    {/* Decorative Offset Border */}
-                    <div className="absolute top-6 -right-6 w-full h-full border border-red-900/30 rounded-sm -z-0 hidden md:block transition-all duration-500 group-hover:top-4 group-hover:-right-4 group-hover:border-red-600/50"></div>
-                    
-                    {/* Floating Stat Card */}
-                    <div className="absolute -bottom-10 -left-10 z-20 hidden md:block">
-                        <Card className="p-6 flex items-center gap-5 bg-[#0a0f1c]/95 backdrop-blur-xl border-white/10 shadow-2xl rounded-none border-l-4 border-l-red-600">
-                           <div className="text-center px-2">
-                                <span className="block text-3xl font-bold font-archivo text-white">15+</span>
-                                <span className="text-[10px] uppercase tracking-widest text-gray-500">Years</span>
-                           </div>
-                           <div className="w-px h-10 bg-white/10"></div>
-                           <div className="text-center px-2">
-                                <span className="block text-3xl font-bold font-archivo text-white">2k+</span>
-                                <span className="text-[10px] uppercase tracking-widest text-gray-500">Graduates</span>
-                           </div>
-                        </Card>
-                    </div>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
 
-                {/* Text Side */}
-                <div className="space-y-8">
-                    <div>
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="h-px w-8 bg-red-600"></span>
-                            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">Who We Are</span>
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-archivo font-medium text-white leading-[1.1]">
-                            Defining the Standard of <span className="text-gray-500">Modern Security.</span>
-                        </h2>
-                    </div>
-                    
-                    <div className="space-y-6 text-gray-400 font-light text-lg leading-relaxed">
-                        <p>
-                            Flatline Security was forged from the necessity for higher standards in the private sector. Founded by former special operations veterans, we translate high-stakes field experience into actionable, civilian-appropriate security protocols.
-                        </p>
-                        <p>
-                            We don't just train; we instill a mindset. Our approach combines tactical precision with strategic foresight, ensuring our clients and trainees are prepared for the unpredictable nature of today's threat landscape.
-                        </p>
-                    </div>
+            {/* Image Side - Composition */}
+            <div className="relative group">
+              <div className="relative z-10 rounded-sm overflow-hidden border border-white/10 shadow-2xl bg-[#0a0f1c]">
+                <div className="absolute inset-0 bg-red-900/10 mix-blend-overlay z-10"></div>
+                <img
+                  src="/images/professional corporate-amage.png"
+                  alt="Professional Flatline Security Team"
+                  className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
+                />
+              </div>
+              {/* Decorative Offset Border */}
+              <div className="absolute top-6 -right-6 w-full h-full border border-red-900/30 rounded-sm -z-0 hidden md:block transition-all duration-500 group-hover:top-4 group-hover:-right-4 group-hover:border-red-600/50"></div>
 
-                    <div className="pt-4 flex flex-col sm:flex-row gap-5">
-                        <Link to="/about">
-                            <Button className="rounded-full px-8 h-12 border border-white/20 hover:border-red-500 hover:bg-red-600/10 transition-all text-white" variant="outline">
-                                Discover Our Heritage
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+              {/* Floating Stat Card */}
+              <div className="absolute -bottom-10 -left-10 z-20 hidden md:block">
+                <Card className="p-6 flex items-center gap-5 bg-[#0a0f1c]/95 backdrop-blur-xl border-white/10 shadow-2xl rounded-none border-l-4 border-l-red-600">
+                  <div className="text-center px-2">
+                    <span className="block text-3xl font-bold font-archivo text-white">15+</span>
+                    <span className="text-[10px] uppercase tracking-widest text-gray-500">Years</span>
+                  </div>
+                  <div className="w-px h-10 bg-white/10"></div>
+                  <div className="text-center px-2">
+                    <span className="block text-3xl font-bold font-archivo text-white">2k+</span>
+                    <span className="text-[10px] uppercase tracking-widest text-gray-500">Graduates</span>
+                  </div>
+                </Card>
+              </div>
             </div>
+
+            {/* Text Side */}
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="h-px w-8 bg-red-600"></span>
+                  <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">Who We Are</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-archivo font-medium text-white leading-[1.1]">
+                  Defining the Standard of <span className="text-gray-500">Modern Security.</span>
+                </h2>
+              </div>
+
+              <div className="space-y-6 text-gray-400 font-light text-lg leading-relaxed">
+                <p>
+                  Flatline Security was forged from the necessity for higher standards in the private sector. Founded by former special operations veterans, we translate high-stakes field experience into actionable, civilian-appropriate security protocols.
+                </p>
+                <p>
+                  We don't just train; we instill a mindset. Our approach combines tactical precision with strategic foresight, ensuring our clients and trainees are prepared for the unpredictable nature of today's threat landscape.
+                </p>
+              </div>
+
+              <div className="pt-4 flex flex-col sm:flex-row gap-5">
+                <Link to="/about">
+                  <Button className="rounded-full px-8 h-12 border border-white/20 hover:border-red-500 hover:bg-red-600/10 transition-all text-white" variant="outline">
+                    Discover Our Heritage
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Why Choose Us - Redesigned to Match Standard */}
       <section className="py-32 bg-[#050810] relative border-t border-white/5">
         <div className="container mx-auto max-w-7xl px-4 md:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-                <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Our Advantage</span>
-                <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Why Choose Flatline?</h2>
-                <p className="text-lg text-gray-400 font-light">
-                    Founded by former special operations personnel, we bring military-grade precision to civilian security. 
-                </p>
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Our Advantage</span>
+            <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Why Choose Flatline?</h2>
+            <p className="text-lg text-gray-400 font-light">
+              Founded by former special operations personnel, we bring military-grade precision to civilian security.
+            </p>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                    { title: "Certified Instructors", desc: "Learn from experienced professionals with proven field records.", icon: Icons.Award },
-                    { title: "Scenario Based", desc: "Practical, immersive training environments that mimic real-world threats.", icon: Icons.Users },
-                    { title: "Global Standards", desc: "Curriculum aligned with international best practices and protocols.", icon: Icons.Globe },
-                    { title: "Custom Solutions", desc: "Tailored security strategies for individuals, businesses, and VIPs.", icon: Icons.Settings },
-                    { title: "Proven Success", desc: "A track record of reliability and high success rates in all operations.", icon: Icons.Shield },
-                    { title: "Trusted Partner", desc: "The preferred choice for local organizations and internal agencies.", icon: Icons.Check }
-                ].map((item, idx) => (
-                    <div key={idx} className="group relative p-8 bg-[#0a0f1c] border border-white/5 hover:border-red-500/50 transition-all duration-500 overflow-hidden">
-                        {/* Hover Gradient Background */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-900/0 to-red-900/0 group-hover:from-red-900/10 group-hover:to-transparent transition-all duration-500"></div>
-                        
-                        <div className="relative z-10">
-                            <div className="h-14 w-14 mb-6 flex items-center justify-center bg-white/5 border border-white/10 group-hover:border-red-500/50 group-hover:bg-red-600/10 transition-all duration-300">
-                                <item.icon className="h-6 w-6 text-gray-300 group-hover:text-red-500 transition-colors" />
-                            </div>
-                            <h3 className="text-xl font-archivo font-medium text-white mb-3 group-hover:translate-x-1 transition-transform duration-300">{item.title}</h3>
-                            <p className="text-body2 text-gray-500 group-hover:text-gray-400 leading-relaxed transition-colors">{item.desc}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "Certified Instructors", desc: "Learn from experienced professionals with proven field records.", icon: Icons.Award },
+              { title: "Scenario Based", desc: "Practical, immersive training environments that mimic real-world threats.", icon: Icons.Users },
+              { title: "Global Standards", desc: "Curriculum aligned with international best practices and protocols.", icon: Icons.Globe },
+              { title: "Custom Solutions", desc: "Tailored security strategies for individuals, businesses, and VIPs.", icon: Icons.Settings },
+              { title: "Proven Success", desc: "A track record of reliability and high success rates in all operations.", icon: Icons.Shield },
+              { title: "Trusted Partner", desc: "The preferred choice for local organizations and internal agencies.", icon: Icons.Check }
+            ].map((item, idx) => (
+              <div key={idx} className="group relative p-8 bg-[#0a0f1c] border border-white/5 hover:border-red-500/50 transition-all duration-500 overflow-hidden">
+                {/* Hover Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/0 to-red-900/0 group-hover:from-red-900/10 group-hover:to-transparent transition-all duration-500"></div>
+
+                <div className="relative z-10">
+                  <div className="h-14 w-14 mb-6 flex items-center justify-center bg-white/5 border border-white/10 group-hover:border-red-500/50 group-hover:bg-red-600/10 transition-all duration-300">
+                    <item.icon className="h-6 w-6 text-gray-300 group-hover:text-red-500 transition-colors" />
+                  </div>
+                  <h3 className="text-xl font-archivo font-medium text-white mb-3 group-hover:translate-x-1 transition-transform duration-300">{item.title}</h3>
+                  <p className="text-body2 text-gray-500 group-hover:text-gray-400 leading-relaxed transition-colors">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -1143,120 +1135,120 @@ const LandingPage = () => {
       <section className="py-32 bg-[#030712] relative border-t border-white/5">
         <div className="container mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-              <div className="max-w-2xl">
-                <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Capabilities</span>
-                <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Expertise You Can Trust</h2>
-                <p className="text-lg text-gray-400 font-light">
-                  We offer a wide array of specialized security services and training modules designed for the modern world.
-                </p>
-              </div>
-              <Link to="/services">
-                <Button variant="outline" className="rounded-full px-8 border-white/20 hover:border-white text-white">View All Services</Button>
-              </Link>
+            <div className="max-w-2xl">
+              <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Capabilities</span>
+              <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Expertise You Can Trust</h2>
+              <p className="text-lg text-gray-400 font-light">
+                We offer a wide array of specialized security services and training modules designed for the modern world.
+              </p>
+            </div>
+            <Link to="/services">
+              <Button variant="outline" className="rounded-full px-8 border-white/20 hover:border-white text-white">View All Services</Button>
+            </Link>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-             {[
-               { title: "Firearms Training", icon: Icons.Shield, desc: "Tactical shooting mastery." },
-               { title: "Executive Protection", icon: Icons.Users, desc: "High-stakes VIP security protocols." },
-               { title: "Risk Consultation", icon: Icons.FileText, desc: "Comprehensive threat assessment." },
-             ].map((s, i) => (
-                <Link to="/services" key={i} className="group block h-full">
-                    <div className="relative h-full p-10 bg-[#0a0f1c] border border-white/5 hover:border-white/20 transition-all duration-500 flex flex-col justify-between overflow-hidden">
-                        {/* Background Image Effect (Subtle) */}
-                        <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-700">
-                             <s.icon className="w-40 h-40" />
-                        </div>
-                        
-                        <div className="relative z-10">
-                            <div className="h-16 w-16 bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-red-600 group-hover:border-red-500 transition-all duration-300 shadow-lg">
-                               <s.icon className="h-7 w-7 text-white" />
-                            </div>
-                            <h3 className="text-2xl font-archivo font-medium text-white mb-3">{s.title}</h3>
-                            <p className="text-gray-500 group-hover:text-gray-400 transition-colors">{s.desc}</p>
-                        </div>
-                        
-                        <div className="relative z-10 mt-8 flex items-center gap-2 text-red-500 text-sm font-medium tracking-wide uppercase opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-100">
-                            Explore <Icons.ChevronRight className="h-4 w-4" />
-                        </div>
+            {[
+              { title: "Firearms Training", icon: Icons.Shield, desc: "Tactical shooting mastery." },
+              { title: "Executive Protection", icon: Icons.Users, desc: "High-stakes VIP security protocols." },
+              { title: "Risk Consultation", icon: Icons.FileText, desc: "Comprehensive threat assessment." },
+            ].map((s, i) => (
+              <Link to="/services" key={i} className="group block h-full">
+                <div className="relative h-full p-10 bg-[#0a0f1c] border border-white/5 hover:border-white/20 transition-all duration-500 flex flex-col justify-between overflow-hidden">
+                  {/* Background Image Effect (Subtle) */}
+                  <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-700">
+                    <s.icon className="w-40 h-40" />
+                  </div>
+
+                  <div className="relative z-10">
+                    <div className="h-16 w-16 bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-red-600 group-hover:border-red-500 transition-all duration-300 shadow-lg">
+                      <s.icon className="h-7 w-7 text-white" />
                     </div>
-                </Link>
-             ))}
+                    <h3 className="text-2xl font-archivo font-medium text-white mb-3">{s.title}</h3>
+                    <p className="text-gray-500 group-hover:text-gray-400 transition-colors">{s.desc}</p>
+                  </div>
+
+                  <div className="relative z-10 mt-8 flex items-center gap-2 text-red-500 text-sm font-medium tracking-wide uppercase opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-100">
+                    Explore <Icons.ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
-      
+
       {/* Training Gallery Preview - Redesigned Interaction */}
       <section className="py-32 bg-[#050810] relative overflow-hidden border-t border-white/5">
         <div className="container mx-auto max-w-7xl px-4 md:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-               <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Visuals</span>
-               <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Training in Action</h2>
-               <p className="text-lg text-gray-400 font-light">Experience our immersive training environments designed for real-world application.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-auto md:grid-rows-2 gap-6 h-auto md:h-[700px]">
-                {galleryItems.map((item, idx) => (
-                    <div key={idx} className={`relative group overflow-hidden border border-white/10 bg-[#0a0f1c] ${item.className}`}>
-                        {/* Image with Grayscale to Color Effect */}
-                        <img 
-                            src={item.img} 
-                            alt={item.title} 
-                            className="absolute inset-0 h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105" 
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
-                        
-                        {/* Content */}
-                        <div className="absolute bottom-0 left-0 p-8 w-full">
-                            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                <span className="text-red-500 font-bold text-[10px] tracking-widest uppercase mb-2 block opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.category}</span>
-                                <div className="flex justify-between items-end">
-                                    <h3 className="text-white font-archivo text-2xl font-medium leading-tight">{item.title}</h3>
-                                    <div className="h-10 w-10 border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200">
-                                        <Icons.ChevronRight className="h-5 w-5 text-white" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Visuals</span>
+            <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Training in Action</h2>
+            <p className="text-lg text-gray-400 font-light">Experience our immersive training environments designed for real-world application.</p>
+          </div>
 
-            <div className="text-center mt-16">
-                <Link to="/about">
-                    <Button variant="outline" className="rounded-full h-14 px-10 text-lg border-white/10 hover:border-white text-white">View Full Gallery</Button>
-                </Link>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-auto md:grid-rows-2 gap-6 h-auto md:h-[700px]">
+            {galleryItems.map((item, idx) => (
+              <div key={idx} className={`relative group overflow-hidden border border-white/10 bg-[#0a0f1c] ${item.className}`}>
+                {/* Image with Grayscale to Color Effect */}
+                <img
+                  src={item.img}
+                  alt={item.title}
+                  className="absolute inset-0 h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
+
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 p-8 w-full">
+                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    <span className="text-red-500 font-bold text-[10px] tracking-widest uppercase mb-2 block opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.category}</span>
+                    <div className="flex justify-between items-end">
+                      <h3 className="text-white font-archivo text-2xl font-medium leading-tight">{item.title}</h3>
+                      <div className="h-10 w-10 border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200">
+                        <Icons.ChevronRight className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-16">
+            <Link to="/about">
+              <Button variant="outline" className="rounded-full h-14 px-10 text-lg border-white/10 hover:border-white text-white">View Full Gallery</Button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Contact Details Section (New) - Redesigned */}
       <section className="py-32 bg-[#030712] border-t border-white/5">
-         <div className="container mx-auto max-w-7xl px-4 md:px-8">
-             <div className="text-center max-w-3xl mx-auto mb-20">
-                 <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Connect</span>
-                 <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Get In Touch</h2>
-                 <p className="text-lg text-gray-400 font-light">Reach out to us directly for immediate assistance or inquiries.</p>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 {[
-                     { icon: Icons.Phone, title: "Call Us", line1: "+1 (876) 555-2847", line2: "Mon-Fri, 9am-6pm" },
-                     { icon: Icons.Mail, title: "Email Us", line1: "info@fstsolutionsltd.com", line2: "24/7 Support" },
-                     { icon: Icons.MapPin, title: "Visit Us", line1: "Discovery Bay, St Ann", line2: "Jamaica" }
-                 ].map((c, i) => (
-                     <div key={i} className="group p-10 flex flex-col items-center text-center bg-[#0a0f1c] border border-white/5 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden">
-                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-red-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                         <div className="h-16 w-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-gray-300 group-hover:text-red-500 group-hover:border-red-500/50 transition-all duration-300 relative z-10">
-                             <c.icon className="h-7 w-7" />
-                         </div>
-                         <h3 className="text-xl font-bold font-archivo text-white mb-3 relative z-10">{c.title}</h3>
-                         <p className="text-gray-400 text-body1 relative z-10">{c.line1}</p>
-                         <p className="text-gray-600 text-sm mt-1 relative z-10">{c.line2}</p>
-                     </div>
-                 ))}
-             </div>
-         </div>
+        <div className="container mx-auto max-w-7xl px-4 md:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Connect</span>
+            <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Get In Touch</h2>
+            <p className="text-lg text-gray-400 font-light">Reach out to us directly for immediate assistance or inquiries.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: Icons.Phone, title: "Call Us", line1: "+1 (876) 555-2847", line2: "Mon-Fri, 9am-6pm" },
+              { icon: Icons.Mail, title: "Email Us", line1: "info@fstsolutionsltd.com", line2: "24/7 Support" },
+              { icon: Icons.MapPin, title: "Visit Us", line1: "Discovery Bay, St Ann", line2: "Jamaica" }
+            ].map((c, i) => (
+              <div key={i} className="group p-10 flex flex-col items-center text-center bg-[#0a0f1c] border border-white/5 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-red-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="h-16 w-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-gray-300 group-hover:text-red-500 group-hover:border-red-500/50 transition-all duration-300 relative z-10">
+                  <c.icon className="h-7 w-7" />
+                </div>
+                <h3 className="text-xl font-bold font-archivo text-white mb-3 relative z-10">{c.title}</h3>
+                <p className="text-gray-400 text-body1 relative z-10">{c.line1}</p>
+                <p className="text-gray-600 text-sm mt-1 relative z-10">{c.line2}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* CTA Section - Elite Gradient */}
@@ -1264,7 +1256,7 @@ const LandingPage = () => {
         <div className="absolute inset-0 bg-[#050810]"></div>
         {/* Abstract Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-red-900/10 rounded-full blur-[100px] pointer-events-none"></div>
-        
+
         <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
           <div className="bg-gradient-to-r from-[#0a0f1c] to-[#0a0f1c] border border-white/10 p-16 md:p-24 flex flex-col items-center text-center relative overflow-hidden">
             {/* Corner Accents */}
@@ -1272,9 +1264,9 @@ const LandingPage = () => {
             <div className="absolute bottom-0 right-0 w-20 h-20 border-b border-r border-red-900/50"></div>
 
             <div className="max-w-3xl relative z-10">
-              <h2 className="text-4xl md:text-6xl font-bold font-archivo text-white mb-6 tracking-tight">Ready to Elevate Your <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-800">Security Standards?</span></h2>
+              <h2 className="text-4xl md:text-6xl font-bold font-archivo text-white mb-6 tracking-tight">Ready to Elevate Your <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-800">Security Standards?</span></h2>
               <p className="text-xl text-gray-400 font-light mb-12">Join elite professionals and secure your future with our world-class training programs.</p>
-              
+
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Link to="/login">
                   <Button size="lg" className="h-16 px-12 text-lg uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] transition-shadow rounded-none">
@@ -1301,181 +1293,180 @@ const AboutPage = () => {
       {/* Cinematic Hero */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-           <img 
-             src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop" 
-             alt="Team Background" 
-             className="w-full h-full object-cover grayscale opacity-30"
-           />
-           <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/50 to-[#030712]"></div>
+          <img
+            src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop"
+            alt="Team Background"
+            className="w-full h-full object-cover grayscale opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/50 to-[#030712]"></div>
         </div>
         <div className="relative z-10 text-center px-4">
-             <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-white/10 bg-white/5 rounded-full backdrop-blur-md">
-                 <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-                 <span className="text-[10px] uppercase tracking-widest text-gray-300">Since 2010</span>
-             </div>
-             <h1 className="text-6xl md:text-8xl font-bold font-archivo tracking-tighter text-white mb-6">OUR HERITAGE</h1>
-             <p className="text-xl text-gray-400 max-w-2xl mx-auto font-light">Forged in conflict. Refined for peace. Defining the new standard.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-white/10 bg-white/5 rounded-full backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-300">Since 2010</span>
+          </div>
+          <h1 className="text-6xl md:text-8xl font-bold font-archivo tracking-tighter text-white mb-6">OUR HERITAGE</h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto font-light">Forged in conflict. Refined for peace. Defining the new standard.</p>
         </div>
       </section>
 
       {/* Main Content - Composition Style */}
       <section className="py-24 container mx-auto max-w-7xl px-4 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-               <div className="relative group">
-                   <div className="relative z-10 rounded-sm overflow-hidden border border-white/10 shadow-2xl bg-[#0a0f1c]">
-                       <div className="absolute inset-0 bg-red-900/10 mix-blend-overlay z-10"></div>
-                       <img src="/images/flatline-team-origins.png" className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Flatline Security Leadership Team - Origins of Excellence" />
-                   </div>
-                   {/* Decorative Offset Border */}
-                   <div className="absolute top-6 -left-6 w-full h-full border border-red-900/30 rounded-sm -z-0 hidden md:block transition-all duration-500 group-hover:top-4 group-hover:-left-4 group-hover:border-red-600/50"></div>
-               </div>
-               
-               <div className="space-y-8">
-                   <div>
-                       <div className="flex items-center gap-3 mb-4">
-                            <span className="h-px w-8 bg-red-600"></span>
-                            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">The Story</span>
-                        </div>
-                       <h2 className="text-4xl md:text-5xl font-archivo font-medium text-white leading-[1.1]">Origins of Excellence.</h2>
-                   </div>
-                   <div className="space-y-6 text-gray-400 font-light text-lg leading-relaxed">
-                       <p>
-                           Flatline Security was founded by a cadre of former special operations personnel who recognized a critical gap in the private security sector. We saw a need for training that went beyond the theoretical—training that was rooted in real-world experience and tactical reality.
-                       </p>
-                       <p>
-                           Today, we stand as a beacon of excellence, providing top-tier security services and comprehensive training programs to individuals, corporations, and government entities. Our commitment to precision is unwavering.
-                       </p>
-                   </div>
-                   
-                   <div className="grid grid-cols-3 gap-6 pt-4 border-t border-white/10 mt-8">
-                       {[
-                           { val: "15+", label: "Years Active" },
-                           { val: "2k+", label: "Graduates" },
-                           { val: "100%", label: "Commitment" }
-                       ].map((stat, i) => (
-                           <div key={i}>
-                               <div className="text-3xl font-bold font-archivo text-white">{stat.val}</div>
-                               <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">{stat.label}</div>
-                           </div>
-                       ))}
-                   </div>
-               </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="relative group">
+            <div className="relative z-10 rounded-sm overflow-hidden border border-white/10 shadow-2xl bg-[#0a0f1c]">
+              <div className="absolute inset-0 bg-red-900/10 mix-blend-overlay z-10"></div>
+              <img src="/images/flatline-team-origins.png" className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Flatline Security Leadership Team - Origins of Excellence" />
+            </div>
+            {/* Decorative Offset Border */}
+            <div className="absolute top-6 -left-6 w-full h-full border border-red-900/30 rounded-sm -z-0 hidden md:block transition-all duration-500 group-hover:top-4 group-hover:-left-4 group-hover:border-red-600/50"></div>
           </div>
+
+          <div className="space-y-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px w-8 bg-red-600"></span>
+                <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">The Story</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-archivo font-medium text-white leading-[1.1]">Origins of Excellence.</h2>
+            </div>
+            <div className="space-y-6 text-gray-400 font-light text-lg leading-relaxed">
+              <p>
+                Flatline Security was founded by a cadre of former special operations personnel who recognized a critical gap in the private security sector. We saw a need for training that went beyond the theoretical—training that was rooted in real-world experience and tactical reality.
+              </p>
+              <p>
+                Today, we stand as a beacon of excellence, providing top-tier security services and comprehensive training programs to individuals, corporations, and government entities. Our commitment to precision is unwavering.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-6 pt-4 border-t border-white/10 mt-8">
+              {[
+                { val: "15+", label: "Years Active" },
+                { val: "2k+", label: "Graduates" },
+                { val: "100%", label: "Commitment" }
+              ].map((stat, i) => (
+                <div key={i}>
+                  <div className="text-3xl font-bold font-archivo text-white">{stat.val}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
-      
+
       {/* Values - Updated Grid */}
       <div className="bg-[#050810] py-32 border-y border-white/5">
-          <div className="container mx-auto max-w-7xl px-4 md:px-8">
-              <div className="text-center mb-20 max-w-3xl mx-auto">
-                  <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Philosophy</span>
-                  <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Core Values</h2>
-                  <p className="text-lg text-gray-400 font-light">The pillars that define every operation we undertake.</p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-8">
-                  {[
-                      { title: "Integrity", desc: "We operate with unshakeable honesty and strong moral principles. Trust is our currency." },
-                      { title: "Vigilance", desc: "Constant awareness and readiness. We identify threats before they manifest." },
-                      { title: "Precision", desc: "Exacting standards in training and execution. There is no room for error." }
-                  ].map((v, i) => (
-                      <div key={i} className="group p-10 bg-[#0a0f1c] border border-white/5 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-red-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                          <div className="h-16 w-16 mx-auto bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-red-600 group-hover:border-red-500 transition-all duration-300 relative z-10">
-                              <Icons.Shield className="h-8 w-8 text-gray-300 group-hover:text-white" />
-                          </div>
-                          <h3 className="text-2xl font-medium font-archivo text-white mb-4 text-center relative z-10">{v.title}</h3>
-                          <p className="text-gray-400 leading-relaxed text-center font-light relative z-10">{v.desc}</p>
-                      </div>
-                  ))}
-              </div>
+        <div className="container mx-auto max-w-7xl px-4 md:px-8">
+          <div className="text-center mb-20 max-w-3xl mx-auto">
+            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Philosophy</span>
+            <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Core Values</h2>
+            <p className="text-lg text-gray-400 font-light">The pillars that define every operation we undertake.</p>
           </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: "Integrity", desc: "We operate with unshakeable honesty and strong moral principles. Trust is our currency." },
+              { title: "Vigilance", desc: "Constant awareness and readiness. We identify threats before they manifest." },
+              { title: "Precision", desc: "Exacting standards in training and execution. There is no room for error." }
+            ].map((v, i) => (
+              <div key={i} className="group p-10 bg-[#0a0f1c] border border-white/5 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-red-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="h-16 w-16 mx-auto bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:bg-red-600 group-hover:border-red-500 transition-all duration-300 relative z-10">
+                  <Icons.Shield className="h-8 w-8 text-gray-300 group-hover:text-white" />
+                </div>
+                <h3 className="text-2xl font-medium font-archivo text-white mb-4 text-center relative z-10">{v.title}</h3>
+                <p className="text-gray-400 leading-relaxed text-center font-light relative z-10">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      
+
       {/* Why Choose Flatline (Duplicate from Homepage) */}
       <section className="py-32 bg-[#050810] relative border-b border-white/5">
         <div className="container mx-auto max-w-7xl px-4 md:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-                <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Our Advantage</span>
-                <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Why Choose Flatline?</h2>
-                <p className="text-lg text-gray-400 font-light">
-                    Founded by former special operations personnel, we bring military-grade precision to civilian security. 
-                </p>
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Our Advantage</span>
+            <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Why Choose Flatline?</h2>
+            <p className="text-lg text-gray-400 font-light">
+              Founded by former special operations personnel, we bring military-grade precision to civilian security.
+            </p>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                    { title: "Certified Instructors", desc: "Learn from experienced professionals with proven field records.", icon: Icons.Award },
-                    { title: "Scenario Based", desc: "Practical, immersive training environments that mimic real-world threats.", icon: Icons.Users },
-                    { title: "Global Standards", desc: "Curriculum aligned with international best practices and protocols.", icon: Icons.Globe },
-                    { title: "Custom Solutions", desc: "Tailored security strategies for individuals, businesses, and VIPs.", icon: Icons.Settings },
-                    { title: "Proven Success", desc: "A track record of reliability and high success rates in all operations.", icon: Icons.Shield },
-                    { title: "Trusted Partner", desc: "The preferred choice for local organizations and internal agencies.", icon: Icons.Check }
-                ].map((item, idx) => (
-                    <div key={idx} className="group relative p-8 bg-[#0a0f1c] border border-white/5 hover:border-red-500/50 transition-all duration-500 overflow-hidden">
-                        {/* Hover Gradient Background */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-900/0 to-red-900/0 group-hover:from-red-900/10 group-hover:to-transparent transition-all duration-500"></div>
-                        
-                        <div className="relative z-10">
-                            <div className="h-14 w-14 mb-6 flex items-center justify-center bg-white/5 border border-white/10 group-hover:border-red-500/50 group-hover:bg-red-600/10 transition-all duration-300">
-                                <item.icon className="h-6 w-6 text-gray-300 group-hover:text-red-500 transition-colors" />
-                            </div>
-                            <h3 className="text-xl font-archivo font-medium text-white mb-3 group-hover:translate-x-1 transition-transform duration-300">{item.title}</h3>
-                            <p className="text-body2 text-gray-500 group-hover:text-gray-400 leading-relaxed transition-colors">{item.desc}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "Certified Instructors", desc: "Learn from experienced professionals with proven field records.", icon: Icons.Award },
+              { title: "Scenario Based", desc: "Practical, immersive training environments that mimic real-world threats.", icon: Icons.Users },
+              { title: "Global Standards", desc: "Curriculum aligned with international best practices and protocols.", icon: Icons.Globe },
+              { title: "Custom Solutions", desc: "Tailored security strategies for individuals, businesses, and VIPs.", icon: Icons.Settings },
+              { title: "Proven Success", desc: "A track record of reliability and high success rates in all operations.", icon: Icons.Shield },
+              { title: "Trusted Partner", desc: "The preferred choice for local organizations and internal agencies.", icon: Icons.Check }
+            ].map((item, idx) => (
+              <div key={idx} className="group relative p-8 bg-[#0a0f1c] border border-white/5 hover:border-red-500/50 transition-all duration-500 overflow-hidden">
+                {/* Hover Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/0 to-red-900/0 group-hover:from-red-900/10 group-hover:to-transparent transition-all duration-500"></div>
+
+                <div className="relative z-10">
+                  <div className="h-14 w-14 mb-6 flex items-center justify-center bg-white/5 border border-white/10 group-hover:border-red-500/50 group-hover:bg-red-600/10 transition-all duration-300">
+                    <item.icon className="h-6 w-6 text-gray-300 group-hover:text-red-500 transition-colors" />
+                  </div>
+                  <h3 className="text-xl font-archivo font-medium text-white mb-3 group-hover:translate-x-1 transition-transform duration-300">{item.title}</h3>
+                  <p className="text-body2 text-gray-500 group-hover:text-gray-400 leading-relaxed transition-colors">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Instructors Section - Updated Cards */}
       <section className="py-32 container mx-auto max-w-7xl px-4 md:px-8">
-             <div className="text-center max-w-3xl mx-auto mb-20">
-                 <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Personnel</span>
-                 <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Meet The Instructors</h2>
-                 <p className="text-lg text-gray-400 font-light">Learn from the best. Our team consists of former military and special operations veterans.</p>
-             </div>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 {[
-                     { name: "Major Alan Dutch", role: "Head Instructor", bio: "Former Special Forces operative with 20 years of field experience in counter-terrorism.", img: "/images/instructor-alan-dutch.png" },
-                     { name: "Sarah Connor", role: "Tactical Evasion", bio: "Specialist in defensive driving and urban evasion tactics for high-risk assets.", img: "/images/instructor-sarah-connor.png" },
-                     { name: "John Matrix", role: "CQC Expert", bio: "Master of close-quarters combat and hand-to-hand defense techniques.", img: "/images/instructor-john-matrix.png" }
-                 ].map((inst, i) => (
-                     <div key={i} className="group relative bg-[#0a0f1c] border border-white/5 overflow-hidden hover:border-red-500/30 transition-all duration-500">
-                         <div className="h-96 overflow-hidden relative">
-                            <img 
-                                src={inst.img} 
-                                alt={inst.name} 
-                                className={`w-full h-full grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${
-                                    inst.name === "Major Alan Dutch" || inst.name === "John Matrix" 
-                                        ? "object-cover object-top" 
-                                        : "object-cover"
-                                }`}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1c] via-transparent to-transparent opacity-90"></div>
-                         </div>
-                         <div className="absolute bottom-0 left-0 w-full p-8">
-                             <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                 <h3 className="text-2xl font-archivo font-medium text-white mb-1">{inst.name}</h3>
-                                 <p className="text-red-500 text-xs font-bold uppercase tracking-widest mb-4">{inst.role}</p>
-                                 <p className="text-gray-400 font-light text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{inst.bio}</p>
-                             </div>
-                         </div>
-                     </div>
-                 ))}
-             </div>
+        <div className="text-center max-w-3xl mx-auto mb-20">
+          <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-3 block">Personnel</span>
+          <h2 className="text-4xl md:text-5xl font-archivo text-white mb-6">Meet The Instructors</h2>
+          <p className="text-lg text-gray-400 font-light">Learn from the best. Our team consists of former military and special operations veterans.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { name: "Major Alan Dutch", role: "Head Instructor", bio: "Former Special Forces operative with 20 years of field experience in counter-terrorism.", img: "/images/instructor-alan-dutch.png" },
+            { name: "Sarah Connor", role: "Tactical Evasion", bio: "Specialist in defensive driving and urban evasion tactics for high-risk assets.", img: "/images/instructor-sarah-connor.png" },
+            { name: "John Matrix", role: "CQC Expert", bio: "Master of close-quarters combat and hand-to-hand defense techniques.", img: "/images/instructor-john-matrix.png" }
+          ].map((inst, i) => (
+            <div key={i} className="group relative bg-[#0a0f1c] border border-white/5 overflow-hidden hover:border-red-500/30 transition-all duration-500">
+              <div className="h-96 overflow-hidden relative">
+                <img
+                  src={inst.img}
+                  alt={inst.name}
+                  className={`w-full h-full grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 ${inst.name === "Major Alan Dutch" || inst.name === "John Matrix"
+                    ? "object-cover object-top"
+                    : "object-cover"
+                    }`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1c] via-transparent to-transparent opacity-90"></div>
+              </div>
+              <div className="absolute bottom-0 left-0 w-full p-8">
+                <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                  <h3 className="text-2xl font-archivo font-medium text-white mb-1">{inst.name}</h3>
+                  <p className="text-red-500 text-xs font-bold uppercase tracking-widest mb-4">{inst.role}</p>
+                  <p className="text-gray-400 font-light text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{inst.bio}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
-      
+
       {/* CTA - Same as Homepage */}
       <section className="py-32 relative overflow-hidden bg-[#030712] border-t border-white/5">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-red-900/5 rounded-full blur-[100px] pointer-events-none"></div>
         <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold font-archivo text-white mb-8">Join the Ranks</h2>
-            <p className="text-xl text-gray-400 font-light mb-12 max-w-2xl mx-auto">Experience the difference that professional training makes. Start your journey with Flatline Security today.</p>
-            <Link to="/login">
-                  <Button size="lg" className="h-16 px-12 text-lg uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] transition-shadow rounded-none">
-                    Get Started Now
-                  </Button>
-            </Link>
+          <h2 className="text-4xl md:text-5xl font-bold font-archivo text-white mb-8">Join the Ranks</h2>
+          <p className="text-xl text-gray-400 font-light mb-12 max-w-2xl mx-auto">Experience the difference that professional training makes. Start your journey with Flatline Security today.</p>
+          <Link to="/login">
+            <Button size="lg" className="h-16 px-12 text-lg uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] transition-shadow rounded-none">
+              Get Started Now
+            </Button>
+          </Link>
         </div>
       </section>
     </div>
@@ -1488,91 +1479,91 @@ const ServicesPage = () => {
       {/* Cinematic Hero */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden pt-32">
         <div className="absolute inset-0">
-           <img
-             src="/images/service-image-fst.png"
-             alt="Services Background"
-             className="w-full h-full object-cover grayscale opacity-30"
-           />
-           <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/50 to-[#030712]"></div>
+          <img
+            src="/images/service-image-fst.png"
+            alt="Services Background"
+            className="w-full h-full object-cover grayscale opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/50 to-[#030712]"></div>
         </div>
         <div className="relative z-10 text-center px-4 mt-8">
-             <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-white/10 bg-white/5 rounded-full backdrop-blur-md">
-                 <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-                 <span className="text-[10px] uppercase tracking-widest text-gray-300">Full Spectrum</span>
-             </div>
-             <h1 className="text-5xl md:text-7xl font-bold font-archivo tracking-tighter text-white mb-6">OPERATIONAL CAPABILITIES</h1>
-             <p className="text-xl text-gray-400 max-w-2xl mx-auto font-light">Comprehensive security solutions and elite training modules designed for the modern threat landscape.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-white/10 bg-white/5 rounded-full backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-300">Full Spectrum</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold font-archivo tracking-tighter text-white mb-6">OPERATIONAL CAPABILITIES</h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto font-light">Comprehensive security solutions and elite training modules designed for the modern threat landscape.</p>
         </div>
       </section>
 
       <div className="container mx-auto max-w-7xl px-4 md:px-8 py-24">
-          
-          {/* Section 1: Training */}
-          <div className="mb-32">
-              <div className="flex items-end justify-between mb-16 border-b border-white/10 pb-6">
-                  <div>
-                    <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-2 block">Skill Acquisition</span>
-                    <h2 className="text-4xl font-bold font-archivo text-white">Specialized Training</h2>
-                  </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { title: "Advanced Firearms", desc: "Master the art of tactical shooting, movement, and rapid target acquisition under stress.", icon: Icons.Shield },
-                  { title: "Close Quarters Combat", desc: "Hand-to-hand defense techniques for confined spaces and sudden encounters.", icon: Icons.Users },
-                  { title: "Tactical Medicine", desc: "Emergency trauma care under fire. Tourniquet application, wound packing, and extraction.", icon: Icons.Plus },
-                  { title: "Defensive Driving", desc: "Evasive maneuvers, convoy operations, and vehicle dynamics for high-risk environments.", icon: Icons.Settings },
-                  { title: "Urban Survival", desc: "Navigation, resource procurement, and evasion in hostile urban settings.", icon: Icons.MapPin },
-                  { title: "Situational Awareness", desc: "The psychology of observation and threat detection before incidents occur.", icon: Icons.Search },
-                ].map((s, i) => (
-                  <div key={i} className="group p-8 bg-[#0a0f1c] border border-white/5 hover:border-red-500/50 transition-all duration-500 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-red-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="h-12 w-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:border-red-500 transition-colors relative z-10">
-                      <s.icon className="h-6 w-6 text-gray-300 group-hover:text-white" />
-                    </div>
-                    <h3 className="text-2xl font-medium font-archivo text-white mb-3 relative z-10">{s.title}</h3>
-                    <p className="text-gray-400 text-body2 leading-relaxed font-light relative z-10">{s.desc}</p>
-                  </div>
-                ))}
-              </div>
+
+        {/* Section 1: Training */}
+        <div className="mb-32">
+          <div className="flex items-end justify-between mb-16 border-b border-white/10 pb-6">
+            <div>
+              <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-2 block">Skill Acquisition</span>
+              <h2 className="text-4xl font-bold font-archivo text-white">Specialized Training</h2>
+            </div>
           </div>
 
-          {/* Section 2: Security Services */}
-          <div>
-              <div className="flex items-end justify-between mb-16 border-b border-white/10 pb-6">
-                  <div>
-                    <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-2 block">Protection</span>
-                    <h2 className="text-4xl font-bold font-archivo text-white">Security Services</h2>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "Advanced Firearms", desc: "Master the art of tactical shooting, movement, and rapid target acquisition under stress.", icon: Icons.Shield },
+              { title: "Close Quarters Combat", desc: "Hand-to-hand defense techniques for confined spaces and sudden encounters.", icon: Icons.Users },
+              { title: "Tactical Medicine", desc: "Emergency trauma care under fire. Tourniquet application, wound packing, and extraction.", icon: Icons.Plus },
+              { title: "Defensive Driving", desc: "Evasive maneuvers, convoy operations, and vehicle dynamics for high-risk environments.", icon: Icons.Settings },
+              { title: "Urban Survival", desc: "Navigation, resource procurement, and evasion in hostile urban settings.", icon: Icons.MapPin },
+              { title: "Situational Awareness", desc: "The psychology of observation and threat detection before incidents occur.", icon: Icons.Search },
+            ].map((s, i) => (
+              <div key={i} className="group p-8 bg-[#0a0f1c] border border-white/5 hover:border-red-500/50 transition-all duration-500 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-red-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="h-12 w-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:border-red-500 transition-colors relative z-10">
+                  <s.icon className="h-6 w-6 text-gray-300 group-hover:text-white" />
+                </div>
+                <h3 className="text-2xl font-medium font-archivo text-white mb-3 relative z-10">{s.title}</h3>
+                <p className="text-gray-400 text-body2 leading-relaxed font-light relative z-10">{s.desc}</p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[
-                  { title: "Executive Protection", desc: "Discreet and professional protection for VIPs, executives, and dignitaries. Our agents are trained in low-profile operations to ensure safety without intrusion.", icon: Icons.Users },
-                  { title: "Event Security", desc: "Comprehensive security planning and execution for large-scale events, corporate gatherings, and private functions. Crowd control, access management, and emergency response.", icon: Icons.Shield },
-                  { title: "Risk Consultation", desc: "Full-spectrum risk assessment for facilities and organizations. We identify vulnerabilities and design robust security protocols.", icon: Icons.FileText },
-                  { title: "Cyber Security", desc: "Digital asset protection, penetration testing, and counter-surveillance for the modern digital battlefield.", icon: Icons.Settings },
-                ].map((s, i) => (
-                  <div key={i} className="group p-10 bg-[#0a0f1c] border border-white/5 hover:border-white/20 transition-all duration-500 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
-                    {/* Background Icon Watermark */}
-                    <div className="absolute -right-6 -bottom-6 text-white/5 transform rotate-12 group-hover:scale-110 transition-transform duration-700">
-                         <s.icon className="h-40 w-40" />
-                    </div>
-                    
-                    <div className="h-16 w-16 shrink-0 rounded-none bg-white/5 border border-white/10 flex items-center justify-center relative z-10">
-                      <s.icon className="h-8 w-8 text-red-500" />
-                    </div>
-                    <div className="relative z-10">
-                        <h3 className="text-2xl font-medium font-archivo text-white mb-3">{s.title}</h3>
-                        <p className="text-gray-400 text-body1 leading-relaxed font-light mb-8">{s.desc}</p>
-                        <Link to="/contact">
-                            <Button variant="outline" size="sm" className="border-white/10 hover:border-white hover:bg-transparent rounded-none">Request Consultation</Button>
-                        </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            ))}
           </div>
+        </div>
+
+        {/* Section 2: Security Services */}
+        <div>
+          <div className="flex items-end justify-between mb-16 border-b border-white/10 pb-6">
+            <div>
+              <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-2 block">Protection</span>
+              <h2 className="text-4xl font-bold font-archivo text-white">Security Services</h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              { title: "Executive Protection", desc: "Discreet and professional protection for VIPs, executives, and dignitaries. Our agents are trained in low-profile operations to ensure safety without intrusion.", icon: Icons.Users },
+              { title: "Event Security", desc: "Comprehensive security planning and execution for large-scale events, corporate gatherings, and private functions. Crowd control, access management, and emergency response.", icon: Icons.Shield },
+              { title: "Risk Consultation", desc: "Full-spectrum risk assessment for facilities and organizations. We identify vulnerabilities and design robust security protocols.", icon: Icons.FileText },
+              { title: "Cyber Security", desc: "Digital asset protection, penetration testing, and counter-surveillance for the modern digital battlefield.", icon: Icons.Settings },
+            ].map((s, i) => (
+              <div key={i} className="group p-10 bg-[#0a0f1c] border border-white/5 hover:border-white/20 transition-all duration-500 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
+                {/* Background Icon Watermark */}
+                <div className="absolute -right-6 -bottom-6 text-white/5 transform rotate-12 group-hover:scale-110 transition-transform duration-700">
+                  <s.icon className="h-40 w-40" />
+                </div>
+
+                <div className="h-16 w-16 shrink-0 rounded-none bg-white/5 border border-white/10 flex items-center justify-center relative z-10">
+                  <s.icon className="h-8 w-8 text-red-500" />
+                </div>
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-medium font-archivo text-white mb-3">{s.title}</h3>
+                  <p className="text-gray-400 text-body1 leading-relaxed font-light mb-8">{s.desc}</p>
+                  <Link to="/contact">
+                    <Button variant="outline" size="sm" className="border-white/10 hover:border-white hover:bg-transparent rounded-none">Request Consultation</Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1585,112 +1576,112 @@ const ContactPage = () => {
       {/* Cinematic Hero */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden pt-32">
         <div className="absolute inset-0">
-           <img
-             src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop"
-             alt="Contact Background"
-             className="w-full h-full object-cover grayscale opacity-30"
-           />
-           <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/50 to-[#030712]"></div>
+          <img
+            src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop"
+            alt="Contact Background"
+            className="w-full h-full object-cover grayscale opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#030712] via-[#030712]/50 to-[#030712]"></div>
         </div>
         <div className="relative z-10 text-center px-4 mt-8">
-             <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-white/10 bg-white/5 rounded-full backdrop-blur-md">
-                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                 <span className="text-[10px] uppercase tracking-widest text-gray-300">Channels Open</span>
-             </div>
-             <h1 className="text-5xl md:text-7xl font-bold font-archivo tracking-tighter text-white mb-6">SECURE COMMS</h1>
-             <p className="text-xl text-gray-400 max-w-2xl mx-auto font-light">Initiate contact for consultations, course enrollment, or sensitive inquiries.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-white/10 bg-white/5 rounded-full backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-300">Channels Open</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold font-archivo tracking-tighter text-white mb-6">SECURE COMMS</h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto font-light">Initiate contact for consultations, course enrollment, or sensitive inquiries.</p>
         </div>
       </section>
 
       <div className="container mx-auto max-w-7xl px-4 md:px-8 py-24">
         <div className="grid md:grid-cols-2 gap-16 lg:gap-24">
-            
-            {/* Contact Info Side */}
-            <div className="space-y-16">
-                <div>
-                    <h3 className="text-3xl font-bold font-archivo text-white mb-8 border-l-4 border-red-600 pl-4">Direct Lines</h3>
-                    <div className="space-y-6">
-                     {[
-                         { icon: Icons.MapPin, title: "Headquarters", lines: ["123 Security Blvd, Discovery Bay", "St Ann, Jamaica"] },
-                         { icon: Icons.Mail, title: "Electronic Mail", lines: ["info@fstsolutionsltd.com", "support@flatline.com"] },
-                         { icon: Icons.Phone, title: "Operations Center", lines: ["+1 (876) 555-2847", "Mon-Fri, 0900-1800 EST"] }
-                     ].map((c, i) => (
-                         <div key={i} className="flex items-start gap-6 group p-6 border border-white/5 hover:border-white/10 bg-[#0a0f1c] transition-all">
-                            <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors">
-                               <c.icon className="h-6 w-6" />
-                            </div>
-                            <div>
-                               <h4 className="text-lg font-medium font-archivo text-white mb-1">{c.title}</h4>
-                               {c.lines.map((line, idx) => <p key={idx} className="text-gray-400 font-light">{line}</p>)}
-                            </div>
-                         </div>
-                     ))}
-                  </div>
-                </div>
 
-                {/* FAQ Mini Section */}
-                <div>
-                    <h3 className="text-3xl font-bold font-archivo text-white mb-8 border-l-4 border-gray-700 pl-4">Intel Brief</h3>
-                    <div className="space-y-4">
-                        {[
-                            { q: "Do I need prior experience for basic training?", a: "No, our Level 1 courses are designed for complete beginners." },
-                            { q: "Do you offer private corporate training?", a: "Yes, we can customize training packages for corporate teams on-site or at our facility." },
-                            { q: "Are your certifications recognized internationally?", a: "Many of our advanced certifications adhere to international security standards (ISO)." }
-                        ].map((faq, i) => (
-                            <div key={i} className="p-6 bg-[#0a0f1c] border-l border-white/10">
-                                <h4 className="font-medium text-white text-lg mb-2">{faq.q}</h4>
-                                <p className="text-gray-400 font-light leading-relaxed">{faq.a}</p>
-                            </div>
-                        ))}
+          {/* Contact Info Side */}
+          <div className="space-y-16">
+            <div>
+              <h3 className="text-3xl font-bold font-archivo text-white mb-8 border-l-4 border-red-600 pl-4">Direct Lines</h3>
+              <div className="space-y-6">
+                {[
+                  { icon: Icons.MapPin, title: "Headquarters", lines: ["123 Security Blvd, Discovery Bay", "St Ann, Jamaica"] },
+                  { icon: Icons.Mail, title: "Electronic Mail", lines: ["info@fstsolutionsltd.com", "support@flatline.com"] },
+                  { icon: Icons.Phone, title: "Operations Center", lines: ["+1 (876) 555-2847", "Mon-Fri, 0900-1800 EST"] }
+                ].map((c, i) => (
+                  <div key={i} className="flex items-start gap-6 group p-6 border border-white/5 hover:border-white/10 bg-[#0a0f1c] transition-all">
+                    <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                      <c.icon className="h-6 w-6" />
                     </div>
-                </div>
+                    <div>
+                      <h4 className="text-lg font-medium font-archivo text-white mb-1">{c.title}</h4>
+                      {c.lines.map((line, idx) => <p key={idx} className="text-gray-400 font-light">{line}</p>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Form Side */}
-            <div className="relative">
-               {/* Decorative background for form */}
-               <div className="absolute -inset-4 bg-gradient-to-r from-red-900/20 to-transparent blur-2xl opacity-50 pointer-events-none"></div>
-               
-               <Card className="p-8 md:p-12 bg-[#0a0f1c]/90 border border-white/10 shadow-2xl relative backdrop-blur-xl rounded-none">
-                  <div className="mb-10">
-                      <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-2 block">Transmission</span>
-                      <h3 className="text-3xl font-archivo text-white">Send Message</h3>
+            {/* FAQ Mini Section */}
+            <div>
+              <h3 className="text-3xl font-bold font-archivo text-white mb-8 border-l-4 border-gray-700 pl-4">Intel Brief</h3>
+              <div className="space-y-4">
+                {[
+                  { q: "Do I need prior experience for basic training?", a: "No, our Level 1 courses are designed for complete beginners." },
+                  { q: "Do you offer private corporate training?", a: "Yes, we can customize training packages for corporate teams on-site or at our facility." },
+                  { q: "Are your certifications recognized internationally?", a: "Many of our advanced certifications adhere to international security standards (ISO)." }
+                ].map((faq, i) => (
+                  <div key={i} className="p-6 bg-[#0a0f1c] border-l border-white/10">
+                    <h4 className="font-medium text-white text-lg mb-2">{faq.q}</h4>
+                    <p className="text-gray-400 font-light leading-relaxed">{faq.a}</p>
                   </div>
-                  
-                  <form className="space-y-6">
-                     <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                           <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">First Name</label>
-                           <Input placeholder="John" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Last Name</label>
-                           <Input placeholder="Doe" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
-                        </div>
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Email Address</label>
-                        <Input type="email" placeholder="john@example.com" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Subject</label>
-                        <Select className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none text-gray-300">
-                           <option>General Inquiry</option>
-                           <option>Course Enrollment</option>
-                           <option>Security Services</option>
-                           <option>Corporate Consultation</option>
-                        </Select>
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Message</label>
-                        <Textarea placeholder="Secure transmission content..." className="bg-black/40 border-gray-800 focus:border-red-600 h-40 rounded-none p-4" />
-                     </div>
-                     <Button size="lg" className="w-full h-16 font-bold text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 rounded-none shadow-lg shadow-red-900/20">
-                         Transmit Message
-                     </Button>
-                  </form>
-               </Card>
+                ))}
+              </div>
             </div>
+          </div>
+
+          {/* Form Side */}
+          <div className="relative">
+            {/* Decorative background for form */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-red-900/20 to-transparent blur-2xl opacity-50 pointer-events-none"></div>
+
+            <Card className="p-8 md:p-12 bg-[#0a0f1c]/90 border border-white/10 shadow-2xl relative backdrop-blur-xl rounded-none">
+              <div className="mb-10">
+                <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs mb-2 block">Transmission</span>
+                <h3 className="text-3xl font-archivo text-white">Send Message</h3>
+              </div>
+
+              <form className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">First Name</label>
+                    <Input placeholder="John" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Last Name</label>
+                    <Input placeholder="Doe" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Email Address</label>
+                  <Input type="email" placeholder="john@example.com" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Subject</label>
+                  <Select className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none text-gray-300">
+                    <option>General Inquiry</option>
+                    <option>Course Enrollment</option>
+                    <option>Security Services</option>
+                    <option>Corporate Consultation</option>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Message</label>
+                  <Textarea placeholder="Secure transmission content..." className="bg-black/40 border-gray-800 focus:border-red-600 h-40 rounded-none p-4" />
+                </div>
+                <Button size="lg" className="w-full h-16 font-bold text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 rounded-none shadow-lg shadow-red-900/20">
+                  Transmit Message
+                </Button>
+              </form>
+            </Card>
+          </div>
 
         </div>
       </div>
@@ -1710,90 +1701,90 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     // Simulate network delay for realism
     setTimeout(async () => {
-        const success = await login(email);
-        if (success) {
-            // Check the actual user role instead of email string
-            // Wait a moment for state to update, then check currentUser
-            setTimeout(() => {
-                // Get user from localStorage since state might not be updated yet
-                const stored = localStorage.getItem('flatline_user');
-                if (stored) {
-                    const user = JSON.parse(stored);
-                    if (user?.role === 'admin') {
-                        navigate('/admin/dashboard');
-                    } else {
-                        navigate('/portal/dashboard');
-                    }
-                } else {
-                    // Fallback to portal if we can't determine role
-                    navigate('/portal/dashboard');
-                }
-            }, 100);
-        } else {
-            setError('Invalid credentials.');
-            setIsLoading(false);
-        }
+      const success = await login(email, password);
+      if (success) {
+        // Check the actual user role instead of email string
+        // Wait a moment for state to update, then check currentUser
+        setTimeout(() => {
+          // Get user from localStorage since state might not be updated yet
+          const stored = localStorage.getItem('flatline_user');
+          if (stored) {
+            const user = JSON.parse(stored);
+            if (user?.role === 'admin') {
+              navigate('/admin/dashboard');
+            } else {
+              navigate('/portal/dashboard');
+            }
+          } else {
+            // Fallback to portal if we can't determine role
+            navigate('/portal/dashboard');
+          }
+        }, 100);
+      } else {
+        setIsLoading(false);
+        setError('Invalid email or password.');
+      }
     }, 800);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden px-4 pt-20">
+    <div className="min-h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden px-4 py-8">
       <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-900/20 blur-[120px] rounded-full animate-pulse"></div>
-      
-      <Card className="w-full max-w-md p-10 relative z-10 border-white/10 bg-[#0a0f1c]/80 backdrop-blur-xl shadow-2xl">
-        <div className="text-center mb-10">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-900/50">
-            <Icons.Shield className="h-10 w-10 text-white" />
+
+      <Card className="w-full max-w-md p-6 sm:p-8 relative z-10 border-white/10 bg-[#0a0f1c]/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-900/50">
+            <Icons.Shield className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-h2 font-archivo tracking-tight text-white">Welcome Back</h1>
-          <p className="text-body2 text-gray-400 mt-3">Sign in to access your secure training portal</p>
+          <h1 className="text-h3 font-archivo tracking-tight text-white">Welcome Back</h1>
+          <p className="text-body2 text-gray-400 mt-2">Sign in to access your secure training portal</p>
         </div>
-        
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-1.5">
             <label className="text-caption1 font-medium text-gray-300 ml-1">Email Address</label>
-            <Input 
-              type="email" 
-              placeholder="user@flatline.com" 
+            <Input
+              type="email"
+              placeholder="user@flatline.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              required 
-              className="h-14"
+              required
+              className="h-11 rounded-none"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label className="text-caption1 font-medium text-gray-300 ml-1">Password</label>
-            <Input 
-              type="password" 
-              placeholder="••••••••" 
+            <Input
+              type="password"
+              placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              required 
-              className="h-14"
+              required
+              className="h-11 rounded-none"
             />
           </div>
-          {error && <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-caption1 font-medium text-center">{error}</div>}
-          <Button type="submit" size="lg" className="w-full h-14 shadow-lg shadow-red-900/20" disabled={isLoading}>
+          {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-caption1 font-medium text-center">{error}</div>}
+          <Button type="submit" size="lg" className="w-full h-11 shadow-lg shadow-red-900/20" disabled={isLoading}>
             {isLoading ? (
-                <span className="flex items-center gap-2">
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    Authenticating...
-                </span>
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                Authenticating...
+              </span>
             ) : "Sign In"}
           </Button>
         </form>
-        <div className="mt-10 pt-8 border-t border-white/10 text-center space-y-4">
-           <div className="flex items-center justify-center gap-2 text-gray-400">
-             <Icons.Info className="h-4 w-4" />
-             <span className="text-caption1">Don't have an account?</span>
-           </div>
-           <p className="text-body2 text-gray-500 max-w-xs mx-auto">
-             Contact your administrator to request access credentials for the training portal.
-           </p>
+        <div className="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
+          <div className="flex items-center justify-center gap-2 text-gray-400">
+            <Icons.Info className="h-4 w-4" />
+            <span className="text-caption1">Don't have an account?</span>
+          </div>
+          <p className="text-caption text-gray-500 max-w-xs mx-auto">
+            Contact your administrator to request access credentials for the training portal.
+          </p>
         </div>
       </Card>
     </div>
@@ -1805,187 +1796,187 @@ const LoginPage = () => {
 const StudentDashboard = () => {
   const { currentUser, courses, enrollments, getCourseProgress, enrollUser } = useData();
   const { toast, showToast, closeToast } = useNotification();
-  
+
   const enrolledCourses = courses.filter(c => enrollments.some(e => e.userId === currentUser?.id && e.courseId === c.id));
   const availableCourses = courses.filter(c => !enrollments.some(e => e.userId === currentUser?.id && e.courseId === c.id));
-  
+
   const handleEnroll = (courseId: string, courseTitle: string) => {
-      if (currentUser) {
-          enrollUser(currentUser.id, courseId);
-          showToast(`Successfully enrolled in ${courseTitle}`);
-      }
+    if (currentUser) {
+      enrollUser(currentUser.id, courseId);
+      showToast(`Successfully enrolled in ${courseTitle}`);
+    }
   };
 
   const activeCourse = enrolledCourses.find(c => {
-      const p = getCourseProgress(currentUser!.id, c.id);
-      return p > 0 && p < 100;
+    const p = getCourseProgress(currentUser!.id, c.id);
+    return p > 0 && p < 100;
   });
 
   return (
     <div className="space-y-12 animate-fade-in max-w-7xl mx-auto">
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
-      
+
       <div className="flex items-end justify-between border-b border-white/10 pb-6">
         <div>
           <h1 className="text-h2 font-archivo font-medium text-white tracking-wide">Command Center</h1>
           <p className="text-gray-400 mt-1 text-body1 font-light">Welcome back, {currentUser?.firstName}. Ready for deployment.</p>
         </div>
         <div className="text-right hidden sm:block">
-           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-caption1 uppercase tracking-widest">
-               <span className="relative flex h-2 w-2">
-                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-               </span>
-               Status: Active
-           </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-caption1 uppercase tracking-widest">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Status: Active
+          </div>
         </div>
       </div>
 
       {/* Hero: Continue Learning */}
       {activeCourse && (
-          <div className="relative overflow-hidden border border-white/10 bg-[#0a0f1c]/80 p-0 shadow-2xl group transition-all duration-500 hover:border-red-500/30">
-              {/* Background with Gradient Overlay */}
-              <div className="absolute inset-0 z-0">
-                  <img src={activeCourse.image} alt="Background" className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1c] via-[#0a0f1c]/90 to-transparent"></div>
-              </div>
-              
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 p-10">
-                  <div className="w-full md:w-auto flex-shrink-0">
-                    <div className="relative h-48 w-72 rounded-sm overflow-hidden border border-white/10 shadow-2xl group-hover:border-red-500/40 transition-colors duration-500">
-                        <img src={activeCourse.image} alt={activeCourse.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="h-12 w-12 border border-white/20 bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                                <Icons.Play className="h-5 w-5 text-white fill-current ml-0.5" />
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                      <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-                        <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">Priority Task</span>
-                        <div className="h-px w-10 bg-red-900/50"></div>
-                      </div>
-                      <h2 className="text-3xl font-archivo font-medium text-white mb-2">{activeCourse.title}</h2>
-                      <p className="text-gray-400 text-body1 mb-8 line-clamp-2 max-w-2xl font-light">{activeCourse.description}</p>
-                      
-                      <div className="max-w-xl">
-                          <div className="flex justify-between text-caption1 mb-2 font-bold text-gray-500 uppercase tracking-widest">
-                              <span>Mission Progress</span>
-                              <span className="text-white">{getCourseProgress(currentUser!.id, activeCourse.id)}%</span>
-                          </div>
-                          <div className="h-1.5 w-full bg-gray-800 rounded-none overflow-hidden">
-                              <div className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" style={{ width: `${getCourseProgress(currentUser!.id, activeCourse.id)}%` }}></div>
-                          </div>
-                      </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                      <Link to={`/portal/course/${activeCourse.id}`}>
-                        <Button size="lg" className="rounded-none h-14 px-8 text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 border border-transparent hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all">
-                            Resume
-                        </Button>
-                      </Link>
-                  </div>
-              </div>
+        <div className="relative overflow-hidden border border-white/10 bg-[#0a0f1c]/80 p-0 shadow-2xl group transition-all duration-500 hover:border-red-500/30">
+          {/* Background with Gradient Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img src={activeCourse.image} alt="Background" className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1c] via-[#0a0f1c]/90 to-transparent"></div>
           </div>
+
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 p-10">
+            <div className="w-full md:w-auto flex-shrink-0">
+              <div className="relative h-48 w-72 rounded-sm overflow-hidden border border-white/10 shadow-2xl group-hover:border-red-500/40 transition-colors duration-500">
+                <img src={activeCourse.image} alt={activeCourse.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="h-12 w-12 border border-white/20 bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Icons.Play className="h-5 w-5 text-white fill-current ml-0.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                <span className="text-red-500 font-bold font-archivo tracking-widest uppercase text-xs">Priority Task</span>
+                <div className="h-px w-10 bg-red-900/50"></div>
+              </div>
+              <h2 className="text-3xl font-archivo font-medium text-white mb-2">{activeCourse.title}</h2>
+              <p className="text-gray-400 text-body1 mb-8 line-clamp-2 max-w-2xl font-light">{activeCourse.description}</p>
+
+              <div className="max-w-xl">
+                <div className="flex justify-between text-caption1 mb-2 font-bold text-gray-500 uppercase tracking-widest">
+                  <span>Mission Progress</span>
+                  <span className="text-white">{getCourseProgress(currentUser!.id, activeCourse.id)}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-gray-800 rounded-none overflow-hidden">
+                  <div className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" style={{ width: `${getCourseProgress(currentUser!.id, activeCourse.id)}%` }}></div>
+                </div>
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              <Link to={`/portal/course/${activeCourse.id}`}>
+                <Button size="lg" className="rounded-none h-14 px-8 text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 border border-transparent hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all">
+                  Resume
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
           <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Enrolled Modules</p>
-              <p className="text-3xl font-archivo text-white">{enrolledCourses.length}</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Enrolled Modules</p>
+            <p className="text-3xl font-archivo text-white">{enrolledCourses.length}</p>
           </div>
           <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
-             <Icons.BookOpen className="h-5 w-5" />
+            <Icons.BookOpen className="h-5 w-5" />
           </div>
         </div>
         <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
           <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Completed</p>
-              <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Completed</p>
+            <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
           </div>
           <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
-             <Icons.Check className="h-5 w-5" />
+            <Icons.Check className="h-5 w-5" />
           </div>
         </div>
         <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
           <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Certifications</p>
-              <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Certifications</p>
+            <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
           </div>
           <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
-             <Icons.Award className="h-5 w-5" />
+            <Icons.Award className="h-5 w-5" />
           </div>
         </div>
       </div>
 
       {enrolledCourses.length > 0 && (
         <div>
-            <div className="flex items-center gap-3 mb-6">
-                <span className="h-px w-6 bg-red-600"></span>
-                <h2 className="text-lg font-archivo font-bold text-white uppercase tracking-widest">Active Training</h2>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="h-px w-6 bg-red-600"></span>
+            <h2 className="text-lg font-archivo font-bold text-white uppercase tracking-widest">Active Training</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enrolledCourses.map(course => {
-                const progress = getCourseProgress(currentUser!.id, course.id);
-                return (
-                    <Link key={course.id} to={`/portal/course/${course.id}`} className="group h-full">
-                    <div className="bg-[#0f121a] border border-white/5 hover:border-red-500/30 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
-                        <div className="relative h-48 w-full overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0f121a] to-transparent z-10" />
-                            <img src={course.image} alt={course.title} className="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
-                            <Badge className="absolute top-4 right-4 z-20 bg-black/80 border-white/10 text-white rounded-none text-xs uppercase tracking-widest px-2 py-1">{course.level}</Badge>
-                        </div>
-                        <div className="p-6 flex-1 flex flex-col relative z-10">
-                            <h3 className="font-archivo text-xl font-medium mb-2 text-white group-hover:text-red-400 transition-colors line-clamp-1">{course.title}</h3>
-                            <p className="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed">{course.description}</p>
-                            
-                            <div className="space-y-3 mt-auto">
-                                <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                                    <span>Progress</span>
-                                    <span>{progress}%</span>
-                                </div>
-                                <div className="h-1 w-full bg-gray-800 overflow-hidden">
-                                    <div className="h-full bg-red-600" style={{ width: `${progress}%` }}></div>
-                                </div>
-                            </div>
-                        </div>
+              const progress = getCourseProgress(currentUser!.id, course.id);
+              return (
+                <Link key={course.id} to={`/portal/course/${course.id}`} className="group h-full">
+                  <div className="bg-[#0f121a] border border-white/5 hover:border-red-500/30 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0f121a] to-transparent z-10" />
+                      <img src={course.image} alt={course.title} className="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                      <Badge className="absolute top-4 right-4 z-20 bg-black/80 border-white/10 text-white rounded-none text-xs uppercase tracking-widest px-2 py-1">{course.level}</Badge>
                     </div>
-                    </Link>
-                );
+                    <div className="p-6 flex-1 flex flex-col relative z-10">
+                      <h3 className="font-archivo text-xl font-medium mb-2 text-white group-hover:text-red-400 transition-colors line-clamp-1">{course.title}</h3>
+                      <p className="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed">{course.description}</p>
+
+                      <div className="space-y-3 mt-auto">
+                        <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                          <span>Progress</span>
+                          <span>{progress}%</span>
+                        </div>
+                        <div className="h-1 w-full bg-gray-800 overflow-hidden">
+                          <div className="h-full bg-red-600" style={{ width: `${progress}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
             })}
-            </div>
+          </div>
         </div>
       )}
 
       {availableCourses.length > 0 && (
-         <div>
-            <div className="flex items-center gap-3 mb-6 mt-12">
-                <span className="h-px w-6 bg-gray-600"></span>
-                <h2 className="text-lg font-archivo font-bold text-gray-300 uppercase tracking-widest">Available Operations</h2>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {availableCourses.map(course => (
-                     <div key={course.id} className="border border-white/5 bg-transparent hover:bg-[#0f121a] hover:border-white/10 transition-all duration-300 group flex flex-col">
-                        <div className="relative h-40 w-full overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity duration-500">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10" />
-                            <img src={course.image} alt={course.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                        </div>
-                        <div className="p-6 flex-1 flex flex-col">
-                            <h3 className="font-archivo text-lg font-medium mb-2 text-gray-300 group-hover:text-white transition-colors">{course.title}</h3>
-                            <p className="text-sm text-gray-600 group-hover:text-gray-400 line-clamp-2 mb-6 leading-relaxed">{course.description}</p>
-                            <div className="mt-auto">
-                                <Button onClick={() => handleEnroll(course.id, course.title)} variant="ghost" size="lg" className="w-full border border-gray-800 hover:bg-white/5 text-gray-400 hover:text-white rounded-none uppercase tracking-widest text-xs h-10">
-                                    Initialize
-                                </Button>
-                            </div>
-                        </div>
-                     </div>
-                ))}
-            </div>
-         </div>
+        <div>
+          <div className="flex items-center gap-3 mb-6 mt-12">
+            <span className="h-px w-6 bg-gray-600"></span>
+            <h2 className="text-lg font-archivo font-bold text-gray-300 uppercase tracking-widest">Available Operations</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {availableCourses.map(course => (
+              <div key={course.id} className="border border-white/5 bg-transparent hover:bg-[#0f121a] hover:border-white/10 transition-all duration-300 group flex flex-col">
+                <div className="relative h-40 w-full overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10" />
+                  <img src={course.image} alt={course.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="font-archivo text-lg font-medium mb-2 text-gray-300 group-hover:text-white transition-colors">{course.title}</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-gray-400 line-clamp-2 mb-6 leading-relaxed">{course.description}</p>
+                  <div className="mt-auto">
+                    <Button onClick={() => handleEnroll(course.id, course.title)} variant="ghost" size="lg" className="w-full border border-gray-800 hover:bg-white/5 text-gray-400 hover:text-white rounded-none uppercase tracking-widest text-xs h-10">
+                      Initialize
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Certificates Section */}
@@ -2129,7 +2120,7 @@ const StudentDashboard = () => {
 // --- Protected Route Wrapper ---
 // Rewritten to use useEffect instead of render-time Navigate to prevent infinite loops
 const ProtectedRoute = ({ children, role }: { children?: React.ReactNode; role: 'admin' | 'user' }) => {
-  const { currentUser } = useData();
+  const { currentUser, sessionChecked } = useData();
   const navigate = useNavigate();
   const hasNavigated = React.useRef(false);
 
@@ -2139,6 +2130,9 @@ const ProtectedRoute = ({ children, role }: { children?: React.ReactNode; role: 
   }, [currentUser, role]);
 
   useEffect(() => {
+    // Don't redirect until we've checked localStorage
+    if (!sessionChecked) return;
+
     // Prevent multiple navigations
     if (hasNavigated.current) return;
 
@@ -2163,7 +2157,19 @@ const ProtectedRoute = ({ children, role }: { children?: React.ReactNode; role: 
       navigate(targetPath, { replace: true });
       return;
     }
-  }, [currentUser, role, navigate]);
+  }, [currentUser, role, navigate, sessionChecked]);
+
+  // Show loading while checking session
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // No user or invalid role - show nothing while redirecting
   if (!currentUser || !currentUser.role || (currentUser.role !== 'admin' && currentUser.role !== 'user')) {
@@ -2386,19 +2392,17 @@ const CoursePlayer = () => {
                           setQuizAnswers({});
                           setQuizSubmitted(false);
                         }}
-                        className={`w-full text-left px-6 py-3 border-l-4 transition-all ${
-                          isCurrent
-                            ? 'bg-red-500/10 border-l-red-500 text-red-400'
-                            : 'border-l-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-                        }`}
+                        className={`w-full text-left px-6 py-3 border-l-4 transition-all ${isCurrent
+                          ? 'bg-red-500/10 border-l-red-500 text-red-400'
+                          : 'border-l-transparent text-gray-400 hover:bg-white/5 hover:text-white'
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           {isComplete ? (
                             <Icons.Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                           ) : (
-                            <div className={`h-4 w-4 rounded-full border-2 flex-shrink-0 ${
-                              isCurrent ? 'border-red-500' : 'border-gray-600'
-                            }`} />
+                            <div className={`h-4 w-4 rounded-full border-2 flex-shrink-0 ${isCurrent ? 'border-red-500' : 'border-gray-600'
+                              }`} />
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="text-subtitle2 font-archivo truncate">{lesson.title}</div>
@@ -2507,11 +2511,10 @@ const CoursePlayer = () => {
                               return (
                                 <label
                                   key={option.id}
-                                  className={`flex items-start gap-4 p-4 cursor-pointer transition-all border-b border-white/5 last:border-b-0 ${
-                                    isSelected
-                                      ? 'bg-red-500/10 hover:bg-red-500/15'
-                                      : 'hover:bg-white/5'
-                                  }`}
+                                  className={`flex items-start gap-4 p-4 cursor-pointer transition-all border-b border-white/5 last:border-b-0 ${isSelected
+                                    ? 'bg-red-500/10 hover:bg-red-500/15'
+                                    : 'hover:bg-white/5'
+                                    }`}
                                 >
                                   <input
                                     type={question.type === 'single_choice' ? 'radio' : 'checkbox'}
@@ -2610,13 +2613,12 @@ const CoursePlayer = () => {
                                 return (
                                   <div
                                     key={option.id}
-                                    className={`flex items-start gap-4 p-4 border-b border-white/5 last:border-b-0 ${
-                                      isCorrectAnswer
-                                        ? 'bg-green-500/10'
-                                        : isUserAnswer
+                                    className={`flex items-start gap-4 p-4 border-b border-white/5 last:border-b-0 ${isCorrectAnswer
+                                      ? 'bg-green-500/10'
+                                      : isUserAnswer
                                         ? 'bg-red-500/10'
                                         : 'bg-white/[0.02]'
-                                    }`}
+                                      }`}
                                   >
                                     <div className="flex-shrink-0 flex items-center gap-3 mt-0.5">
                                       {isCorrectAnswer && <Icons.Check className="h-5 w-5 text-green-400" />}
@@ -3015,7 +3017,7 @@ const StudentLiveSessions = () => {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (days > 0) return `${days} day${days > 1 ? 's' : ''} remaining`;
     if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} remaining`;
     if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} remaining`;
@@ -3173,7 +3175,7 @@ const StudentExams = () => {
     const lastAttempt = attempts[attempts.length - 1];
     const exam = exams.find(e => e.id === examId);
     if (!exam) return { status: 'not_started', attempts: attempts.length };
-    
+
     if (attempts.length >= exam.maxAttempts && lastAttempt.status !== 'submitted') {
       return { status: 'max_attempts', attempts: attempts.length, lastScore: lastAttempt.score };
     }
@@ -3332,7 +3334,7 @@ const ExamTaking = () => {
 
   useEffect(() => {
     if (!exam || !exam.timePerQuestionSeconds) return;
-    
+
     const question = exam.questions[currentQuestionIndex];
     if (!question) return;
 
@@ -3494,11 +3496,10 @@ const ExamTaking = () => {
                 return (
                   <label
                     key={option.id}
-                    className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      isSelected
-                        ? 'border-red-600 bg-red-600/10'
-                        : 'border-white/10 hover:border-white/20 bg-white/5'
-                    }`}
+                    className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${isSelected
+                      ? 'border-red-600 bg-red-600/10'
+                      : 'border-white/10 hover:border-white/20 bg-white/5'
+                      }`}
                   >
                     <input
                       type={currentQuestion.type === 'single_choice' ? 'radio' : 'checkbox'}
@@ -3800,37 +3801,49 @@ const AdminCourses = () => {
   const [newCourse, setNewCourse] = useState({ title: '', description: '', level: 'Beginner', duration: 120, modules: 1, image: '' });
   const { toast, showToast, closeToast } = useNotification();
 
-  const handleAddCourse = () => {
+  const handleAddCourse = async () => {
     if (!newCourse.title || !newCourse.description) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
-    addCourse(newCourse);
-    showToast(`Course "${newCourse.title}" added successfully`, 'success');
-    setShowAddModal(false);
-    setNewCourse({ title: '', description: '', level: 'Beginner', duration: 120, modules: 1, image: '' });
+    try {
+      await addCourse(newCourse);
+      showToast(`Course "${newCourse.title}" added successfully`, 'success');
+      setShowAddModal(false);
+      setNewCourse({ title: '', description: '', level: 'Beginner', duration: 120, modules: 1, image: '' });
+    } catch (error) {
+      showToast('Failed to add course', 'error');
+    }
   };
 
-  const handleEditCourse = () => {
+  const handleEditCourse = async () => {
     if (!editingCourse || !editingCourse.title || !editingCourse.description) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
-    updateCourse(editingCourse.id, editingCourse);
-    showToast(`Course "${editingCourse.title}" updated successfully`, 'success');
-    setShowEditModal(false);
-    setEditingCourse(null);
+    try {
+      await updateCourse(editingCourse.id, editingCourse);
+      showToast(`Course "${editingCourse.title}" updated successfully`, 'success');
+      setShowEditModal(false);
+      setEditingCourse(null);
+    } catch (error) {
+      showToast('Failed to update course', 'error');
+    }
   };
 
-  const handleDeleteCourse = (course: Course) => {
+  const handleDeleteCourse = async (course: Course) => {
     if (confirm(`Are you sure you want to delete "${course.title}"? This will also delete all modules and lessons.`)) {
-      deleteCourse(course.id);
-      showToast(`Course "${course.title}" deleted successfully`, 'success');
+      try {
+        await deleteCourse(course.id);
+        showToast(`Course "${course.title}" deleted successfully`, 'success');
+      } catch (error) {
+        showToast('Failed to delete course', 'error');
+      }
     }
   };
 
   const openEditModal = (course: Course) => {
-    setEditingCourse({...course});
+    setEditingCourse({ ...course });
     setShowEditModal(true);
   };
 
@@ -3895,34 +3908,39 @@ const AdminCourses = () => {
       </div>
 
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Add Training Module">
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Course Title *</label>
-            <Input value={newCourse.title} onChange={(e) => setNewCourse({...newCourse, title: e.target.value})} placeholder="Enter course title" />
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">Course Title *</label>
+            <Input value={newCourse.title} onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })} placeholder="Enter course title" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Description *</label>
-            <Textarea value={newCourse.description} onChange={(e) => setNewCourse({...newCourse, description: e.target.value})} placeholder="Enter course description" />
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">Description *</label>
+            <Textarea
+              value={newCourse.description}
+              onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+              placeholder="Enter course description"
+              className="min-h-[60px]"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Level</label>
-              <Select value={newCourse.level} onChange={(e) => setNewCourse({...newCourse, level: e.target.value})}>
+              <label className="block text-sm font-medium text-gray-400 mb-1.5">Level</label>
+              <Select value={newCourse.level} onChange={(e) => setNewCourse({ ...newCourse, level: e.target.value })}>
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
                 <option value="Advanced">Advanced</option>
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Duration (min)</label>
-              <Input type="number" value={newCourse.duration} onChange={(e) => setNewCourse({...newCourse, duration: parseInt(e.target.value)})} />
+              <label className="block text-sm font-medium text-gray-400 mb-1.5">Duration (min)</label>
+              <Input type="number" value={newCourse.duration} onChange={(e) => setNewCourse({ ...newCourse, duration: parseInt(e.target.value) })} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Image URL</label>
-            <Input value={newCourse.image} onChange={(e) => setNewCourse({...newCourse, image: e.target.value})} placeholder="https://..." />
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">Image URL</label>
+            <Input value={newCourse.image} onChange={(e) => setNewCourse({ ...newCourse, image: e.target.value })} placeholder="https://..." />
           </div>
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-4">
             <Button onClick={handleAddCourse} className="flex-1 rounded-none">Add Course</Button>
             <Button variant="outline" onClick={() => setShowAddModal(false)} className="flex-1 rounded-none">Cancel</Button>
           </div>
@@ -3934,16 +3952,16 @@ const AdminCourses = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Course Title *</label>
-              <Input value={editingCourse.title} onChange={(e) => setEditingCourse({...editingCourse, title: e.target.value})} placeholder="Enter course title" />
+              <Input value={editingCourse.title} onChange={(e) => setEditingCourse({ ...editingCourse, title: e.target.value })} placeholder="Enter course title" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Description *</label>
-              <Textarea value={editingCourse.description} onChange={(e) => setEditingCourse({...editingCourse, description: e.target.value})} placeholder="Enter course description" />
+              <Textarea value={editingCourse.description} onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })} placeholder="Enter course description" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Level</label>
-                <Select value={editingCourse.level} onChange={(e) => setEditingCourse({...editingCourse, level: e.target.value as any})}>
+                <Select value={editingCourse.level} onChange={(e) => setEditingCourse({ ...editingCourse, level: e.target.value as any })}>
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
                   <option value="Advanced">Advanced</option>
@@ -3951,12 +3969,12 @@ const AdminCourses = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Duration (min)</label>
-                <Input type="number" value={editingCourse.duration} onChange={(e) => setEditingCourse({...editingCourse, duration: parseInt(e.target.value)})} />
+                <Input type="number" value={editingCourse.duration} onChange={(e) => setEditingCourse({ ...editingCourse, duration: parseInt(e.target.value) })} />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Image URL</label>
-              <Input value={editingCourse.image} onChange={(e) => setEditingCourse({...editingCourse, image: e.target.value})} placeholder="https://..." />
+              <Input value={editingCourse.image} onChange={(e) => setEditingCourse({ ...editingCourse, image: e.target.value })} placeholder="https://..." />
             </div>
             <div className="flex gap-3 mt-6">
               <Button onClick={handleEditCourse} className="flex-1 rounded-none">Update Course</Button>
@@ -4216,7 +4234,7 @@ const AdminUsers = () => {
   };
 
   const openEditModal = (user: User) => {
-    setEditingUser({...user});
+    setEditingUser({ ...user });
     setShowEditModal(true);
   };
 
@@ -4443,20 +4461,20 @@ const AdminUsers = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">First Name *</label>
-              <Input value={newUser.firstName} onChange={(e) => setNewUser({...newUser, firstName: e.target.value})} placeholder="John" />
+              <Input value={newUser.firstName} onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })} placeholder="John" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Last Name *</label>
-              <Input value={newUser.lastName} onChange={(e) => setNewUser({...newUser, lastName: e.target.value})} placeholder="Doe" />
+              <Input value={newUser.lastName} onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })} placeholder="Doe" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">Email *</label>
-            <Input type="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} placeholder="john.doe@example.com" />
+            <Input type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="john.doe@example.com" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">Source Company</label>
-            <Input value={newUser.source} onChange={(e) => setNewUser({...newUser, source: e.target.value})} placeholder="e.g., Guardsman Security, Hawk Eye Security" />
+            <Input value={newUser.source} onChange={(e) => setNewUser({ ...newUser, source: e.target.value })} placeholder="e.g., Guardsman Security, Hawk Eye Security" />
           </div>
           <div className="flex gap-3 mt-6">
             <Button onClick={handleAddUser} className="flex-1 rounded-none">Add Trainee</Button>
@@ -4473,7 +4491,7 @@ const AdminUsers = () => {
                 <label className="block text-sm font-medium text-gray-400 mb-2">First Name *</label>
                 <Input
                   value={editingUser.firstName}
-                  onChange={(e) => setEditingUser({...editingUser, firstName: e.target.value})}
+                  onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
                   placeholder="John"
                 />
               </div>
@@ -4481,7 +4499,7 @@ const AdminUsers = () => {
                 <label className="block text-sm font-medium text-gray-400 mb-2">Last Name *</label>
                 <Input
                   value={editingUser.lastName}
-                  onChange={(e) => setEditingUser({...editingUser, lastName: e.target.value})}
+                  onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
                   placeholder="Doe"
                 />
               </div>
@@ -4491,7 +4509,7 @@ const AdminUsers = () => {
               <Input
                 type="email"
                 value={editingUser.email}
-                onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                 placeholder="john.doe@example.com"
               />
             </div>
@@ -4499,7 +4517,7 @@ const AdminUsers = () => {
               <label className="block text-sm font-medium text-gray-400 mb-2">Source Company</label>
               <Input
                 value={editingUser.source || ''}
-                onChange={(e) => setEditingUser({...editingUser, source: e.target.value})}
+                onChange={(e) => setEditingUser({ ...editingUser, source: e.target.value })}
                 placeholder="e.g., Guardsman Security, Hawk Eye Security"
               />
             </div>
@@ -4508,7 +4526,7 @@ const AdminUsers = () => {
                 <label className="block text-sm font-medium text-gray-400 mb-2">Role</label>
                 <Select
                   value={editingUser.role}
-                  onChange={(e) => setEditingUser({...editingUser, role: e.target.value as 'user' | 'admin'})}
+                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'user' | 'admin' })}
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
@@ -4518,7 +4536,7 @@ const AdminUsers = () => {
                 <label className="block text-sm font-medium text-gray-400 mb-2">Status</label>
                 <Select
                   value={editingUser.status}
-                  onChange={(e) => setEditingUser({...editingUser, status: e.target.value as 'active' | 'inactive'})}
+                  onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value as 'active' | 'inactive' })}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -4591,11 +4609,10 @@ const AdminUsers = () => {
                         handleAssignCourse(course.id);
                       }
                     }}
-                    className={`w-full text-left p-3 border transition-all rounded-none ${
-                      isAllEnrolled
-                        ? 'border-green-900/30 bg-green-900/10 cursor-not-allowed'
-                        : 'border-red-900/20 hover:border-red-900/40 bg-black/40 hover:bg-red-900/10'
-                    }`}
+                    className={`w-full text-left p-3 border transition-all rounded-none ${isAllEnrolled
+                      ? 'border-green-900/30 bg-green-900/10 cursor-not-allowed'
+                      : 'border-red-900/20 hover:border-red-900/40 bg-black/40 hover:bg-red-900/10'
+                      }`}
                     disabled={targetUsers.length === 0 || isAllEnrolled}
                   >
                     <div className="flex items-center justify-between">
@@ -4854,30 +4871,44 @@ const AdminCourseDetail = () => {
     setShowModuleModal(true);
   };
 
-  const handleSaveModule = () => {
+  const saveModule = async () => {
     if (editingModule) {
       if (!editingModule.title) {
         showToast('Please enter a module title', 'error');
         return;
       }
-      updateModule(editingModule.id, editingModule);
-      showToast('Module updated successfully', 'success');
+      try {
+        await updateModule(editingModule.id, editingModule);
+        showToast('Module updated successfully', 'success');
+      } catch (error) {
+        showToast('Failed to update module', 'error');
+        return;
+      }
     } else {
       if (!newModule.title) {
         showToast('Please enter a module title', 'error');
         return;
       }
-      addModule({ ...newModule, courseId: courseId! });
-      showToast('Module created successfully', 'success');
+      try {
+        await addModule({ ...newModule, courseId: courseId! });
+        showToast('Module created successfully', 'success');
+      } catch (error) {
+        showToast('Failed to create module', 'error');
+        return;
+      }
     }
     setShowModuleModal(false);
     setEditingModule(null);
   };
 
-  const handleDeleteModule = (module: Module) => {
+  const handleDeleteModule = async (module: any) => {
     if (confirm(`Delete "${module.title}"? This will also delete all lessons in this module.`)) {
-      deleteModule(module.id);
-      showToast('Module deleted successfully', 'success');
+      try {
+        await deleteModule(module.id);
+        showToast('Module deleted successfully', 'success');
+      } catch (error) {
+        showToast('Failed to delete module', 'error');
+      }
     }
   };
 
@@ -4903,30 +4934,44 @@ const AdminCourseDetail = () => {
     setShowLessonModal(true);
   };
 
-  const handleSaveLesson = () => {
+  const handleSaveLesson = async () => {
     if (editingLesson) {
       if (!editingLesson.title) {
         showToast('Please enter a lesson title', 'error');
         return;
       }
-      updateLesson(editingLesson.id, editingLesson);
-      showToast('Lesson updated successfully', 'success');
+      try {
+        await updateLesson(editingLesson.id, editingLesson);
+        showToast('Lesson updated successfully', 'success');
+      } catch (error) {
+        showToast('Failed to update lesson', 'error');
+        return;
+      }
     } else {
       if (!newLesson.title) {
         showToast('Please enter a lesson title', 'error');
         return;
       }
-      addLesson({ ...newLesson, moduleId: selectedModuleId! });
-      showToast('Lesson created successfully', 'success');
+      try {
+        await addLesson({ ...newLesson, moduleId: selectedModuleId! });
+        showToast('Lesson created successfully', 'success');
+      } catch (error) {
+        showToast('Failed to create lesson', 'error');
+        return;
+      }
     }
     setShowLessonModal(false);
     setEditingLesson(null);
   };
 
-  const handleDeleteLesson = (lesson: Lesson) => {
+  const handleDeleteLesson = async (lesson: any) => {
     if (confirm(`Delete lesson "${lesson.title}"?`)) {
-      deleteLesson(lesson.id);
-      showToast('Lesson deleted successfully', 'success');
+      try {
+        await deleteLesson(lesson.id);
+        showToast('Lesson deleted successfully', 'success');
+      } catch (error) {
+        showToast('Failed to delete lesson', 'error');
+      }
     }
   };
 
@@ -5068,8 +5113,8 @@ const AdminCourseDetail = () => {
             <Input
               value={editingModule ? editingModule.title : newModule.title}
               onChange={(e) => editingModule
-                ? setEditingModule({...editingModule, title: e.target.value})
-                : setNewModule({...newModule, title: e.target.value})
+                ? setEditingModule({ ...editingModule, title: e.target.value })
+                : setNewModule({ ...newModule, title: e.target.value })
               }
               placeholder="e.g., Introduction to Security Protocols"
             />
@@ -5079,8 +5124,8 @@ const AdminCourseDetail = () => {
             <Textarea
               value={editingModule ? editingModule.description : newModule.description}
               onChange={(e) => editingModule
-                ? setEditingModule({...editingModule, description: e.target.value})
-                : setNewModule({...newModule, description: e.target.value})
+                ? setEditingModule({ ...editingModule, description: e.target.value })
+                : setNewModule({ ...newModule, description: e.target.value })
               }
               placeholder="Brief description of module content"
             />
@@ -5091,8 +5136,8 @@ const AdminCourseDetail = () => {
               type="number"
               value={editingModule ? editingModule.orderNumber : newModule.orderNumber}
               onChange={(e) => editingModule
-                ? setEditingModule({...editingModule, orderNumber: parseInt(e.target.value)})
-                : setNewModule({...newModule, orderNumber: parseInt(e.target.value)})
+                ? setEditingModule({ ...editingModule, orderNumber: parseInt(e.target.value) })
+                : setNewModule({ ...newModule, orderNumber: parseInt(e.target.value) })
               }
             />
           </div>
@@ -5119,8 +5164,8 @@ const AdminCourseDetail = () => {
             <Input
               value={editingLesson ? editingLesson.title : newLesson.title}
               onChange={(e) => editingLesson
-                ? setEditingLesson({...editingLesson, title: e.target.value})
-                : setNewLesson({...newLesson, title: e.target.value})
+                ? setEditingLesson({ ...editingLesson, title: e.target.value })
+                : setNewLesson({ ...newLesson, title: e.target.value })
               }
               placeholder="e.g., Understanding Threat Vectors"
             />
@@ -5130,8 +5175,8 @@ const AdminCourseDetail = () => {
             <Select
               value={editingLesson ? editingLesson.type : newLesson.type}
               onChange={(e) => editingLesson
-                ? setEditingLesson({...editingLesson, type: e.target.value as any})
-                : setNewLesson({...newLesson, type: e.target.value})
+                ? setEditingLesson({ ...editingLesson, type: e.target.value as any })
+                : setNewLesson({ ...newLesson, type: e.target.value })
               }
             >
               <option value="content">Content</option>
@@ -5144,8 +5189,8 @@ const AdminCourseDetail = () => {
               type="number"
               value={editingLesson ? editingLesson.orderNumber : newLesson.orderNumber}
               onChange={(e) => editingLesson
-                ? setEditingLesson({...editingLesson, orderNumber: parseInt(e.target.value)})
-                : setNewLesson({...newLesson, orderNumber: parseInt(e.target.value)})
+                ? setEditingLesson({ ...editingLesson, orderNumber: parseInt(e.target.value) })
+                : setNewLesson({ ...newLesson, orderNumber: parseInt(e.target.value) })
               }
             />
           </div>
@@ -5157,8 +5202,8 @@ const AdminCourseDetail = () => {
                 rows={10}
                 value={editingLesson ? editingLesson.content || '' : newLesson.content}
                 onChange={(e) => editingLesson
-                  ? setEditingLesson({...editingLesson, content: e.target.value})
-                  : setNewLesson({...newLesson, content: e.target.value})
+                  ? setEditingLesson({ ...editingLesson, content: e.target.value })
+                  : setNewLesson({ ...newLesson, content: e.target.value })
                 }
                 placeholder="<h2>Title</h2><p>Content here...</p>"
               />
@@ -5176,8 +5221,8 @@ const AdminCourseDetail = () => {
                   max="100"
                   value={editingLesson ? editingLesson.passingScore || 70 : newLesson.passingScore}
                   onChange={(e) => editingLesson
-                    ? setEditingLesson({...editingLesson, passingScore: parseInt(e.target.value)})
-                    : setNewLesson({...newLesson, passingScore: parseInt(e.target.value)})
+                    ? setEditingLesson({ ...editingLesson, passingScore: parseInt(e.target.value) })
+                    : setNewLesson({ ...newLesson, passingScore: parseInt(e.target.value) })
                   }
                 />
               </div>
@@ -5203,7 +5248,7 @@ const AdminCourseDetail = () => {
                           ],
                           explanation: ''
                         };
-                        setEditingLesson({...editingLesson, questions: [...questions, newQuestion]});
+                        setEditingLesson({ ...editingLesson, questions: [...questions, newQuestion] });
                       }}
                       className="rounded-none border border-white/10"
                     >
@@ -5226,8 +5271,8 @@ const AdminCourseDetail = () => {
                                   value={question.text}
                                   onChange={(e) => {
                                     const updatedQuestions = [...editingLesson.questions!];
-                                    updatedQuestions[qIndex] = {...question, text: e.target.value};
-                                    setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                    updatedQuestions[qIndex] = { ...question, text: e.target.value };
+                                    setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                   }}
                                   placeholder="Enter your question..."
                                 />
@@ -5240,8 +5285,8 @@ const AdminCourseDetail = () => {
                                     value={question.type}
                                     onChange={(e) => {
                                       const updatedQuestions = [...editingLesson.questions!];
-                                      updatedQuestions[qIndex] = {...question, type: e.target.value as any};
-                                      setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                      updatedQuestions[qIndex] = { ...question, type: e.target.value as any };
+                                      setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                     }}
                                   >
                                     <option value="single_choice">Single Choice</option>
@@ -5255,8 +5300,8 @@ const AdminCourseDetail = () => {
                                     value={question.points}
                                     onChange={(e) => {
                                       const updatedQuestions = [...editingLesson.questions!];
-                                      updatedQuestions[qIndex] = {...question, points: parseInt(e.target.value)};
-                                      setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                      updatedQuestions[qIndex] = { ...question, points: parseInt(e.target.value) };
+                                      setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                     }}
                                   />
                                 </div>
@@ -5275,7 +5320,7 @@ const AdminCourseDetail = () => {
                                         ...question,
                                         options: [...question.options, newOption]
                                       };
-                                      setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                      setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                     }}
                                     className="rounded-none text-xs h-6 px-2"
                                   >
@@ -5292,9 +5337,9 @@ const AdminCourseDetail = () => {
                                         onChange={(e) => {
                                           const updatedQuestions = [...editingLesson.questions!];
                                           const updatedOptions = [...question.options];
-                                          updatedOptions[optIndex] = {...option, isCorrect: e.target.checked};
-                                          updatedQuestions[qIndex] = {...question, options: updatedOptions};
-                                          setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                          updatedOptions[optIndex] = { ...option, isCorrect: e.target.checked };
+                                          updatedQuestions[qIndex] = { ...question, options: updatedOptions };
+                                          setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                         }}
                                         className="flex-shrink-0"
                                       />
@@ -5303,9 +5348,9 @@ const AdminCourseDetail = () => {
                                         onChange={(e) => {
                                           const updatedQuestions = [...editingLesson.questions!];
                                           const updatedOptions = [...question.options];
-                                          updatedOptions[optIndex] = {...option, text: e.target.value};
-                                          updatedQuestions[qIndex] = {...question, options: updatedOptions};
-                                          setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                          updatedOptions[optIndex] = { ...option, text: e.target.value };
+                                          updatedQuestions[qIndex] = { ...question, options: updatedOptions };
+                                          setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                         }}
                                         placeholder={`Option ${optIndex + 1}`}
                                         className="flex-1"
@@ -5319,7 +5364,7 @@ const AdminCourseDetail = () => {
                                             ...question,
                                             options: question.options.filter((_, i) => i !== optIndex)
                                           };
-                                          setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                          setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                         }}
                                         className="rounded-none text-red-400 h-8 px-2"
                                       >
@@ -5337,8 +5382,8 @@ const AdminCourseDetail = () => {
                                   value={question.explanation || ''}
                                   onChange={(e) => {
                                     const updatedQuestions = [...editingLesson.questions!];
-                                    updatedQuestions[qIndex] = {...question, explanation: e.target.value};
-                                    setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                    updatedQuestions[qIndex] = { ...question, explanation: e.target.value };
+                                    setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                                   }}
                                   placeholder="Explain the correct answer..."
                                   rows={2}
@@ -5351,7 +5396,7 @@ const AdminCourseDetail = () => {
                               variant="ghost"
                               onClick={() => {
                                 const updatedQuestions = editingLesson.questions!.filter((_, i) => i !== qIndex);
-                                setEditingLesson({...editingLesson, questions: updatedQuestions});
+                                setEditingLesson({ ...editingLesson, questions: updatedQuestions });
                               }}
                               className="rounded-none text-red-400"
                             >
@@ -5386,7 +5431,7 @@ const AdminCourseDetail = () => {
                           ],
                           explanation: ''
                         };
-                        setNewLesson({...newLesson, questions: [...questions, newQuestion]});
+                        setNewLesson({ ...newLesson, questions: [...questions, newQuestion] });
                       }}
                       className="rounded-none border border-white/10"
                     >
@@ -5409,8 +5454,8 @@ const AdminCourseDetail = () => {
                                   value={question.text}
                                   onChange={(e) => {
                                     const updatedQuestions = [...newLesson.questions];
-                                    updatedQuestions[qIndex] = {...question, text: e.target.value};
-                                    setNewLesson({...newLesson, questions: updatedQuestions});
+                                    updatedQuestions[qIndex] = { ...question, text: e.target.value };
+                                    setNewLesson({ ...newLesson, questions: updatedQuestions });
                                   }}
                                   placeholder="Enter your question..."
                                 />
@@ -5423,8 +5468,8 @@ const AdminCourseDetail = () => {
                                     value={question.type}
                                     onChange={(e) => {
                                       const updatedQuestions = [...newLesson.questions];
-                                      updatedQuestions[qIndex] = {...question, type: e.target.value};
-                                      setNewLesson({...newLesson, questions: updatedQuestions});
+                                      updatedQuestions[qIndex] = { ...question, type: e.target.value };
+                                      setNewLesson({ ...newLesson, questions: updatedQuestions });
                                     }}
                                   >
                                     <option value="single_choice">Single Choice</option>
@@ -5438,8 +5483,8 @@ const AdminCourseDetail = () => {
                                     value={question.points}
                                     onChange={(e) => {
                                       const updatedQuestions = [...newLesson.questions];
-                                      updatedQuestions[qIndex] = {...question, points: parseInt(e.target.value)};
-                                      setNewLesson({...newLesson, questions: updatedQuestions});
+                                      updatedQuestions[qIndex] = { ...question, points: parseInt(e.target.value) };
+                                      setNewLesson({ ...newLesson, questions: updatedQuestions });
                                     }}
                                   />
                                 </div>
@@ -5458,7 +5503,7 @@ const AdminCourseDetail = () => {
                                         ...question,
                                         options: [...question.options, newOption]
                                       };
-                                      setNewLesson({...newLesson, questions: updatedQuestions});
+                                      setNewLesson({ ...newLesson, questions: updatedQuestions });
                                     }}
                                     className="rounded-none text-xs h-6 px-2"
                                   >
@@ -5475,9 +5520,9 @@ const AdminCourseDetail = () => {
                                         onChange={(e) => {
                                           const updatedQuestions = [...newLesson.questions];
                                           const updatedOptions = [...question.options];
-                                          updatedOptions[optIndex] = {...option, isCorrect: e.target.checked};
-                                          updatedQuestions[qIndex] = {...question, options: updatedOptions};
-                                          setNewLesson({...newLesson, questions: updatedQuestions});
+                                          updatedOptions[optIndex] = { ...option, isCorrect: e.target.checked };
+                                          updatedQuestions[qIndex] = { ...question, options: updatedOptions };
+                                          setNewLesson({ ...newLesson, questions: updatedQuestions });
                                         }}
                                         className="flex-shrink-0"
                                       />
@@ -5486,9 +5531,9 @@ const AdminCourseDetail = () => {
                                         onChange={(e) => {
                                           const updatedQuestions = [...newLesson.questions];
                                           const updatedOptions = [...question.options];
-                                          updatedOptions[optIndex] = {...option, text: e.target.value};
-                                          updatedQuestions[qIndex] = {...question, options: updatedOptions};
-                                          setNewLesson({...newLesson, questions: updatedQuestions});
+                                          updatedOptions[optIndex] = { ...option, text: e.target.value };
+                                          updatedQuestions[qIndex] = { ...question, options: updatedOptions };
+                                          setNewLesson({ ...newLesson, questions: updatedQuestions });
                                         }}
                                         placeholder={`Option ${optIndex + 1}`}
                                         className="flex-1"
@@ -5502,7 +5547,7 @@ const AdminCourseDetail = () => {
                                             ...question,
                                             options: question.options.filter((_: any, i: number) => i !== optIndex)
                                           };
-                                          setNewLesson({...newLesson, questions: updatedQuestions});
+                                          setNewLesson({ ...newLesson, questions: updatedQuestions });
                                         }}
                                         className="rounded-none text-red-400 h-8 px-2"
                                       >
@@ -5520,8 +5565,8 @@ const AdminCourseDetail = () => {
                                   value={question.explanation || ''}
                                   onChange={(e) => {
                                     const updatedQuestions = [...newLesson.questions];
-                                    updatedQuestions[qIndex] = {...question, explanation: e.target.value};
-                                    setNewLesson({...newLesson, questions: updatedQuestions});
+                                    updatedQuestions[qIndex] = { ...question, explanation: e.target.value };
+                                    setNewLesson({ ...newLesson, questions: updatedQuestions });
                                   }}
                                   placeholder="Explain the correct answer..."
                                   rows={2}
@@ -5534,7 +5579,7 @@ const AdminCourseDetail = () => {
                               variant="ghost"
                               onClick={() => {
                                 const updatedQuestions = newLesson.questions.filter((_: any, i: number) => i !== qIndex);
-                                setNewLesson({...newLesson, questions: updatedQuestions});
+                                setNewLesson({ ...newLesson, questions: updatedQuestions });
                               }}
                               className="rounded-none text-red-400"
                             >
@@ -6328,8 +6373,8 @@ const App = () => {
           <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
           <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
-          <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
-          
+          <Route path="/login" element={<LoginPage />} />
+
           {/* Student Portal */}
           <Route path="/portal/*" element={
             <ProtectedRoute role="user">
