@@ -139,10 +139,29 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
           })));
         }
 
+        // Fetch enrollments
+        const { data: enrollmentsData, error: enrollmentsError } = await supabase
+          .from('enrollments')
+          .select('*')
+          .order('enrolled_at', { ascending: false });
+
+        if (enrollmentsError) throw enrollmentsError;
+        if (enrollmentsData) {
+          setEnrollments(enrollmentsData.map((e: any) => ({
+            id: e.id,
+            userId: e.user_id,
+            courseId: e.course_id,
+            progress: e.progress,
+            completedLessons: e.completed_lessons || [],
+            status: e.status
+          })));
+        }
+
         console.log('✅ Data loaded from Supabase:', {
           courses: coursesData?.length,
           modules: modulesData?.length,
-          lessons: lessonsData?.length
+          lessons: lessonsData?.length,
+          enrollments: enrollmentsData?.length
         });
       } catch (error) {
         console.error('Error loading data from Supabase:', error);
@@ -220,13 +239,40 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     localStorage.removeItem('flatline_user');
   };
 
-  const addUser = (userData: Omit<User, 'id' | 'status'>) => {
-    const newUser: User = {
-      ...userData,
-      id: Math.random().toString(36).substr(2, 9),
-      status: 'active'
-    };
-    setUsers([...users, newUser]);
+  const addUser = async (userData: Omit<User, 'id' | 'status'>, userId: string) => {
+    try {
+      // Create user profile in users table with provided ID (from Supabase Auth)
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert([{
+          id: userId,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          email: userData.email,
+          role: userData.role,
+          status: 'active',
+          source: userData.source || 'Direct'
+        }]);
+
+      if (profileError) throw profileError;
+
+      const newUser: User = {
+        id: userId,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        role: userData.role,
+        status: 'active',
+        source: userData.source || 'Direct'
+      };
+
+      setUsers([...users, newUser]);
+      console.log('✅ User profile created:', userData.email);
+      return newUser;
+    } catch (error) {
+      console.error('Error adding user:', error);
+      throw error;
+    }
   };
 
   const updateUser = (id: string, data: Partial<User>) => {
@@ -502,40 +548,92 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  const enrollUser = (userId: string, courseId: string) => {
-    if (enrollments.some(e => e.userId === userId && e.courseId === courseId)) return;
-    const newEnrollment: Enrollment = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId,
-      courseId,
-      progress: 0,
-      completedLessons: [],
-      status: 'active'
-    };
-    setEnrollments([...enrollments, newEnrollment]);
+  const enrollUser = async (userId: string, courseId: string) => {
+    try {
+      // Check if already enrolled
+      const existing = enrollments.find(e => e.userId === userId && e.courseId === courseId);
+      if (existing) return;
+
+      const { data, error } = await supabase
+        .from('enrollments')
+        .insert([{
+          user_id: userId,
+          course_id: courseId,
+          progress: 0,
+          completed_lessons: [],
+          status: 'active'
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newEnrollment: Enrollment = {
+        id: data.id,
+        userId: data.user_id,
+        courseId: data.course_id,
+        progress: data.progress,
+        completedLessons: data.completed_lessons || [],
+        status: data.status
+      };
+
+      setEnrollments([...enrollments, newEnrollment]);
+      console.log('✅ User enrolled in course');
+    } catch (error) {
+      console.error('Error enrolling user:', error);
+      throw error;
+    }
   };
 
-  const updateProgress = (userId: string, lessonId: string, courseId: string) => {
-    setEnrollments(prev => prev.map(e => {
-      if (e.userId === userId && e.courseId === courseId) {
-        if (e.completedLessons.includes(lessonId)) return e;
+  const updateProgress = async (userId: string, lessonId: string, courseId: string) => {
+    try {
+      // Find the enrollment
+      const enrollment = enrollments.find(e => e.userId === userId && e.courseId === courseId);
+      if (!enrollment) return;
 
-        const newCompleted = [...e.completedLessons, lessonId];
-        // Calculate simplistic progress
-        const courseModules = modules.filter(m => m.courseId === courseId);
-        const moduleIds = courseModules.map(m => m.id);
-        const totalLessons = lessons.filter(l => moduleIds.includes(l.moduleId)).length;
-        const newProgress = Math.round((newCompleted.length / totalLessons) * 100);
+      // Check if lesson already completed
+      if (enrollment.completedLessons.includes(lessonId)) return;
 
-        return {
-          ...e,
-          completedLessons: newCompleted,
+      const newCompleted = [...enrollment.completedLessons, lessonId];
+
+      // Calculate progress
+      const courseModules = modules.filter(m => m.courseId === courseId);
+      const moduleIds = courseModules.map(m => m.id);
+      const totalLessons = lessons.filter(l => moduleIds.includes(l.moduleId)).length;
+      const newProgress = totalLessons > 0 ? Math.round((newCompleted.length / totalLessons) * 100) : 0;
+      const newStatus = newProgress === 100 ? 'completed' : 'active';
+
+      // Update in Supabase
+      const { error } = await supabase
+        .from('enrollments')
+        .update({
+          completed_lessons: newCompleted,
           progress: newProgress,
-          status: newProgress === 100 ? 'completed' : 'active'
-        };
-      }
-      return e;
-    }));
+          status: newStatus,
+          completed_at: newStatus === 'completed' ? new Date().toISOString() : null
+        })
+        .eq('id', enrollment.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setEnrollments(prev => prev.map(e => {
+        if (e.id === enrollment.id) {
+          return {
+            ...e,
+            completedLessons: newCompleted,
+            progress: newProgress,
+            status: newStatus
+          };
+        }
+        return e;
+      }));
+
+      console.log('✅ Progress updated:', newProgress + '%');
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      throw error;
+    }
   };
 
   const getCourseProgress = (userId: string, courseId: string) => {
