@@ -4282,7 +4282,7 @@ const AdminUsers = () => {
   };
 
   return (
-    <div className="space-y-12 animate-fade-in max-w-7xl mx-auto">
+    <div className="space-y-4 animate-fade-in max-w-7xl mx-auto">
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
       {selectedTrainees.length > 0 && (
@@ -4305,29 +4305,16 @@ const AdminUsers = () => {
           <h1 className="text-h3 sm:text-h2 font-archivo font-medium text-white tracking-wide">Trainee Management</h1>
           <p className="text-gray-400 mt-1 text-body2 sm:text-body1 font-light">Manage trainees and course assignments</p>
         </div>
-        <div className="flex gap-2 sm:gap-3 flex-wrap">
-          <Button onClick={() => setShowAddModal(true)} size="sm" className="rounded-none bg-red-600 hover:bg-red-700 text-xs sm:text-sm">
-            <Icons.Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Trainee</span>
-          </Button>
-          <Button onClick={() => setShowImportModal(true)} size="sm" variant="outline" className="rounded-none text-xs sm:text-sm">
-            <Icons.FileUp className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Import CSV</span>
-          </Button>
-          <Button onClick={handleExportCSV} size="sm" variant="outline" className="rounded-none text-xs sm:text-sm">
-            <Icons.Download className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">{selectedTrainees.length > 0 ? `Export (${selectedTrainees.length})` : 'Export CSV'}</span>
-          </Button>
-          <Button onClick={() => setShowAssignModal(true)} size="sm" variant="outline" className="rounded-none text-xs sm:text-sm">
-            <Icons.BookOpen className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Assign Course</span>
-          </Button>
-        </div>
+        <Button onClick={() => setShowAddModal(true)} size="sm" className="rounded-none bg-red-600 hover:bg-red-700">
+          <Icons.Plus className="h-4 w-4 mr-2" />
+          Add Trainee
+        </Button>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        <div className="relative flex-1 max-w-md">
+      <div>
+
+        {/* Search Bar - Standalone */}
+        <div className="relative max-w-md">
           <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input
             type="text"
@@ -4337,39 +4324,61 @@ const AdminUsers = () => {
             className="pl-10 bg-black/40 border-red-900/20"
           />
         </div>
-        <div className="flex gap-3 flex-wrap">
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
-            className="w-32"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </Select>
-          <Select
-            value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-            className="w-44"
-          >
-            <option value="all">All Sources</option>
-            {sourceCompanies.map(source => (
-              <option key={source} value={source}>{source}</option>
-            ))}
-          </Select>
-          {(searchQuery || statusFilter !== 'all' || sourceFilter !== 'all') && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-                setSourceFilter('all');
-              }}
-              className="text-gray-400 hover:text-white"
+
+        {/* Action Toolbar with Filters */}
+        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-start lg:items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-sm mt-6">
+          <div className="flex gap-2 sm:gap-3 flex-wrap items-center">
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+              className="w-32"
             >
-              Clear Filters
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </Select>
+            <Select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="w-40"
+            >
+              <option value="all">All Sources</option>
+              {sourceCompanies.map(source => (
+                <option key={source} value={source}>{source}</option>
+              ))}
+            </Select>
+            <div className="h-6 w-px bg-white/10 mx-1"></div>
+            <Button onClick={() => setShowImportModal(true)} size="sm" variant="outline" className="rounded-none text-xs sm:text-sm">
+              <Icons.FileUp className="h-4 w-4 mr-2" />
+              Import CSV
             </Button>
+            <Button onClick={handleExportCSV} size="sm" variant="outline" className="rounded-none text-xs sm:text-sm">
+              <Icons.Download className="h-4 w-4 mr-2" />
+              {selectedTrainees.length > 0 ? `Export (${selectedTrainees.length})` : 'Export CSV'}
+            </Button>
+            <Button onClick={() => setShowAssignModal(true)} size="sm" variant="outline" className="rounded-none text-xs sm:text-sm">
+              <Icons.BookOpen className="h-4 w-4 mr-2" />
+              Assign Course
+            </Button>
+            {(searchQuery || statusFilter !== 'all' || sourceFilter !== 'all') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('all');
+                  setSourceFilter('all');
+                }}
+                className="text-gray-400 hover:text-white text-xs"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
+          {selectedTrainees.length > 0 && (
+            <div className="text-sm text-gray-400">
+              {selectedTrainees.length} trainee{selectedTrainees.length !== 1 ? 's' : ''} selected
+            </div>
           )}
         </div>
       </div>
@@ -4831,7 +4840,7 @@ const AdminUsers = () => {
           </div>
         </div>
       </Modal>
-    </div>
+    </div >
   );
 };
 
