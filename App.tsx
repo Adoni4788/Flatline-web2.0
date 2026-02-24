@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Navigate, useLocation, Link, useNa
 import { Button, Input, Textarea, Card, Badge, Icons, Modal, Select, Toast, BarChart } from './components/ui';
 import { DataProvider, useData } from './lib/context';
 import { User, Course } from './lib/types';
+import { supabase } from './lib/supabase';
 
 // --- Scroll To Top Hook ---
 const ScrollToTop = () => {
@@ -1571,6 +1572,47 @@ const ServicesPage = () => {
 };
 
 const ContactPage = () => {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: 'General Inquiry',
+    message: '',
+  });
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleChange = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (!form.firstName || !form.lastName || !form.email || !form.message) {
+      setErrorMsg('Please fill in all required fields.');
+      return;
+    }
+
+    setStatus('sending');
+
+    try {
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: form,
+      });
+
+      if (error) throw error;
+
+      setStatus('success');
+      setForm({ firstName: '', lastName: '', email: '', subject: 'General Inquiry', message: '' });
+    } catch (err) {
+      console.error('Contact form error:', err);
+      setStatus('error');
+      setErrorMsg('Transmission failed. Please try again or contact us directly.');
+    }
+  };
+
   return (
     <div className="bg-[#030712]">
       {/* Cinematic Hero */}
@@ -1648,38 +1690,94 @@ const ContactPage = () => {
                 <h3 className="text-3xl font-archivo text-white">Send Message</h3>
               </div>
 
-              <form className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">First Name</label>
-                    <Input placeholder="John" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
+              {status === 'success' ? (
+                <div className="text-center py-16 space-y-4">
+                  <div className="h-16 w-16 bg-green-900/30 border border-green-500/30 flex items-center justify-center mx-auto">
+                    <Icons.Check className="h-8 w-8 text-green-500" />
+                  </div>
+                  <h4 className="text-xl font-bold font-archivo text-white">Transmission Sent</h4>
+                  <p className="text-gray-400 font-light">We've received your message and will respond within 1–2 business days. Check your inbox for a confirmation.</p>
+                  <button
+                    type="button"
+                    onClick={() => setStatus('idle')}
+                    className="mt-4 text-sm text-red-500 hover:text-red-400 underline underline-offset-4"
+                  >
+                    Send another message
+                  </button>
+                </div>
+              ) : (
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">First Name</label>
+                      <Input
+                        placeholder="John"
+                        className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none"
+                        value={form.firstName}
+                        onChange={(e) => handleChange('firstName', e.target.value)}
+                        disabled={status === 'sending'}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Last Name</label>
+                      <Input
+                        placeholder="Doe"
+                        className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none"
+                        value={form.lastName}
+                        onChange={(e) => handleChange('lastName', e.target.value)}
+                        disabled={status === 'sending'}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Last Name</label>
-                    <Input placeholder="Doe" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Email Address</label>
+                    <Input
+                      type="email"
+                      placeholder="john@example.com"
+                      className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none"
+                      value={form.email}
+                      onChange={(e) => handleChange('email', e.target.value)}
+                      disabled={status === 'sending'}
+                    />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Email Address</label>
-                  <Input type="email" placeholder="john@example.com" className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Subject</label>
-                  <Select className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none text-gray-300">
-                    <option>General Inquiry</option>
-                    <option>Course Enrollment</option>
-                    <option>Security Services</option>
-                    <option>Corporate Consultation</option>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Message</label>
-                  <Textarea placeholder="Secure transmission content..." className="bg-black/40 border-gray-800 focus:border-red-600 h-40 rounded-none p-4" />
-                </div>
-                <Button size="lg" className="w-full h-16 font-bold text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 rounded-none shadow-lg shadow-red-900/20">
-                  Transmit Message
-                </Button>
-              </form>
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Subject</label>
+                    <Select
+                      className="bg-black/40 border-gray-800 focus:border-red-600 h-14 rounded-none text-gray-300"
+                      value={form.subject}
+                      onChange={(e) => handleChange('subject', e.target.value)}
+                      disabled={status === 'sending'}
+                    >
+                      <option>General Inquiry</option>
+                      <option>Course Enrollment</option>
+                      <option>Security Services</option>
+                      <option>Corporate Consultation</option>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Message</label>
+                    <Textarea
+                      placeholder="Secure transmission content..."
+                      className="bg-black/40 border-gray-800 focus:border-red-600 h-40 rounded-none p-4"
+                      value={form.message}
+                      onChange={(e) => handleChange('message', e.target.value)}
+                      disabled={status === 'sending'}
+                    />
+                  </div>
+
+                  {errorMsg && (
+                    <p className="text-red-400 text-sm border border-red-900/50 bg-red-900/10 px-4 py-3">{errorMsg}</p>
+                  )}
+
+                  <Button
+                    size="lg"
+                    className="w-full h-16 font-bold text-lg uppercase tracking-widest bg-red-600 hover:bg-red-700 rounded-none shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={status === 'sending'}
+                  >
+                    {status === 'sending' ? 'Transmitting...' : 'Transmit Message'}
+                  </Button>
+                </form>
+              )}
             </Card>
           </div>
 
