@@ -5,6 +5,40 @@ import { DataProvider, useData } from './lib/context';
 import { User, Course } from './lib/types';
 import { supabase } from './lib/supabase';
 
+// --- Error Boundary ---
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#030712] flex items-center justify-center p-8">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="h-16 w-16 bg-red-900/30 border border-red-500/30 flex items-center justify-center mx-auto rounded-full">
+              <span className="text-red-500 text-2xl font-bold">!</span>
+            </div>
+            <h1 className="text-2xl font-bold font-archivo text-white">Something went wrong</h1>
+            <p className="text-gray-400">An unexpected error occurred. Please refresh the page to try again.</p>
+            <button
+              type="button"
+              onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // --- Scroll To Top Hook ---
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -689,7 +723,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
       setShowPasswordModal(false);
       setPasswordForm({ current: '', new: '', confirm: '' });
     } catch (error: any) {
-      console.error('Error changing password:', error);
+
       setPasswordError(error.message || 'Failed to change password');
     }
   };
@@ -1631,7 +1665,7 @@ const ContactPage = () => {
       setStatus('success');
       setForm({ firstName: '', lastName: '', email: '', subject: 'General Inquiry', message: '' });
     } catch (err) {
-      console.error('Contact form error:', err);
+
       setStatus('error');
       setErrorMsg('Transmission failed. Please try again or contact us directly.');
     }
@@ -2426,7 +2460,7 @@ const CoursePlayer = () => {
         try {
           await updateProgress(currentUser.id, currentLessonId, courseId);
         } catch (error) {
-          console.error('Failed to update progress:', error);
+
         }
       }
     } else {
@@ -4134,6 +4168,7 @@ const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [saving, setSaving] = useState(false);
   const { toast, showToast, closeToast } = useNotification();
 
   // Generate a secure temporary password
@@ -4337,11 +4372,10 @@ const AdminUsers = () => {
       return;
     }
 
-    // Generate temporary password for the new user
+    setSaving(true);
     const tempPassword = generatePassword();
 
     try {
-      // Create the user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email.toLowerCase(),
         password: tempPassword,
@@ -4350,10 +4384,8 @@ const AdminUsers = () => {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create auth user');
 
-      // Create user profile in users table
       await addUser(newUser, authData.user.id);
 
-      // Store credentials and show modal
       setCreatedCredentials({
         email: newUser.email,
         password: tempPassword,
@@ -4365,8 +4397,9 @@ const AdminUsers = () => {
       setNewUser({ firstName: '', lastName: '', email: '', role: 'user', status: 'active', source: '' });
       showToast(`Trainee "${newUser.firstName} ${newUser.lastName}" created successfully`, 'success');
     } catch (error: any) {
-      console.error('Error creating trainee:', error);
       showToast(error.message || 'Failed to create trainee', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -4381,7 +4414,7 @@ const AdminUsers = () => {
         showToast(`${count} trainee(s) deleted successfully`, 'success');
         setSelectedTrainees([]);
       } catch (error: any) {
-        console.error('Error in bulk delete:', error);
+
         showToast(error.message || 'Failed to delete some trainees', 'error');
       }
     }
@@ -4397,14 +4430,20 @@ const AdminUsers = () => {
       showToast('Please fill in all required fields', 'error');
       return;
     }
+    if (!editingUser.email.includes('@')) {
+      showToast('Please enter a valid email address', 'error');
+      return;
+    }
+    setSaving(true);
     try {
       await updateUser(editingUser.id, editingUser);
       showToast(`Trainee "${editingUser.firstName} ${editingUser.lastName}" updated successfully`, 'success');
       setShowEditModal(false);
       setEditingUser(null);
     } catch (error: any) {
-      console.error('Error updating trainee:', error);
       showToast(error.message || 'Failed to update trainee', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -4415,7 +4454,7 @@ const AdminUsers = () => {
         await deleteUser(user.id);
         showToast(`Trainee "${user.firstName} ${user.lastName}" deleted successfully`, 'success');
       } catch (error: any) {
-        console.error('Error deleting trainee:', error);
+
         showToast(error.message || 'Failed to delete trainee', 'error');
       }
     }
@@ -4431,7 +4470,7 @@ const AdminUsers = () => {
         setShowAssignModal(false);
         setSelectedUser('');
       } catch (error: any) {
-        console.error('Error assigning course:', error);
+
         showToast(error.message || 'Failed to assign course', 'error');
       }
     }
@@ -4650,7 +4689,7 @@ const AdminUsers = () => {
             <Input value={newUser.source} onChange={(e) => setNewUser({ ...newUser, source: e.target.value })} placeholder="e.g., Guardsman Security, Hawk Eye Security" />
           </div>
           <div className="flex gap-3 mt-6">
-            <Button onClick={handleAddUser} className="flex-1 rounded-none">Add Trainee</Button>
+            <Button onClick={handleAddUser} className="flex-1 rounded-none" disabled={saving}>{saving ? 'Creating...' : 'Add Trainee'}</Button>
             <Button variant="outline" onClick={() => setShowAddModal(false)} className="flex-1 rounded-none">Cancel</Button>
           </div>
         </div>
@@ -4717,7 +4756,7 @@ const AdminUsers = () => {
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <Button onClick={handleEditUser} className="flex-1 rounded-none">Update Trainee</Button>
+              <Button onClick={handleEditUser} className="flex-1 rounded-none" disabled={saving}>{saving ? 'Saving...' : 'Update Trainee'}</Button>
               <Button variant="outline" onClick={() => setShowEditModal(false)} className="flex-1 rounded-none">Cancel</Button>
             </div>
           </div>
@@ -6537,6 +6576,7 @@ const AdminExamCreate = () => {
 // --- Main App Component ---
 const App = () => {
   return (
+    <ErrorBoundary>
     <DataProvider>
       <Router>
         <ScrollToTop />
@@ -6597,6 +6637,7 @@ const App = () => {
         </Routes>
       </Router>
     </DataProvider>
+    </ErrorBoundary>
   );
 };
 
