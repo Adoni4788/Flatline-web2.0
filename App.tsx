@@ -154,7 +154,7 @@ const PublicLayout = ({ children }: { children?: React.ReactNode }) => {
               </li>
               <li className="flex items-center gap-3">
                 <Icons.Phone className="h-5 w-5 text-red-600 shrink-0" />
-                <span>+1 (876) 555-2847</span>
+                <span>876 298 2262 / 876 593 7721</span>
               </li>
               <li className="flex items-center gap-3">
                 <Icons.Mail className="h-5 w-5 text-red-600 shrink-0" />
@@ -1234,7 +1234,7 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Icons.Phone, title: "Call Us", line1: "+1 (876) 555-2847", line2: "Mon-Fri, 9am-6pm" },
+              { icon: Icons.Phone, title: "Call Us", line1: "876 298 2262", line2: "876 593 7721" },
               { icon: Icons.Mail, title: "Email Us", line1: "info@fstsolutionsltd.com", line2: "24/7 Support" },
               { icon: Icons.MapPin, title: "Visit Us", line1: "Discovery Bay, St Ann", line2: "Jamaica" }
             ].map((c, i) => (
@@ -1646,7 +1646,7 @@ const ContactPage = () => {
                 {[
                   { icon: Icons.MapPin, title: "Headquarters", lines: ["123 Security Blvd, Discovery Bay", "St Ann, Jamaica"] },
                   { icon: Icons.Mail, title: "Electronic Mail", lines: ["info@fstsolutionsltd.com", "support@flatline.com"] },
-                  { icon: Icons.Phone, title: "Operations Center", lines: ["+1 (876) 555-2847", "Mon-Fri, 0900-1800 EST"] }
+                  { icon: Icons.Phone, title: "Operations Center", lines: ["876 298 2262", "876 593 7721"] }
                 ].map((c, i) => (
                   <div key={i} className="flex items-start gap-6 group p-6 border border-white/5 hover:border-white/10 bg-[#0a0f1c] transition-all">
                     <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors">
