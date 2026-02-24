@@ -50,9 +50,9 @@ const ScrollToTop = () => {
 
 // --- Notification Hook ---
 const useNotification = () => {
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    setToast({ message, type });
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; action?: { label: string; onClick: () => void } } | null>(null);
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success', action?: { label: string; onClick: () => void }) => {
+    setToast({ message, type, action });
   };
   const closeToast = () => setToast(null);
   return { toast, showToast, closeToast };
@@ -654,7 +654,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
         </div>
       )}
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} action={toast.action} />}
     </div>
   );
 };
@@ -982,7 +982,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         </div>
       )}
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} action={toast.action} />}
     </div>
   );
 };
@@ -1970,7 +1970,7 @@ const StudentDashboard = () => {
 
   return (
     <div className="space-y-12 animate-fade-in max-w-7xl mx-auto">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} action={toast.action} />}
 
       <div className="flex items-end justify-between border-b border-white/10 pb-6">
         <div>
@@ -2341,13 +2341,6 @@ const ProtectedRoute = ({ children, role }: { children?: React.ReactNode; role: 
   return <>{children}</>;
 };
 
-// --- Placeholder Components for missing routes ---
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <div className="p-8">
-    <h1 className="text-h2 font-archivo text-white mb-4">{title}</h1>
-    <p className="text-gray-400">This module is currently under development.</p>
-  </div>
-);
 
 const CoursePlayer = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -4013,7 +4006,7 @@ const AdminCourses = () => {
 
   return (
     <div className="space-y-12 animate-fade-in max-w-7xl mx-auto">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} action={toast.action} />}
 
       <div className="flex items-end justify-between border-b border-red-900/20 pb-6">
         <div>
@@ -4478,7 +4471,7 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-4 animate-fade-in max-w-7xl mx-auto">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} action={toast.action} />}
 
       {selectedTrainees.length > 0 && (
         <div className="fixed top-20 right-8 z-50 bg-red-900/90 backdrop-blur-sm border border-red-500/50 rounded-lg px-6 py-4 shadow-2xl animate-fade-in">
@@ -4619,13 +4612,13 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="text-white text-sm">{user.firstName} {user.lastName}</div>
-                      <div className="text-gray-500 text-xs md:hidden">{user.email}</div>
+                      <div className="text-gray-400 text-xs md:hidden">{user.email}</div>
                     </td>
                     <td className="px-3 py-2.5 text-gray-400 text-sm hidden md:table-cell">{user.email}</td>
                     <td className="px-3 py-2.5 text-gray-400 text-sm hidden lg:table-cell">{user.source || 'N/A'}</td>
                     <td className="px-3 py-2.5">
                       <Badge variant={user.status === 'active' ? 'success' : 'default'} className="rounded-none text-xs">
-                        {user.status}
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${user.status === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`} />{user.status === 'active' ? 'Active' : 'Inactive'}
                       </Badge>
                     </td>
                     <td className="px-3 py-2.5 text-gray-400 text-sm hidden sm:table-cell">{userEnrollments.length}</td>
@@ -4672,21 +4665,21 @@ const AdminUsers = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">First Name *</label>
-              <Input value={newUser.firstName} onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })} placeholder="John" />
+              <label htmlFor="add-firstName" className="block text-sm font-medium text-gray-300 mb-2">First Name *</label>
+              <Input id="add-firstName" value={newUser.firstName} onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })} placeholder="John" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Last Name *</label>
-              <Input value={newUser.lastName} onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })} placeholder="Doe" />
+              <label htmlFor="add-lastName" className="block text-sm font-medium text-gray-300 mb-2">Last Name *</label>
+              <Input id="add-lastName" value={newUser.lastName} onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })} placeholder="Doe" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Email *</label>
-            <Input type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="john.doe@example.com" />
+            <label htmlFor="add-email" className="block text-sm font-medium text-gray-300 mb-2">Email *</label>
+            <Input id="add-email" type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="john.doe@example.com" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Source Company</label>
-            <Input value={newUser.source} onChange={(e) => setNewUser({ ...newUser, source: e.target.value })} placeholder="e.g., Guardsman Security, Hawk Eye Security" />
+            <label htmlFor="add-source" className="block text-sm font-medium text-gray-300 mb-2">Source Company</label>
+            <Input id="add-source" value={newUser.source} onChange={(e) => setNewUser({ ...newUser, source: e.target.value })} placeholder="e.g., Company Name" />
           </div>
           <div className="flex gap-3 mt-6">
             <Button onClick={handleAddUser} className="flex-1 rounded-none" disabled={saving}>{saving ? 'Creating...' : 'Add Trainee'}</Button>
@@ -4700,16 +4693,18 @@ const AdminUsers = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">First Name *</label>
+                <label htmlFor="edit-firstName" className="block text-sm font-medium text-gray-300 mb-2">First Name *</label>
                 <Input
+                  id="edit-firstName"
                   value={editingUser.firstName}
                   onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
                   placeholder="John"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Last Name *</label>
+                <label htmlFor="edit-lastName" className="block text-sm font-medium text-gray-300 mb-2">Last Name *</label>
                 <Input
+                  id="edit-lastName"
                   value={editingUser.lastName}
                   onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
                   placeholder="Doe"
@@ -4717,8 +4712,9 @@ const AdminUsers = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Email *</label>
+              <label htmlFor="edit-email" className="block text-sm font-medium text-gray-300 mb-2">Email *</label>
               <Input
+                id="edit-email"
                 type="email"
                 value={editingUser.email}
                 onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
@@ -4726,17 +4722,19 @@ const AdminUsers = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Source Company</label>
+              <label htmlFor="edit-source" className="block text-sm font-medium text-gray-300 mb-2">Source Company</label>
               <Input
+                id="edit-source"
                 value={editingUser.source || ''}
                 onChange={(e) => setEditingUser({ ...editingUser, source: e.target.value })}
-                placeholder="e.g., Guardsman Security, Hawk Eye Security"
+                placeholder="e.g., Company Name"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Role</label>
+                <label htmlFor="edit-role" className="block text-sm font-medium text-gray-300 mb-2">Role</label>
                 <Select
+                  id="edit-role"
                   value={editingUser.role}
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'user' | 'admin' })}
                 >
@@ -4745,8 +4743,9 @@ const AdminUsers = () => {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Status</label>
+                <label htmlFor="edit-status" className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <Select
+                  id="edit-status"
                   value={editingUser.status}
                   onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value as 'active' | 'inactive' })}
                 >
@@ -5189,7 +5188,7 @@ const AdminCourseDetail = () => {
 
   return (
     <div className="space-y-8 animate-fade-in max-w-7xl mx-auto">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} action={toast.action} />}
 
       {/* Course Header */}
       <div className="flex items-center gap-4 border-b border-red-900/20 pb-6">
@@ -6106,7 +6105,12 @@ const AdminExams = () => {
   );
 };
 
-const AdminSettings = () => <PlaceholderPage title="System Settings" />;
+const AdminSettings = () => (
+  <div className="p-8">
+    <h1 className="text-h2 font-archivo text-white mb-4">System Settings</h1>
+    <p className="text-gray-300">System settings coming soon.</p>
+  </div>
+);
 
 // Admin Exam Create/Edit Component
 const AdminExamCreate = () => {

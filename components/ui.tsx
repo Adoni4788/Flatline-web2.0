@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 
 // --- Icons ---
 export const Icons = {
@@ -150,16 +150,39 @@ export const Badge = ({ className = '', variant = 'default', children, ...props 
 
 // Modal - Responsive with scrolling for smaller screens
 export const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    const prev = document.activeElement as HTMLElement;
+    modalRef.current?.querySelector<HTMLElement>('button, input')?.focus();
+    return () => { document.removeEventListener('keydown', handleKeyDown); prev?.focus(); };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in overflow-y-auto">
-      <div className="relative w-full max-w-lg max-h-[90vh] rounded-xl border border-white/10 bg-[#0a0f1c] shadow-2xl flex flex-col my-auto">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in overflow-y-auto" onClick={onClose} role="dialog" aria-modal="true" aria-label={title}>
+      <div ref={modalRef} onClick={e => e.stopPropagation()} className="relative w-full max-w-lg max-h-[90vh] rounded-xl border border-white/10 bg-[#0a0f1c] shadow-2xl flex flex-col my-auto">
         <div className="flex items-center justify-between p-6 pb-0 mb-6">
           <h3 className="text-h5 font-archivo text-white flex items-center gap-2">
             <Icons.Shield className="h-5 w-5 text-red-600" />
             {title}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors rounded-full p-1 hover:bg-white/5">
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors rounded-full p-1 hover:bg-white/5" aria-label="Close">
             <Icons.X className="h-5 w-5" />
           </button>
         </div>
@@ -174,12 +197,14 @@ interface ToastProps {
   message: string;
   type: 'success' | 'error' | 'info';
   onClose: () => void;
+  action?: { label: string; onClick: () => void };
+  duration?: number;
 }
-export const Toast = ({ message, type, onClose }: ToastProps) => {
+export const Toast = ({ message, type, onClose, action, duration = 3000 }: ToastProps) => {
   useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
+    const timer = setTimeout(onClose, action ? Math.max(duration, 5000) : duration);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, action, duration]);
 
   const bgColors = {
     success: 'bg-emerald-900/90 border-emerald-500/50 text-white',
@@ -188,11 +213,16 @@ export const Toast = ({ message, type, onClose }: ToastProps) => {
   };
 
   return (
-    <div className={`fixed bottom-4 right-4 z-[100] px-4 py-3 rounded-lg border shadow-lg flex items-center gap-3 animate-fade-in ${bgColors[type]}`}>
+    <div className={`fixed bottom-4 right-4 z-[100] px-4 py-3 rounded-lg border shadow-lg flex items-center gap-3 animate-fade-in ${bgColors[type]}`} role="alert">
       {type === 'success' && <Icons.Check className="h-5 w-5 text-emerald-400" />}
       {type === 'error' && <Icons.X className="h-5 w-5 text-red-400" />}
       {type === 'info' && <Icons.Info className="h-5 w-5 text-blue-400" />}
       <span className="font-medium font-archivo text-subtitle2">{message}</span>
+      {action && (
+        <button onClick={() => { action.onClick(); onClose(); }} className="ml-2 px-2 py-1 text-sm font-semibold underline hover:no-underline">
+          {action.label}
+        </button>
+      )}
     </div>
   );
 };
