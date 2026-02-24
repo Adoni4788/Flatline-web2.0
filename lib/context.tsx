@@ -31,9 +31,9 @@ interface DataContextType {
   // User Actions
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  addUser: (user: Omit<User, 'id' | 'status'>) => void;
-  updateUser: (id: string, data: Partial<User>) => void;
-  deleteUser: (id: string) => void;
+  addUser: (user: Omit<User, 'id' | 'status'>, userId: string) => Promise<User>;
+  updateUser: (id: string, data: Partial<User>) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
   // Course Actions
   addCourse: (course: Omit<Course, 'id'>) => void;
   updateCourse: (id: string, data: Partial<Course>) => void;
@@ -254,7 +254,8 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setCurrentUser(null);
     localStorage.removeItem('flatline_user');
   };
@@ -295,14 +296,48 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  const updateUser = (id: string, data: Partial<User>) => {
-    setUsers(users.map(u => u.id === id ? { ...u, ...data } : u));
+  const updateUser = async (id: string, data: Partial<User>) => {
+    try {
+      const updateData: any = {};
+      if (data.firstName !== undefined) updateData.first_name = data.firstName;
+      if (data.lastName !== undefined) updateData.last_name = data.lastName;
+      if (data.email !== undefined) updateData.email = data.email;
+      if (data.role !== undefined) updateData.role = data.role;
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.source !== undefined) updateData.source = data.source;
+
+      const { error } = await supabase
+        .from('users')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setUsers(users.map(u => u.id === id ? { ...u, ...data } : u));
+      console.log('✅ User updated:', id);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
   };
 
-  const deleteUser = (id: string) => {
-    setUsers(users.filter(u => u.id !== id));
-    // Also delete user's enrollments
-    setEnrollments(enrollments.filter(e => e.userId !== id));
+  const deleteUser = async (id: string) => {
+    try {
+      // Delete user's enrollments first
+      await supabase.from('enrollments').delete().eq('user_id', id);
+
+      // Delete the user profile
+      const { error } = await supabase.from('users').delete().eq('id', id);
+      if (error) throw error;
+
+      // Update local state
+      setUsers(users.filter(u => u.id !== id));
+      setEnrollments(enrollments.filter(e => e.userId !== id));
+      console.log('✅ User deleted:', id);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
   };
 
   const addCourse = async (courseData: Omit<Course, 'id'>) => {
@@ -373,11 +408,17 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
       const moduleIds = courseModules.map(m => m.id);
 
       if (moduleIds.length > 0) {
-        await supabase.from('lessons').delete().in('module_id', moduleIds);
+        const { error: lessonsError } = await supabase.from('lessons').delete().in('module_id', moduleIds);
+        if (lessonsError) throw new Error(`Failed to delete lessons: ${lessonsError.message}`);
       }
 
       // Delete associated modules
-      await supabase.from('modules').delete().eq('course_id', id);
+      const { error: modulesError } = await supabase.from('modules').delete().eq('course_id', id);
+      if (modulesError) throw new Error(`Failed to delete modules: ${modulesError.message}`);
+
+      // Delete associated enrollments
+      const { error: enrollmentsError } = await supabase.from('enrollments').delete().eq('course_id', id);
+      if (enrollmentsError) throw new Error(`Failed to delete enrollments: ${enrollmentsError.message}`);
 
       // Delete the course
       const { error } = await supabase.from('courses').delete().eq('id', id);

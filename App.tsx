@@ -651,7 +651,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
     return () => window.removeEventListener('previewBannerClosed', handleBannerClose);
   }, []);
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     setPasswordError(null);
     if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
       setPasswordError('All fields are required');
@@ -665,9 +665,33 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
       setPasswordError('New passwords do not match');
       return;
     }
-    showToast('Password changed successfully', 'success');
-    setShowPasswordModal(false);
-    setPasswordForm({ current: '', new: '', confirm: '' });
+
+    try {
+      // Verify current password by re-authenticating
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: currentUser?.email || '',
+        password: passwordForm.current,
+      });
+
+      if (signInError) {
+        setPasswordError('Current password is incorrect');
+        return;
+      }
+
+      // Update to new password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordForm.new,
+      });
+
+      if (updateError) throw updateError;
+
+      showToast('Password changed successfully', 'success');
+      setShowPasswordModal(false);
+      setPasswordForm({ current: '', new: '', confirm: '' });
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      setPasswordError(error.message || 'Failed to change password');
+    }
   };
 
   const navItems = [
@@ -4302,40 +4326,64 @@ const AdminUsers = () => {
     );
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     if (!newUser.firstName || !newUser.lastName || !newUser.email) {
       showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    if (!newUser.email.includes('@')) {
+      showToast('Please enter a valid email address', 'error');
       return;
     }
 
     // Generate temporary password for the new user
     const tempPassword = generatePassword();
 
-    addUser(newUser);
+    try {
+      // Create the user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newUser.email.toLowerCase(),
+        password: tempPassword,
+      });
 
-    // Store credentials and show modal
-    setCreatedCredentials({
-      email: newUser.email,
-      password: tempPassword,
-      name: `${newUser.firstName} ${newUser.lastName}`
-    });
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('Failed to create auth user');
 
-    setShowAddModal(false);
-    setShowCredentialsModal(true);
-    setNewUser({ firstName: '', lastName: '', email: '', role: 'user', status: 'active', source: '' });
+      // Create user profile in users table
+      await addUser(newUser, authData.user.id);
 
-    // Simulated email notification
-    setTimeout(() => {
-      showToast(`Welcome email sent to ${newUser.email}`, 'info');
-    }, 1500);
+      // Store credentials and show modal
+      setCreatedCredentials({
+        email: newUser.email,
+        password: tempPassword,
+        name: `${newUser.firstName} ${newUser.lastName}`
+      });
+
+      setShowAddModal(false);
+      setShowCredentialsModal(true);
+      setNewUser({ firstName: '', lastName: '', email: '', role: 'user', status: 'active', source: '' });
+      showToast(`Trainee "${newUser.firstName} ${newUser.lastName}" created successfully`, 'success');
+    } catch (error: any) {
+      console.error('Error creating trainee:', error);
+      showToast(error.message || 'Failed to create trainee', 'error');
+    }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedTrainees.length === 0) return;
     if (confirm(`Are you sure you want to delete ${selectedTrainees.length} trainee(s)? This will also remove all their enrollments.`)) {
-      selectedTrainees.forEach(id => deleteUser(id));
-      showToast(`${selectedTrainees.length} trainee(s) deleted successfully`, 'success');
-      setSelectedTrainees([]);
+      try {
+        const count = selectedTrainees.length;
+        for (const id of selectedTrainees) {
+          await deleteUser(id);
+        }
+        showToast(`${count} trainee(s) deleted successfully`, 'success');
+        setSelectedTrainees([]);
+      } catch (error: any) {
+        console.error('Error in bulk delete:', error);
+        showToast(error.message || 'Failed to delete some trainees', 'error');
+      }
     }
   };
 
@@ -4344,38 +4392,48 @@ const AdminUsers = () => {
     setShowEditModal(true);
   };
 
-  const handleEditUser = () => {
+  const handleEditUser = async () => {
     if (!editingUser || !editingUser.firstName || !editingUser.lastName || !editingUser.email) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
-    updateUser(editingUser.id, editingUser);
-    showToast(`Trainee "${editingUser.firstName} ${editingUser.lastName}" updated successfully`, 'success');
-    setShowEditModal(false);
-    setEditingUser(null);
-  };
-
-  const handleDeleteUser = (user: User) => {
-    setOpenMenuId(null);
-    if (confirm(`Are you sure you want to delete "${user.firstName} ${user.lastName}"? This will also remove all their enrollments.`)) {
-      deleteUser(user.id);
-      showToast(`Trainee "${user.firstName} ${user.lastName}" deleted successfully`, 'success');
+    try {
+      await updateUser(editingUser.id, editingUser);
+      showToast(`Trainee "${editingUser.firstName} ${editingUser.lastName}" updated successfully`, 'success');
+      setShowEditModal(false);
+      setEditingUser(null);
+    } catch (error: any) {
+      console.error('Error updating trainee:', error);
+      showToast(error.message || 'Failed to update trainee', 'error');
     }
   };
 
-  const handleAssignCourse = (courseId: string) => {
-    if (selectedUser && courseId) {
-      enrollUser(selectedUser, courseId);
-      const user = users.find(u => u.id === selectedUser);
-      const course = courses.find(c => c.id === courseId);
-      showToast(`Assigned "${course?.title}" to ${user?.firstName} ${user?.lastName}`, 'success');
-      setShowAssignModal(false);
-      setSelectedUser('');
+  const handleDeleteUser = async (user: User) => {
+    setOpenMenuId(null);
+    if (confirm(`Are you sure you want to delete "${user.firstName} ${user.lastName}"? This will also remove all their enrollments.`)) {
+      try {
+        await deleteUser(user.id);
+        showToast(`Trainee "${user.firstName} ${user.lastName}" deleted successfully`, 'success');
+      } catch (error: any) {
+        console.error('Error deleting trainee:', error);
+        showToast(error.message || 'Failed to delete trainee', 'error');
+      }
+    }
+  };
 
-      // Simulated email notification
-      setTimeout(() => {
-        showToast(`Course enrollment confirmation sent to ${user?.email}`, 'info');
-      }, 1500);
+  const handleAssignCourse = async (courseId: string) => {
+    if (selectedUser && courseId) {
+      try {
+        await enrollUser(selectedUser, courseId);
+        const user = users.find(u => u.id === selectedUser);
+        const course = courses.find(c => c.id === courseId);
+        showToast(`Assigned "${course?.title}" to ${user?.firstName} ${user?.lastName}`, 'success');
+        setShowAssignModal(false);
+        setSelectedUser('');
+      } catch (error: any) {
+        console.error('Error assigning course:', error);
+        showToast(error.message || 'Failed to assign course', 'error');
+      }
     }
   };
 
