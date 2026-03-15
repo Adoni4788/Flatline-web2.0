@@ -13,8 +13,8 @@ jobs:
       - name: Ping Supabase REST API
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}")
+            "${{ secrets.ASUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.ASUPABASE_ANON_KEY }}")
           echo "Supabase responded with HTTP $STATUS"
           if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 500 ]; then
             echo "Warning: Unexpected status code $STATUS"
