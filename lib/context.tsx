@@ -14,26 +14,26 @@ interface DataContextType {
   currentUser: User | null;
   sessionChecked: boolean;
   // User Actions
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<string | null>;
   logout: () => void;
   addUser: (user: Omit<User, 'id' | 'status'>, userId: string) => Promise<User>;
   updateUser: (id: string, data: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   // Course Actions
-  addCourse: (course: Omit<Course, 'id'>) => void;
-  updateCourse: (id: string, data: Partial<Course>) => void;
-  deleteCourse: (id: string) => void;
+  addCourse: (course: Omit<Course, 'id'>) => Promise<void>;
+  updateCourse: (id: string, data: Partial<Course>) => Promise<void>;
+  deleteCourse: (id: string) => Promise<void>;
   // Module Actions
-  addModule: (module: Omit<Module, 'id'>) => void;
-  updateModule: (id: string, data: Partial<Module>) => void;
-  deleteModule: (id: string) => void;
+  addModule: (module: Omit<Module, 'id'>) => Promise<void>;
+  updateModule: (id: string, data: Partial<Module>) => Promise<void>;
+  deleteModule: (id: string) => Promise<void>;
   // Lesson Actions
-  addLesson: (lesson: Omit<Lesson, 'id'>) => void;
-  updateLesson: (id: string, data: Partial<Lesson>) => void;
-  deleteLesson: (id: string) => void;
+  addLesson: (lesson: Omit<Lesson, 'id'>) => Promise<void>;
+  updateLesson: (id: string, data: Partial<Lesson>) => Promise<void>;
+  deleteLesson: (id: string) => Promise<void>;
   // Enrollment Actions
-  enrollUser: (userId: string, courseId: string) => void;
-  updateProgress: (userId: string, lessonId: string, courseId: string) => void;
+  enrollUser: (userId: string, courseId: string) => Promise<void>;
+  updateProgress: (userId: string, lessonId: string, courseId: string) => Promise<void>;
   getCourseProgress: (userId: string, courseId: string) => number;
   // Live Session Actions
   addLiveSession: (session: Omit<LiveSession, 'id' | 'createdAt'>) => void;
@@ -177,14 +177,15 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     setSessionChecked(true);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<string | null> => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase(),
         password: password
       });
 
-      if (authError || !authData.user) return false;
+      if (authError) return authError.message;
+      if (!authData.user) return 'Login failed. Please try again.';
 
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -195,7 +196,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
       if (userError || !userData) {
         await supabase.auth.signOut();
-        return false;
+        return 'Your account is inactive or not found. Please contact support.';
       }
 
       const user: User = {
@@ -210,9 +211,9 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
       setCurrentUser(user);
       localStorage.setItem('flatline_user', JSON.stringify(user));
-      return true;
-    } catch {
-      return false;
+      return null;
+    } catch (err: any) {
+      return err.message || 'An unexpected error occurred.';
     }
   };
 

@@ -14,6 +14,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   static getDerivedStateFromError() {
     return { hasError: true };
   }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[ErrorBoundary] Uncaught error:', error, info.componentStack);
+  }
   render() {
     if (this.state.hasError) {
       return (
@@ -246,7 +249,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
     return () => window.removeEventListener('previewBannerClosed', handleBannerClose);
   }, []);
 
-  const handleEditProfile = () => {
+  const handleEditProfile = async () => {
     setProfileError(null);
     if (!profileForm.firstName || !profileForm.lastName || !profileForm.email) {
       setProfileError('All fields are required');
@@ -257,13 +260,17 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
       return;
     }
     if (currentUser) {
-      updateUser(currentUser.id, {
-        firstName: profileForm.firstName,
-        lastName: profileForm.lastName,
-        email: profileForm.email
-      });
-      showToast('Profile updated successfully', 'success');
-      setShowEditProfileModal(false);
+      try {
+        await updateUser(currentUser.id, {
+          firstName: profileForm.firstName,
+          lastName: profileForm.lastName,
+          email: profileForm.email
+        });
+        showToast('Profile updated successfully', 'success');
+        setShowEditProfileModal(false);
+      } catch {
+        setProfileError('Failed to update profile. Please try again.');
+      }
     }
   };
 
@@ -280,7 +287,7 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     setPasswordError(null);
     if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
       setPasswordError('All fields are required');
@@ -294,10 +301,15 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
       setPasswordError('New passwords do not match');
       return;
     }
-    // Simulated password change (in real app, this would call an API)
-    showToast('Password changed successfully', 'success');
-    setShowPasswordModal(false);
-    setPasswordForm({ current: '', new: '', confirm: '' });
+    try {
+      const { error } = await supabase.auth.updateUser({ password: passwordForm.new });
+      if (error) throw error;
+      showToast('Password changed successfully', 'success');
+      setShowPasswordModal(false);
+      setPasswordForm({ current: '', new: '', confirm: '' });
+    } catch (error: any) {
+      setPasswordError(error.message || 'Failed to change password. Please try again.');
+    }
   };
 
   const navItems = [
@@ -817,7 +829,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <span className="font-bold text-white font-archivo text-h6">Admin Console</span>
           <Button size="icon" variant="ghost" onClick={() => setIsMobileMenuOpen(true)}><Icons.Menu className="h-5 w-5" /></Button>
         </header>
-        <div className="flex-1 p-6 md:p-12 overflow-y-auto pb-20 relative z-10">
+        <div className={`flex-1 p-6 md:p-12 overflow-y-auto pb-20 relative z-10 ${!isSidebarOpen ? 'md:pl-24' : ''}`}>
           {children}
         </div>
       </main>
@@ -1860,8 +1872,8 @@ const LoginPage = () => {
 
     // Simulate network delay for realism
     setTimeout(async () => {
-      const success = await login(email, password);
-      if (success) {
+      const loginError = await login(email, password);
+      if (!loginError) {
         // Check the actual user role instead of email string
         // Wait a moment for state to update, then check currentUser
         setTimeout(() => {
@@ -1881,7 +1893,7 @@ const LoginPage = () => {
         }, 100);
       } else {
         setIsLoading(false);
-        setError('Invalid email or password.');
+        setError(loginError);
       }
     }, 800);
   };
@@ -2060,7 +2072,7 @@ const StudentDashboard = () => {
         <div className="p-6 border border-white/5 bg-[#0f121a]/60 backdrop-blur-md flex items-center justify-between group hover:border-white/10 transition-colors">
           <div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Certifications</p>
-            <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed').length}</p>
+            <p className="text-3xl font-archivo text-white">{enrollments.filter(e => e.userId === currentUser?.id && e.status === 'completed' && e.completedLessons?.length > 0).length}</p>
           </div>
           <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
             <Icons.Award className="h-5 w-5" />
@@ -2390,6 +2402,16 @@ const CoursePlayer = () => {
     );
   }
 
+  if (!enrollment) {
+    return (
+      <div className="p-8">
+        <h1 className="text-h2 font-archivo text-white mb-4">{course.title}</h1>
+        <p className="text-gray-400 mb-6">You are not enrolled in this course.</p>
+        <Button onClick={() => navigate('/portal/courses')} variant="primary" className="rounded-none">Back to My Training</Button>
+      </div>
+    );
+  }
+
   const currentLesson = lessons.find(l => l.id === currentLessonId);
   const currentModule = currentLesson ? modules.find(m => m.id === currentLesson.moduleId) : null;
   const currentLessonIndex = courseLessons.findIndex(l => l.id === currentLessonId);
@@ -2453,7 +2475,7 @@ const CoursePlayer = () => {
         try {
           await updateProgress(currentUser.id, currentLessonId, courseId);
         } catch (error) {
-
+          showToast('Progress could not be saved. Please try again.', 'error');
         }
       }
     } else {
@@ -3092,6 +3114,13 @@ const StudentCertifications = () => {
                   variant="ghost"
                   size="lg"
                   className="w-full border border-white/20 hover:bg-white/10 text-white rounded-none"
+                  onClick={() => {
+                    const win = window.open('', '_blank');
+                    if (!win) return;
+                    win.document.write(`<html><head><title>${cert.title} Certificate</title><style>body{font-family:sans-serif;padding:60px;text-align:center;background:#fff}h1{font-size:2.5rem;margin-bottom:0.5rem}h2{font-size:1.8rem;color:#dc2626;margin-bottom:1rem}p{font-size:1.1rem;color:#555;margin:0.4rem 0}.badge{display:inline-block;border:2px solid #dc2626;padding:6px 20px;border-radius:4px;color:#dc2626;font-weight:bold;margin-top:1.5rem}</style></head><body><h1>Certificate of Completion</h1><h2>${cert.title}</h2><p>Awarded to: <strong>${currentUser?.firstName} ${currentUser?.lastName}</strong></p><p>Completion Date: ${cert.completedDate}</p><div class="badge">${cert.level} Level</div></body></html>`);
+                    win.document.close();
+                    win.print();
+                  }}
                 >
                   <Icons.Download className="h-4 w-4 mr-2" />
                   Download Certificate
@@ -4096,6 +4125,7 @@ const AdminCourses = () => {
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1.5">Image URL</label>
             <Input value={newCourse.image} onChange={(e) => setNewCourse({ ...newCourse, image: e.target.value })} placeholder="https://..." />
+            <p className="text-xs text-gray-500 mt-1.5">Recommended: landscape 16:9 or 2:1, e.g. 1024×576 or 800×450. Paste any image URL.</p>
           </div>
           <div className="flex gap-3 mt-4">
             <Button onClick={handleAddCourse} className="flex-1 rounded-none">Add Course</Button>
@@ -4132,6 +4162,7 @@ const AdminCourses = () => {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Image URL</label>
               <Input value={editingCourse.image} onChange={(e) => setEditingCourse({ ...editingCourse, image: e.target.value })} placeholder="https://..." />
+              <p className="text-xs text-gray-500 mt-1.5">Recommended: landscape 16:9 or 2:1, e.g. 1024×576 or 800×450. Paste any image URL.</p>
             </div>
             <div className="flex gap-3 mt-6">
               <Button onClick={handleEditCourse} className="flex-1 rounded-none">Update Course</Button>
@@ -4245,20 +4276,35 @@ const AdminUsers = () => {
   };
 
   // Import users from CSV
-  const handleBulkImport = () => {
+  const handleBulkImport = async () => {
     if (csvData.length === 0) return;
 
-    csvData.forEach(userData => {
-      addUser({
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        role: 'user',
-        source: userData.source || ''
-      });
-    });
+    let successCount = 0;
+    let failCount = 0;
+    for (const userData of csvData) {
+      try {
+        const tempPassword = generatePassword();
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: userData.email.toLowerCase(),
+          password: tempPassword,
+        });
+        if (authError) throw authError;
+        if (!authData.user) throw new Error('Failed to create auth user');
+        await addUser({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          role: 'user',
+          source: userData.source || ''
+        }, authData.user.id);
+        successCount++;
+      } catch {
+        failCount++;
+      }
+    }
 
-    showToast(`Successfully imported ${csvData.length} trainee(s)`, 'success');
+    if (successCount > 0) showToast(`Successfully imported ${successCount} trainee(s)`, 'success');
+    if (failCount > 0) showToast(`${failCount} import(s) failed — check for duplicate emails`, 'error');
     setShowImportModal(false);
     setCsvData([]);
   };
@@ -4360,7 +4406,7 @@ const AdminUsers = () => {
       return;
     }
 
-    if (!newUser.email.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUser.email)) {
       showToast('Please enter a valid email address', 'error');
       return;
     }
@@ -4799,21 +4845,27 @@ const AdminUsers = () => {
                 return (
                   <button
                     key={course.id}
-                    onClick={() => {
+                    onClick={async () => {
                       if (selectedTrainees.length > 0) {
                         // Bulk assign
                         let assignedCount = 0;
-                        selectedTrainees.forEach(userId => {
+                        let failCount = 0;
+                        for (const userId of selectedTrainees) {
                           if (!enrollments.some(e => e.userId === userId && e.courseId === course.id)) {
-                            enrollUser(userId, course.id);
-                            assignedCount++;
+                            try {
+                              await enrollUser(userId, course.id);
+                              assignedCount++;
+                            } catch {
+                              failCount++;
+                            }
                           }
-                        });
+                        }
                         if (assignedCount > 0) {
                           showToast(`Assigned "${course.title}" to ${assignedCount} trainee(s)`, 'success');
-                        } else {
+                        } else if (failCount === 0) {
                           showToast('All selected trainees are already enrolled in this course', 'info');
                         }
+                        if (failCount > 0) showToast(`${failCount} assignment(s) failed`, 'error');
                         setShowAssignModal(false);
                         setSelectedTrainees([]);
                       } else {
