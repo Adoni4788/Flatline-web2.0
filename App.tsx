@@ -5353,7 +5353,7 @@ const AdminCourseDetail = () => {
             />
           </div>
           <div className="flex gap-3 mt-6">
-            <Button onClick={handleSaveModule} className="flex-1 rounded-none">
+            <Button onClick={saveModule} className="flex-1 rounded-none">
               {editingModule ? 'Update' : 'Create'} Module
             </Button>
             <Button variant="outline" onClick={() => setShowModuleModal(false)} className="flex-1 rounded-none">

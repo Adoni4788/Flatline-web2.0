@@ -151,11 +151,13 @@ export const Badge = ({ className = '', variant = 'default', children, ...props 
 // Modal - Responsive with scrolling for smaller screens
 export const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; });
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Escape') { onCloseRef.current(); return; }
       if (e.key === 'Tab' && modalRef.current) {
         const focusable = modalRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -169,9 +171,9 @@ export const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; o
     };
     document.addEventListener('keydown', handleKeyDown);
     const prev = document.activeElement as HTMLElement;
-    modalRef.current?.querySelector<HTMLElement>('button, input')?.focus();
+    modalRef.current?.querySelector<HTMLElement>('input, textarea')?.focus();
     return () => { document.removeEventListener('keydown', handleKeyDown); prev?.focus(); };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
   return (
