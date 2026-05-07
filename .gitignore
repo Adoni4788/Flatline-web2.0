@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Private client materials — never push
+/Flatline Security And Training Solutions/
+/docs/
+/supabase/.temp/

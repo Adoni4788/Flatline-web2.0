@@ -14,6 +14,7 @@ interface DataContextType {
   examAttempts: ExamAttempt[];
   currentUser: User | null;
   sessionChecked: boolean;
+  dataLoadError: string | null;
   // User Actions
   login: (email: string, password: string) => Promise<string | null>;
   logout: () => void;
@@ -64,6 +65,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [dataLoadError, setDataLoadError] = useState<string | null>(null);
 
   // Load data from Supabase on mount
   useEffect(() => {
@@ -162,8 +164,10 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
             status: e.status
           })));
         }
-      } catch {
-        // Data will remain as empty arrays if Supabase fails
+      } catch (err: any) {
+        const message = err?.message || 'Failed to load data from Supabase. Check your connection and try again.';
+        setDataLoadError(message);
+        console.error('[DataProvider] loadData failed:', err);
       }
     };
 
@@ -686,7 +690,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <DataContext.Provider value={{
-      users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser, sessionChecked,
+      users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser, sessionChecked, dataLoadError,
       login, logout,
       addUser, registerCreatedUser, updateUser, deleteUser,
       addCourse, updateCourse, deleteCourse,

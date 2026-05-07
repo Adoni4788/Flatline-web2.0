@@ -317,7 +317,23 @@ const StudentLayout = ({ children }: { children?: React.ReactNode }) => {
       setPasswordError('New passwords do not match');
       return;
     }
+    if (passwordForm.current === passwordForm.new) {
+      setPasswordError('New password must be different from current password');
+      return;
+    }
+    if (!currentUser?.email) {
+      setPasswordError('Session expired. Please sign in again.');
+      return;
+    }
     try {
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: currentUser.email,
+        password: passwordForm.current,
+      });
+      if (reauthError) {
+        setPasswordError('Current password is incorrect');
+        return;
+      }
       const { error } = await supabase.auth.updateUser({ password: passwordForm.new });
       if (error) throw error;
       showToast('Password changed successfully', 'success');
@@ -1886,32 +1902,15 @@ const LoginPage = () => {
     setIsLoading(true);
     setError('');
 
-    // Simulate network delay for realism
-    setTimeout(async () => {
-      const loginError = await login(email, password);
-      if (!loginError) {
-        // Check the actual user role instead of email string
-        // Wait a moment for state to update, then check currentUser
-        setTimeout(() => {
-          // Get user from localStorage since state might not be updated yet
-          const stored = localStorage.getItem('flatline_user');
-          if (stored) {
-            const user = JSON.parse(stored);
-            if (user?.role === 'admin') {
-              navigate('/admin/dashboard');
-            } else {
-              navigate('/portal/dashboard');
-            }
-          } else {
-            // Fallback to portal if we can't determine role
-            navigate('/portal/dashboard');
-          }
-        }, 100);
-      } else {
-        setIsLoading(false);
-        setError(loginError);
-      }
-    }, 800);
+    const loginError = await login(email, password);
+    if (loginError) {
+      setIsLoading(false);
+      setError(loginError);
+      return;
+    }
+    const stored = localStorage.getItem('flatline_user');
+    const user = stored ? JSON.parse(stored) : null;
+    navigate(user?.role === 'admin' ? '/admin/dashboard' : '/portal/dashboard');
   };
 
   return (
@@ -2454,7 +2453,7 @@ const CoursePlayer = () => {
       }
     });
 
-    const percentage = Math.round((score / totalPoints) * 100);
+    const percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
     setQuizScore(percentage);
     setQuizSubmitted(true);
 
@@ -4247,16 +4246,29 @@ const AdminUsers = () => {
   const [saving, setSaving] = useState(false);
   const { toast, showToast, closeToast } = useNotification();
 
-  // Generate a secure temporary password
   const generatePassword = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    const specialChars = '!@#$%&*';
-    let password = '';
-    for (let i = 0; i < 10; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lower = 'abcdefghjkmnpqrstuvwxyz';
+    const digits = '23456789';
+    const specials = '!@#$%&*';
+    const all = upper + lower + digits + specials;
+    const pick = (set: string, n = 1) => {
+      const buf = new Uint32Array(n);
+      crypto.getRandomValues(buf);
+      let out = '';
+      for (let i = 0; i < n; i++) out += set.charAt(buf[i] % set.length);
+      return out;
+    };
+    const required = pick(upper) + pick(lower) + pick(digits) + pick(specials);
+    const rest = pick(all, 8);
+    const pwdArr = (required + rest).split('');
+    const shuffleBuf = new Uint32Array(pwdArr.length);
+    crypto.getRandomValues(shuffleBuf);
+    for (let i = pwdArr.length - 1; i > 0; i--) {
+      const j = shuffleBuf[i] % (i + 1);
+      [pwdArr[i], pwdArr[j]] = [pwdArr[j], pwdArr[i]];
     }
-    password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
-    return password;
+    return pwdArr.join('');
   };
 
   const createTraineeAccount = async (
@@ -6898,6 +6910,22 @@ const AdminExamCreate = () => {
   );
 };
 
+const DataLoadErrorBanner = () => {
+  const { dataLoadError } = useData();
+  if (!dataLoadError) return null;
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-red-900/95 backdrop-blur-sm border-b border-red-500/40 text-white px-4 py-2 text-center text-sm">
+      <span className="font-medium">Data load error:</span> {dataLoadError}
+      <button
+        onClick={() => window.location.reload()}
+        className="ml-3 underline hover:text-red-200"
+      >
+        Reload
+      </button>
+    </div>
+  );
+};
+
 // --- Main App Component ---
 const App = () => {
   return (
@@ -6905,6 +6933,7 @@ const App = () => {
     <DataProvider>
       <Router>
         <ScrollToTop />
+        <DataLoadErrorBanner />
         <Routes>
           {/* Public */}
           <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />

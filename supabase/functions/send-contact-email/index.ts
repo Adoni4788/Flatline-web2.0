@@ -14,6 +14,14 @@ interface ContactFormPayload {
   message: string
 }
 
+const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+
 serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -55,6 +63,11 @@ serve(async (req: Request) => {
       })
     }
 
+    const safeFirstName = escapeHtml(firstName)
+    const safeFullName = escapeHtml(`${firstName} ${lastName}`)
+    const safeEmail = escapeHtml(email)
+    const safeSubjectLine = escapeHtml(subject || 'General Inquiry')
+    const safeMessage = escapeHtml(message)
     const fullName = `${firstName} ${lastName}`
     const subjectLine = subject || 'General Inquiry'
 
@@ -80,25 +93,25 @@ serve(async (req: Request) => {
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
               <tr>
                 <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; width: 120px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Name</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #ffffff;">${fullName}</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #ffffff;">${safeFullName}</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Email</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #ffffff;"><a href="mailto:${email}" style="color: #dc2626;">${email}</a></td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #ffffff;"><a href="mailto:${safeEmail}" style="color: #dc2626;">${safeEmail}</a></td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Subject</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #ffffff;">${subjectLine}</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #1f2937; color: #ffffff;">${safeSubjectLine}</td>
               </tr>
             </table>
 
             <div style="background: #0a0f1c; border: 1px solid #1f2937; padding: 20px; margin-bottom: 24px;">
               <p style="margin: 0 0 8px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Message</p>
-              <p style="margin: 0; color: #ffffff; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+              <p style="margin: 0; color: #ffffff; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
             </div>
 
             <p style="color: #6b7280; font-size: 12px; margin: 0;">
-              Reply directly to this email to respond to ${firstName} at ${email}.
+              Reply directly to this email to respond to ${safeFirstName} at ${safeEmail}.
             </p>
           </div>
         `,
@@ -132,9 +145,9 @@ serve(async (req: Request) => {
               <p style="margin: 4px 0 0; color: #9ca3af; font-size: 14px;">Flatline Security Training</p>
             </div>
 
-            <p style="color: #d1d5db; line-height: 1.6;">Hi ${firstName},</p>
+            <p style="color: #d1d5db; line-height: 1.6;">Hi ${safeFirstName},</p>
             <p style="color: #d1d5db; line-height: 1.6;">
-              Thank you for reaching out. We've received your message regarding <strong style="color: #ffffff;">${subjectLine}</strong> and will get back to you within 1–2 business days.
+              Thank you for reaching out. We've received your message regarding <strong style="color: #ffffff;">${safeSubjectLine}</strong> and will get back to you within 1–2 business days.
             </p>
             <p style="color: #d1d5db; line-height: 1.6;">
               If your matter is urgent, please call our Operations Center directly at <strong style="color: #ffffff;">+1 (876) 555-2847</strong>, Mon–Fri, 0900–1800 EST.
