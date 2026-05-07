@@ -4228,10 +4228,12 @@ const AdminCourses = () => {
 
 // Admin Users Management
 const AdminUsers = () => {
-  const { users, courses, enrollments, registerCreatedUser, updateUser, deleteUser, enrollUser } = useData();
+  const { users, courses, enrollments, registerCreatedUser, updateUser, deleteUser, enrollUser, unenrollUser } = useData();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showCoursesModal, setShowCoursesModal] = useState(false);
+  const [coursesModalUser, setCoursesModalUser] = useState<User | null>(null);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string; name: string } | null>(null);
   const [copiedField, setCopiedField] = useState<'email' | 'password' | 'all' | null>(null);
@@ -4585,6 +4587,22 @@ const AdminUsers = () => {
     }
   };
 
+  const handleUnassignCourse = async (userId: string, courseId: string, courseTitle: string) => {
+    if (!confirm(`Remove "${courseTitle}" from this trainee? Their progress for this course will be lost.`)) return;
+    try {
+      await unenrollUser(userId, courseId);
+      showToast(`Removed "${courseTitle}" from trainee`, 'success');
+    } catch (error: any) {
+      showToast(error.message || 'Failed to remove course', 'error');
+    }
+  };
+
+  const openCoursesModal = (user: User) => {
+    setCoursesModalUser(user);
+    setShowCoursesModal(true);
+    setOpenMenuId(null);
+  };
+
   const handleAssignCourse = async (courseId: string) => {
     if (selectedUser && courseId) {
       try {
@@ -4773,6 +4791,13 @@ const AdminUsers = () => {
                             >
                               <Icons.Edit className="h-4 w-4" />
                               Edit Trainee
+                            </button>
+                            <button
+                              onClick={() => openCoursesModal(user)}
+                              className="w-full text-left px-3 py-2 hover:bg-red-900/10 transition-colors flex items-center gap-2 text-gray-300 hover:text-white text-sm"
+                            >
+                              <Icons.BookOpen className="h-4 w-4" />
+                              Manage Courses
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user)}
@@ -4986,6 +5011,73 @@ const AdminUsers = () => {
             </div>
           </div>
         </div>
+      </Modal>
+
+      <Modal isOpen={showCoursesModal} onClose={() => setShowCoursesModal(false)} title={coursesModalUser ? `Courses for ${coursesModalUser.firstName} ${coursesModalUser.lastName}` : 'Courses'}>
+        {coursesModalUser && (() => {
+          const userEnrollments = enrollments.filter(e => e.userId === coursesModalUser.id);
+          if (userEnrollments.length === 0) {
+            return (
+              <div className="p-6 text-center border border-red-900/20 bg-black/40 rounded-none">
+                <p className="text-gray-400 text-sm">No courses assigned to this trainee.</p>
+                <Button
+                  onClick={() => {
+                    setShowCoursesModal(false);
+                    setSelectedUser(coursesModalUser.id);
+                    setShowAssignModal(true);
+                  }}
+                  className="mt-4 rounded-none"
+                  variant="primary"
+                  size="sm"
+                >
+                  Assign a Course
+                </Button>
+              </div>
+            );
+          }
+          return (
+            <div className="space-y-2">
+              {userEnrollments.map(en => {
+                const course = courses.find(c => c.id === en.courseId);
+                if (!course) return null;
+                return (
+                  <div key={en.id} className="flex items-center justify-between p-3 border border-red-900/20 bg-black/40 rounded-none">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-white truncate">{course.title}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {en.status === 'completed' ? 'Completed' : `${en.progress}% complete`}
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handleUnassignCourse(coursesModalUser.id, course.id, course.title)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-none ml-3"
+                    >
+                      <Icons.Trash className="h-4 w-4 mr-1.5" />
+                      Remove
+                    </Button>
+                  </div>
+                );
+              })}
+              <div className="pt-3 mt-3 border-t border-red-900/20">
+                <Button
+                  onClick={() => {
+                    setShowCoursesModal(false);
+                    setSelectedUser(coursesModalUser.id);
+                    setShowAssignModal(true);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="w-full rounded-none"
+                >
+                  <Icons.Plus className="h-4 w-4 mr-2" />
+                  Assign Another Course
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
 
       {/* Credentials Modal - shown after creating a new user */}

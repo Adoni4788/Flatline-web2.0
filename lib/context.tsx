@@ -36,6 +36,7 @@ interface DataContextType {
   deleteLesson: (id: string) => Promise<void>;
   // Enrollment Actions
   enrollUser: (userId: string, courseId: string) => Promise<void>;
+  unenrollUser: (userId: string, courseId: string) => Promise<void>;
   updateProgress: (userId: string, lessonId: string, courseId: string) => Promise<void>;
   getCourseProgress: (userId: string, courseId: string) => number;
   // Live Session Actions
@@ -287,10 +288,23 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const deleteUser = async (id: string) => {
-    await supabase.from('enrollments').delete().eq('user_id', id);
-
-    const { error } = await supabase.from('users').delete().eq('id', id);
-    if (error) throw error;
+    const { data, error } = await supabase.functions.invoke('delete-trainee', { body: { userId: id } });
+    let errMsg: string | undefined = data?.error;
+    if (!errMsg && error) {
+      const ctx = (error as any).context;
+      if (ctx instanceof Response) {
+        try {
+          const body = await ctx.clone().json();
+          errMsg = body?.error;
+        } catch {
+          try { errMsg = await ctx.clone().text(); } catch {}
+        }
+      } else if (ctx && typeof ctx === 'object') {
+        errMsg = ctx.error;
+      }
+      if (!errMsg) errMsg = (error as any).message;
+    }
+    if (errMsg) throw new Error(errMsg);
 
     setUsers(prev => prev.filter(u => u.id !== id));
     setEnrollments(prev => prev.filter(e => e.userId !== id));
@@ -538,6 +552,16 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     setEnrollments(prev => [...prev, newEnrollment]);
   };
 
+  const unenrollUser = async (userId: string, courseId: string) => {
+    const { error } = await supabase
+      .from('enrollments')
+      .delete()
+      .eq('user_id', userId)
+      .eq('course_id', courseId);
+    if (error) throw error;
+    setEnrollments(prev => prev.filter(e => !(e.userId === userId && e.courseId === courseId)));
+  };
+
   const updateProgress = async (userId: string, lessonId: string, courseId: string) => {
     const enrollment = enrollments.find(e => e.userId === userId && e.courseId === courseId);
     if (!enrollment) return;
@@ -696,7 +720,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
       addCourse, updateCourse, deleteCourse,
       addModule, updateModule, deleteModule,
       addLesson, updateLesson, deleteLesson,
-      enrollUser, updateProgress, getCourseProgress,
+      enrollUser, unenrollUser, updateProgress, getCourseProgress,
       addLiveSession, updateLiveSession, deleteLiveSession,
       addExam, updateExam, deleteExam, startExamAttempt, submitExamAttempt, getExamAttempts, getExamAttempt
     }}>
