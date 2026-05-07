@@ -5188,6 +5188,7 @@ const AdminCourseDetail = () => {
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [lessonFormError, setLessonFormError] = useState<string | null>(null);
   const [newLesson, setNewLesson] = useState<Partial<Lesson>>({
     title: '',
     type: 'content',
@@ -5263,6 +5264,7 @@ const AdminCourseDetail = () => {
   const openAddLessonModal = (moduleId: string) => {
     const moduleLessons = lessons.filter(l => l.moduleId === moduleId);
     setSelectedModuleId(moduleId);
+    setLessonFormError(null);
     setNewLesson({
       title: '',
       type: 'content',
@@ -5276,12 +5278,14 @@ const AdminCourseDetail = () => {
   };
 
   const openEditLessonModal = (lesson: Lesson) => {
+    setLessonFormError(null);
     setEditingLesson(lesson);
     setSelectedModuleId(lesson.moduleId);
     setShowLessonModal(true);
   };
 
   const updateLessonDraft = (changes: Partial<Lesson>) => {
+    setLessonFormError(null);
     if (editingLesson) {
       setEditingLesson({ ...editingLesson, ...changes });
     } else {
@@ -5305,12 +5309,14 @@ const AdminCourseDetail = () => {
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
+      setLessonFormError('Please upload a PDF file for presentations.');
       showToast('Please upload a PDF file for presentations', 'error');
       e.target.value = '';
       return;
     }
 
     if (file.size > PRESENTATION_FILE_SIZE_LIMIT) {
+      setLessonFormError('PDF is too large. Please keep presentation uploads under 10MB.');
       showToast('PDF is too large. Please keep presentation uploads under 10MB.', 'error');
       e.target.value = '';
       return;
@@ -5336,6 +5342,7 @@ const AdminCourseDetail = () => {
 
       showToast(`Attached "${file.name}" to this lesson`, 'success');
     } catch {
+      setLessonFormError('Failed to process presentation file.');
       showToast('Failed to process presentation file', 'error');
     } finally {
       e.target.value = '';
@@ -5345,6 +5352,7 @@ const AdminCourseDetail = () => {
   const handleSaveLesson = async () => {
     if (editingLesson) {
       if (!editingLesson.title) {
+        setLessonFormError('Please enter a lesson title.');
         showToast('Please enter a lesson title', 'error');
         return;
       }
@@ -5355,6 +5363,7 @@ const AdminCourseDetail = () => {
         const hasFile = presentation?.sourceType === 'upload' && presentation.fileDataUrl;
 
         if (!hasEmbed && !hasFile) {
+          setLessonFormError('Please add an embed URL or upload a PDF for this presentation.');
           showToast('Please add an embed URL or upload a PDF for this presentation', 'error');
           return;
         }
@@ -5362,13 +5371,16 @@ const AdminCourseDetail = () => {
 
       try {
         await updateLesson(editingLesson.id, editingLesson);
+        setLessonFormError(null);
         showToast('Lesson updated successfully', 'success');
       } catch (error) {
+        setLessonFormError('Failed to update lesson.');
         showToast('Failed to update lesson', 'error');
         return;
       }
     } else {
       if (!newLesson.title) {
+        setLessonFormError('Please enter a lesson title.');
         showToast('Please enter a lesson title', 'error');
         return;
       }
@@ -5379,6 +5391,7 @@ const AdminCourseDetail = () => {
         const hasFile = presentation?.sourceType === 'upload' && presentation.fileDataUrl;
 
         if (!hasEmbed && !hasFile) {
+          setLessonFormError('Please add an embed URL or upload a PDF for this presentation.');
           showToast('Please add an embed URL or upload a PDF for this presentation', 'error');
           return;
         }
@@ -5386,8 +5399,10 @@ const AdminCourseDetail = () => {
 
       try {
         await addLesson({ ...(newLesson as Lesson), moduleId: selectedModuleId! });
+        setLessonFormError(null);
         showToast('Lesson created successfully', 'success');
       } catch (error) {
+        setLessonFormError('Failed to create lesson.');
         showToast('Failed to create lesson', 'error');
         return;
       }
@@ -5592,10 +5607,18 @@ const AdminCourseDetail = () => {
       {/* Lesson Modal */}
       <Modal
         isOpen={showLessonModal}
-        onClose={() => setShowLessonModal(false)}
+        onClose={() => {
+          setShowLessonModal(false);
+          setLessonFormError(null);
+        }}
         title={editingLesson ? 'Edit Lesson' : 'Add Lesson'}
       >
         <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+          {lessonFormError && (
+            <div className="border border-red-900/40 bg-red-900/20 px-4 py-3 text-sm text-red-200">
+              {lessonFormError}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">Lesson Title *</label>
             <Input
@@ -6104,7 +6127,14 @@ const AdminCourseDetail = () => {
             <Button onClick={handleSaveLesson} className="flex-1 rounded-none">
               {editingLesson ? 'Update' : 'Create'} Lesson
             </Button>
-            <Button variant="outline" onClick={() => setShowLessonModal(false)} className="flex-1 rounded-none">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowLessonModal(false);
+                setLessonFormError(null);
+              }}
+              className="flex-1 rounded-none"
+            >
               Cancel
             </Button>
           </div>

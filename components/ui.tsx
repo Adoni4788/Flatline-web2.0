@@ -215,7 +215,7 @@ export const Toast = ({ message, type, onClose, action, duration = 3000 }: Toast
   };
 
   return (
-    <div className={`fixed bottom-4 right-4 z-[100] px-4 py-3 rounded-lg border shadow-lg flex items-center gap-3 animate-fade-in ${bgColors[type]}`} role="alert">
+    <div className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:max-w-md z-[200] px-4 py-3 rounded-lg border shadow-2xl flex items-center gap-3 animate-fade-in ${bgColors[type]}`} role="alert">
       {type === 'success' && <Icons.Check className="h-5 w-5 text-emerald-400" />}
       {type === 'error' && <Icons.X className="h-5 w-5 text-red-400" />}
       {type === 'info' && <Icons.Info className="h-5 w-5 text-blue-400" />}
