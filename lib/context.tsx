@@ -18,7 +18,6 @@ interface DataContextType {
   // User Actions
   login: (email: string, password: string) => Promise<string | null>;
   logout: () => void;
-  addUser: (user: Omit<User, 'id' | 'status'>, userId: string) => Promise<User>;
   registerCreatedUser: (user: User) => void;
   updateUser: (id: string, data: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
@@ -348,35 +347,6 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     await supabase.auth.signOut();
     setCurrentUser(null);
     localStorage.removeItem('flatline_user');
-  };
-
-  const addUser = async (userData: Omit<User, 'id' | 'status'>, userId: string) => {
-    const { error: profileError } = await supabase
-      .from('users')
-      .insert([{
-        id: userId,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        email: userData.email,
-        role: userData.role,
-        status: 'active',
-        source: userData.source || 'Direct'
-      }]);
-
-    if (profileError) throw profileError;
-
-    const newUser: User = {
-      id: userId,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      role: userData.role,
-      status: 'active',
-      source: userData.source || 'Direct'
-    };
-
-    setUsers(prev => [...prev, newUser]);
-    return newUser;
   };
 
   const registerCreatedUser = (user: User) => {
@@ -946,7 +916,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     <DataContext.Provider value={{
       users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser, sessionChecked, dataLoadError,
       login, logout,
-      addUser, registerCreatedUser, updateUser, deleteUser,
+      registerCreatedUser, updateUser, deleteUser,
       addCourse, updateCourse, deleteCourse,
       addModule, updateModule, deleteModule,
       addLesson, updateLesson, deleteLesson,

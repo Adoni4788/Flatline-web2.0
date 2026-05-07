@@ -4463,7 +4463,7 @@ const AdminUsers = () => {
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        source: userData.source || '',
+        source: userData.source?.trim() || 'Direct',
         password
       }
     });
@@ -4713,19 +4713,20 @@ const AdminUsers = () => {
 
   const handleBulkDelete = async () => {
     if (selectedTrainees.length === 0) return;
-    if (confirm(`Are you sure you want to delete ${selectedTrainees.length} trainee(s)? This will also remove all their enrollments.`)) {
-      try {
-        const count = selectedTrainees.length;
-        for (const id of selectedTrainees) {
-          await deleteUser(id);
-        }
-        showToast(`${count} trainee(s) deleted successfully`, 'success');
-        setSelectedTrainees([]);
-      } catch (error: any) {
+    if (!confirm(`Are you sure you want to delete ${selectedTrainees.length} trainee(s)? This will also remove all their enrollments.`)) return;
 
-        showToast(error.message || 'Failed to delete some trainees', 'error');
-      }
+    const results = await Promise.allSettled(selectedTrainees.map(id => deleteUser(id)));
+    const success = results.filter(r => r.status === 'fulfilled').length;
+    const failures = results.filter(r => r.status === 'rejected') as PromiseRejectedResult[];
+
+    if (success > 0) {
+      showToast(`${success} trainee(s) deleted successfully`, 'success');
     }
+    if (failures.length > 0) {
+      const firstReason = (failures[0].reason as any)?.message || 'unknown error';
+      showToast(`${failures.length} delete(s) failed (${firstReason})`, 'error');
+    }
+    setSelectedTrainees([]);
   };
 
   const openEditModal = (user: User) => {
