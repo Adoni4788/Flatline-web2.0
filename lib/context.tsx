@@ -240,13 +240,68 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     loadData();
   }, []);
 
-  // Restore session from localStorage
+  // Restore session - validate against Supabase before trusting localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('flatline_user');
-    if (stored) {
-      setCurrentUser(JSON.parse(stored));
-    }
-    setSessionChecked(true);
+    let cancelled = false;
+    const restore = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (!session?.user) {
+          localStorage.removeItem('flatline_user');
+          setCurrentUser(null);
+          setSessionChecked(true);
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (cancelled) return;
+        if (profileError || !profile) {
+          await supabase.auth.signOut();
+          localStorage.removeItem('flatline_user');
+          setCurrentUser(null);
+          setSessionChecked(true);
+          return;
+        }
+
+        const user: User = {
+          id: profile.id,
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          email: profile.email,
+          role: profile.role,
+          status: profile.status,
+          source: profile.source,
+        };
+        setCurrentUser(user);
+        localStorage.setItem('flatline_user', JSON.stringify(user));
+      } catch (err) {
+        console.error('[DataProvider] session restore failed:', err);
+        localStorage.removeItem('flatline_user');
+        if (!cancelled) setCurrentUser(null);
+      } finally {
+        if (!cancelled) setSessionChecked(true);
+      }
+    };
+    restore();
+
+    const { data: authSub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('flatline_user');
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      authSub.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<string | null> => {

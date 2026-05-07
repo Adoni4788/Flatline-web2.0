@@ -1959,6 +1959,11 @@ const LoginPage = () => {
               </span>
             ) : "Sign In"}
           </Button>
+          <div className="text-center pt-1">
+            <Link to="/forgot-password" className="text-caption1 text-gray-400 hover:text-red-400 transition-colors">
+              Forgot password?
+            </Link>
+          </div>
         </form>
         <div className="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
           <div className="flex items-center justify-center gap-2 text-gray-400">
@@ -1969,6 +1974,177 @@ const LoginPage = () => {
             Contact your administrator to request access credentials for the training portal.
           </p>
         </div>
+      </Card>
+    </div>
+  );
+};
+
+const ForgotPasswordPage = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+    setStatus('sending');
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), { redirectTo });
+    if (resetError) {
+      setStatus('idle');
+      setError(resetError.message || 'Unable to send reset email');
+      return;
+    }
+    setStatus('sent');
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden px-4 py-8">
+      <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
+      <Card className="w-full max-w-md p-6 sm:p-8 relative z-10 border-white/10 bg-[#0a0f1c]/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-900/50">
+            <Icons.Shield className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-h3 font-archivo tracking-tight text-white">Reset Password</h1>
+          <p className="text-body2 text-gray-400 mt-2">
+            Enter your email and we will send you a link to set a new password.
+          </p>
+        </div>
+
+        {status === 'sent' ? (
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-300 text-sm">
+              If an account exists for <strong>{email}</strong>, a password reset link has been sent.
+              Check your inbox (and spam folder) for instructions.
+            </div>
+            <Link to="/login" className="block text-center text-caption1 text-gray-400 hover:text-red-400 transition-colors">
+              Back to Sign In
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">Email Address</label>
+              <Input
+                type="email"
+                placeholder="user@flatline.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="h-11 rounded-none"
+              />
+            </div>
+            {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-caption1 font-medium text-center">{error}</div>}
+            <Button type="submit" size="lg" className="w-full h-11 shadow-lg shadow-red-900/20" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Send Reset Link'}
+            </Button>
+            <div className="text-center pt-1">
+              <Link to="/login" className="text-caption1 text-gray-400 hover:text-red-400 transition-colors">
+                Back to Sign In
+              </Link>
+            </div>
+          </form>
+        )}
+      </Card>
+    </div>
+  );
+};
+
+const ResetPasswordPage = () => {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'done'>('idle');
+  const [error, setError] = useState('');
+  const [ready, setReady] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setReady(true);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setReady(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    setStatus('submitting');
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) {
+      setStatus('idle');
+      setError(updateError.message || 'Unable to update password');
+      return;
+    }
+    setStatus('done');
+    setTimeout(() => navigate('/login'), 2000);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden px-4 py-8">
+      <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
+      <Card className="w-full max-w-md p-6 sm:p-8 relative z-10 border-white/10 bg-[#0a0f1c]/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-900/50">
+            <Icons.Shield className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-h3 font-archivo tracking-tight text-white">Set New Password</h1>
+          <p className="text-body2 text-gray-400 mt-2">Choose a new password for your account.</p>
+        </div>
+
+        {!ready ? (
+          <div className="p-4 rounded-lg bg-amber-900/20 border border-amber-500/30 text-amber-300 text-sm text-center">
+            Open this page from the password reset link in your email.
+          </div>
+        ) : status === 'done' ? (
+          <div className="p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-300 text-sm text-center">
+            Password updated. Redirecting to sign in…
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">New Password</label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                required
+                className="h-11 rounded-none"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">Confirm Password</label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                required
+                className="h-11 rounded-none"
+              />
+            </div>
+            {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-caption1 font-medium text-center">{error}</div>}
+            <Button type="submit" size="lg" className="w-full h-11 shadow-lg shadow-red-900/20" disabled={status === 'submitting'}>
+              {status === 'submitting' ? 'Updating…' : 'Update Password'}
+            </Button>
+          </form>
+        )}
       </Card>
     </div>
   );
@@ -7054,6 +7230,8 @@ const App = () => {
           <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Student Portal */}
           {/* Course Player - Fullscreen without layout */}
