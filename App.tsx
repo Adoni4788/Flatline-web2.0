@@ -4300,6 +4300,7 @@ const AdminUsers = () => {
       }
     });
 
+    console.log('[create-trainee] data:', JSON.stringify(data), 'error:', JSON.stringify(error), 'error.context:', (error as any)?.context);
     const errMsg = data?.error || (error as any)?.context?.error || (error as any)?.message;
     if (errMsg) throw new Error(errMsg);
     if (!data?.user) throw new Error('Failed to create trainee');
