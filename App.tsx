@@ -4300,8 +4300,21 @@ const AdminUsers = () => {
       }
     });
 
-    console.log('[create-trainee] data:', JSON.stringify(data), 'error:', JSON.stringify(error), 'error.context:', (error as any)?.context);
-    const errMsg = data?.error || (error as any)?.context?.error || (error as any)?.message;
+    let errMsg: string | undefined = data?.error;
+    if (!errMsg && error) {
+      const ctx = (error as any).context;
+      if (ctx instanceof Response) {
+        try {
+          const body = await ctx.clone().json();
+          errMsg = body?.error;
+        } catch {
+          try { errMsg = await ctx.clone().text(); } catch {}
+        }
+      } else if (ctx && typeof ctx === 'object') {
+        errMsg = ctx.error;
+      }
+      if (!errMsg) errMsg = (error as any).message;
+    }
     if (errMsg) throw new Error(errMsg);
     if (!data?.user) throw new Error('Failed to create trainee');
 
