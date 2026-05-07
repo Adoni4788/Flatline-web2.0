@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation, Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Textarea, Card, Badge, Icons, Modal, Select, Toast, BarChart } from './components/ui';
 import { DataProvider, useData } from './lib/context';
-import { User, Course } from './lib/types';
+import { User, Course, Lesson, Module } from './lib/types';
+import { PresentationLessonContent, PresentationSourceType, parsePresentationLessonContent, serializePresentationLessonContent } from './lib/presentations';
 import { supabase } from './lib/supabase';
 
 // --- Error Boundary ---
@@ -59,6 +60,21 @@ const useNotification = () => {
   };
   const closeToast = () => setToast(null);
   return { toast, showToast, closeToast };
+};
+
+const PRESENTATION_FILE_SIZE_LIMIT = 10 * 1024 * 1024;
+
+const createEmptyPresentation = (): PresentationLessonContent => ({
+  kind: 'presentation_v1',
+  sourceType: 'embed',
+  embedUrl: '',
+  fileName: '',
+  fileDataUrl: '',
+  mimeType: ''
+});
+
+const getLessonPresentation = (lesson?: Lesson | null): PresentationLessonContent | null => {
+  return parsePresentationLessonContent(lesson?.content);
 };
 
 // --- Preview Banner Component ---
@@ -2416,6 +2432,7 @@ const CoursePlayer = () => {
   const currentModule = currentLesson ? modules.find(m => m.id === currentLesson.moduleId) : null;
   const currentLessonIndex = courseLessons.findIndex(l => l.id === currentLessonId);
   const isLessonComplete = enrollment?.completedLessons.includes(currentLessonId || '');
+  const currentPresentation = getLessonPresentation(currentLesson);
 
   const handleMarkComplete = async () => {
     if (currentUser && currentLessonId && courseId) {
@@ -2586,7 +2603,7 @@ const CoursePlayer = () => {
                           <div className="flex-1 min-w-0">
                             <div className="text-subtitle2 font-archivo truncate">{lesson.title}</div>
                             <div className="text-caption text-gray-500">
-                              {lesson.type === 'quiz' ? 'Quiz' : 'Lesson'} {lessonIndex + 1}
+                              {lesson.type === 'quiz' ? 'Quiz' : lesson.type === 'presentation' ? 'Presentation' : 'Lesson'} {lessonIndex + 1}
                             </div>
                           </div>
                         </div>
@@ -2622,7 +2639,7 @@ const CoursePlayer = () => {
                 <Icons.ChevronRight className="h-4 w-4 rotate-180" />
                 Previous
               </Button>
-              {currentLesson?.type === 'content' && !isLessonComplete && (
+              {(currentLesson?.type === 'content' || currentLesson?.type === 'presentation') && !isLessonComplete && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -2656,6 +2673,68 @@ const CoursePlayer = () => {
                   className="text-gray-300 leading-relaxed space-y-4"
                   dangerouslySetInnerHTML={{ __html: currentLesson.content || '<p>No content available.</p>' }}
                 />
+              </div>
+            ) : currentLesson?.type === 'presentation' ? (
+              <div className="space-y-6">
+                <div className="border border-white/10 bg-white/[0.02] p-6">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <div className="text-caption1 text-gray-500 uppercase tracking-widest mb-2">Presentation Lesson</div>
+                      <h3 className="text-h5 font-archivo text-white">View the training presentation below</h3>
+                    </div>
+                    <Badge className="rounded-none bg-white/5 border-white/10 text-white">
+                      {currentPresentation?.sourceType === 'upload' ? 'PDF Upload' : 'Embedded Link'}
+                    </Badge>
+                  </div>
+
+                  {currentPresentation?.sourceType === 'embed' && currentPresentation.embedUrl ? (
+                    <div className="space-y-4">
+                      <div className="border border-white/10 bg-black/30 overflow-hidden">
+                        <iframe
+                          src={currentPresentation.embedUrl}
+                          title={currentLesson.title}
+                          className="w-full min-h-[70vh] bg-[#02040a]"
+                          allow="fullscreen"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <a
+                          href={currentPresentation.embedUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center px-4 py-2 border border-white/10 text-sm text-gray-300 hover:text-white hover:border-white/20 transition-colors"
+                        >
+                          Open in New Tab
+                          <Icons.ChevronRight className="h-4 w-4 ml-2" />
+                        </a>
+                      </div>
+                    </div>
+                  ) : currentPresentation?.sourceType === 'upload' && currentPresentation.fileDataUrl ? (
+                    <div className="space-y-4">
+                      <div className="border border-white/10 bg-black/30 overflow-hidden">
+                        <iframe
+                          src={currentPresentation.fileDataUrl}
+                          title={currentPresentation.fileName || currentLesson.title}
+                          className="w-full min-h-[70vh] bg-[#02040a]"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-sm text-gray-400">
+                        <span className="truncate">{currentPresentation.fileName || 'Presentation file'}</span>
+                        <a
+                          href={currentPresentation.fileDataUrl}
+                          download={currentPresentation.fileName || 'presentation.pdf'}
+                          className="inline-flex items-center px-4 py-2 border border-white/10 text-gray-300 hover:text-white hover:border-white/20 transition-colors"
+                        >
+                          Download PDF
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border border-amber-500/20 bg-amber-500/10 p-6 text-amber-100">
+                      This presentation is not configured correctly yet. Please contact the administrator.
+                    </div>
+                  )}
+                </div>
               </div>
             ) : currentLesson?.type === 'quiz' ? (
               <div className="space-y-6">
@@ -5109,7 +5188,7 @@ const AdminCourseDetail = () => {
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
-  const [newLesson, setNewLesson] = useState<any>({
+  const [newLesson, setNewLesson] = useState<Partial<Lesson>>({
     title: '',
     type: 'content',
     content: '',
@@ -5117,6 +5196,11 @@ const AdminCourseDetail = () => {
     passingScore: 70,
     questions: []
   });
+
+  const currentLessonEditor = editingLesson || newLesson;
+  const currentPresentationEditor = currentLessonEditor.type === 'presentation'
+    ? getLessonPresentation(currentLessonEditor as Lesson) || createEmptyPresentation()
+    : null;
 
   if (!course) {
     return <div className="text-white">Course not found</div>;
@@ -5197,12 +5281,85 @@ const AdminCourseDetail = () => {
     setShowLessonModal(true);
   };
 
+  const updateLessonDraft = (changes: Partial<Lesson>) => {
+    if (editingLesson) {
+      setEditingLesson({ ...editingLesson, ...changes });
+    } else {
+      setNewLesson(prev => ({ ...prev, ...changes }));
+    }
+  };
+
+  const updatePresentationDraft = (changes: Partial<PresentationLessonContent>) => {
+    const nextPresentation = {
+      ...(currentPresentationEditor || createEmptyPresentation()),
+      ...changes
+    };
+
+    updateLessonDraft({
+      content: serializePresentationLessonContent(nextPresentation)
+    });
+  };
+
+  const handlePresentationFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      showToast('Please upload a PDF file for presentations', 'error');
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > PRESENTATION_FILE_SIZE_LIMIT) {
+      showToast('PDF is too large. Please keep presentation uploads under 10MB.', 'error');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      const fileDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+
+      updateLessonDraft({
+        content: serializePresentationLessonContent({
+          kind: 'presentation_v1',
+          sourceType: 'upload',
+          fileName: file.name,
+          fileDataUrl,
+          mimeType: file.type
+        })
+      });
+
+      showToast(`Attached "${file.name}" to this lesson`, 'success');
+    } catch {
+      showToast('Failed to process presentation file', 'error');
+    } finally {
+      e.target.value = '';
+    }
+  };
+
   const handleSaveLesson = async () => {
     if (editingLesson) {
       if (!editingLesson.title) {
         showToast('Please enter a lesson title', 'error');
         return;
       }
+
+      if (editingLesson.type === 'presentation') {
+        const presentation = getLessonPresentation(editingLesson);
+        const hasEmbed = presentation?.sourceType === 'embed' && presentation.embedUrl;
+        const hasFile = presentation?.sourceType === 'upload' && presentation.fileDataUrl;
+
+        if (!hasEmbed && !hasFile) {
+          showToast('Please add an embed URL or upload a PDF for this presentation', 'error');
+          return;
+        }
+      }
+
       try {
         await updateLesson(editingLesson.id, editingLesson);
         showToast('Lesson updated successfully', 'success');
@@ -5215,8 +5372,20 @@ const AdminCourseDetail = () => {
         showToast('Please enter a lesson title', 'error');
         return;
       }
+
+      if (newLesson.type === 'presentation') {
+        const presentation = getLessonPresentation(newLesson as Lesson);
+        const hasEmbed = presentation?.sourceType === 'embed' && presentation.embedUrl;
+        const hasFile = presentation?.sourceType === 'upload' && presentation.fileDataUrl;
+
+        if (!hasEmbed && !hasFile) {
+          showToast('Please add an embed URL or upload a PDF for this presentation', 'error');
+          return;
+        }
+      }
+
       try {
-        await addLesson({ ...newLesson, moduleId: selectedModuleId! });
+        await addLesson({ ...(newLesson as Lesson), moduleId: selectedModuleId! });
         showToast('Lesson created successfully', 'success');
       } catch (error) {
         showToast('Failed to create lesson', 'error');
@@ -5326,6 +5495,8 @@ const AdminCourseDetail = () => {
                               </div>
                               {lesson.type === 'quiz' ? (
                                 <Icons.Award className="h-5 w-5 text-yellow-500" />
+                              ) : lesson.type === 'presentation' ? (
+                                <Icons.FileUp className="h-5 w-5 text-purple-400" />
                               ) : (
                                 <Icons.FileText className="h-5 w-5 text-blue-400" />
                               )}
@@ -5333,8 +5504,11 @@ const AdminCourseDetail = () => {
                                 <h4 className="text-subtitle1 text-white">{lesson.title}</h4>
                                 <div className="flex gap-3 text-xs text-gray-500 mt-1">
                                   <Badge className="rounded-none bg-white/5 border-white/10">
-                                    {lesson.type === 'quiz' ? 'Quiz' : 'Content'}
+                                    {lesson.type === 'quiz' ? 'Quiz' : lesson.type === 'presentation' ? 'Presentation' : 'Content'}
                                   </Badge>
+                                  {lesson.type === 'presentation' && (
+                                    <span>Embedded in portal</span>
+                                  )}
                                   {lesson.type === 'quiz' && lesson.questions && (
                                     <span>{lesson.questions.length} questions</span>
                                   )}
@@ -5443,6 +5617,7 @@ const AdminCourseDetail = () => {
               }
             >
               <option value="content">Content</option>
+              <option value="presentation">Presentation</option>
               <option value="quiz">Quiz</option>
             </Select>
           </div>
@@ -5471,6 +5646,73 @@ const AdminCourseDetail = () => {
                 placeholder="<h2>Title</h2><p>Content here...</p>"
               />
               <p className="text-xs text-gray-500 mt-1">You can use HTML tags: h2, h3, p, ul, li, strong, em</p>
+            </div>
+          )}
+
+          {(editingLesson?.type === 'presentation' || newLesson.type === 'presentation') && currentPresentationEditor && (
+            <div className="space-y-4 border border-white/10 bg-white/[0.02] p-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Presentation Source *</label>
+                <Select
+                  value={currentPresentationEditor.sourceType}
+                  onChange={(e) => updatePresentationDraft({
+                    sourceType: e.target.value as PresentationSourceType,
+                    embedUrl: e.target.value === 'embed' ? currentPresentationEditor.embedUrl || '' : '',
+                    fileName: e.target.value === 'upload' ? currentPresentationEditor.fileName || '' : '',
+                    fileDataUrl: e.target.value === 'upload' ? currentPresentationEditor.fileDataUrl || '' : '',
+                    mimeType: e.target.value === 'upload' ? currentPresentationEditor.mimeType || '' : ''
+                  })}
+                >
+                  <option value="embed">Embed Link</option>
+                  <option value="upload">Upload PDF</option>
+                </Select>
+              </div>
+
+              {currentPresentationEditor.sourceType === 'embed' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">Embed URL *</label>
+                  <Input
+                    value={currentPresentationEditor.embedUrl || ''}
+                    onChange={(e) => updatePresentationDraft({ embedUrl: e.target.value })}
+                    placeholder="Paste the Gamma embed/share URL"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">This will open directly inside the training portal. Use a link that allows embedding where possible.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Presentation PDF *</label>
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      onChange={handlePresentationFileUpload}
+                      className="block w-full text-sm text-gray-300 file:mr-4 file:border-0 file:bg-red-600 file:px-4 file:py-2 file:text-white hover:file:bg-red-700"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">PDF only. Current MVP stores the file with the lesson record, so keep it under 10MB.</p>
+                  </div>
+
+                  {currentPresentationEditor.fileName && (
+                    <div className="flex items-center justify-between gap-4 border border-white/10 bg-black/20 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm text-white truncate">{currentPresentationEditor.fileName}</p>
+                        <p className="text-xs text-gray-500">This file will display inside the lesson player.</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => updatePresentationDraft({
+                          fileName: '',
+                          fileDataUrl: '',
+                          mimeType: ''
+                        })}
+                        className="rounded-none border border-red-900/20 text-red-400"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

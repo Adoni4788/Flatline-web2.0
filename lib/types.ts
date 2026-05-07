@@ -46,7 +46,7 @@ export interface Lesson {
   id: string;
   moduleId: string;
   title: string;
-  type: 'content' | 'quiz';
+  type: 'content' | 'presentation' | 'quiz';
   content?: string; // HTML/Markdown
   videoUrl?: string; // Video URL for video lessons
   orderNumber: number;

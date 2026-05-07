@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Course, Module, Lesson, Enrollment, LiveSession, Exam, ExamAttempt } from './types';
+import { parsePresentationLessonContent } from './presentations';
 import { supabase } from './supabase';
 
 interface DataContextType {
@@ -115,7 +116,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
             id: l.id,
             moduleId: l.module_id,
             title: l.title,
-            type: l.type,
+            type: l.type === 'content' && parsePresentationLessonContent(l.content) ? 'presentation' : l.type,
             orderNumber: l.order_number,
             content: l.content,
             videoUrl: l.video_url,
@@ -415,12 +416,14 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const addLesson = async (lessonData: Omit<Lesson, 'id'>) => {
+    const databaseLessonType = lessonData.type === 'presentation' ? 'content' : lessonData.type;
+
     const { data, error } = await supabase
       .from('lessons')
       .insert([{
         module_id: lessonData.moduleId,
         title: lessonData.title,
-        type: lessonData.type,
+        type: databaseLessonType,
         order_number: lessonData.orderNumber,
         content: lessonData.content,
         video_url: lessonData.videoUrl,
@@ -436,7 +439,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
       id: data.id,
       moduleId: data.module_id,
       title: data.title,
-      type: data.type,
+      type: lessonData.type,
       orderNumber: data.order_number,
       content: data.content,
       videoUrl: data.video_url,
@@ -450,7 +453,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   const updateLesson = async (id: string, data: Partial<Lesson>) => {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
-    if (data.type !== undefined) updateData.type = data.type;
+    if (data.type !== undefined) updateData.type = data.type === 'presentation' ? 'content' : data.type;
     if (data.orderNumber !== undefined) updateData.order_number = data.orderNumber;
     if (data.content !== undefined) updateData.content = data.content;
     if (data.videoUrl !== undefined) updateData.video_url = data.videoUrl;
