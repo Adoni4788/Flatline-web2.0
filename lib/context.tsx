@@ -39,6 +39,8 @@ interface DataContextType {
   unenrollUser: (userId: string, courseId: string) => Promise<void>;
   updateProgress: (userId: string, lessonId: string, courseId: string) => Promise<void>;
   getCourseProgress: (userId: string, courseId: string) => number;
+  refreshEnrollments: () => Promise<void>;
+  refreshExamAttempts: () => Promise<void>;
   // Live Session Actions
   addLiveSession: (session: Omit<LiveSession, 'id' | 'createdAt'>) => Promise<void>;
   updateLiveSession: (id: string, data: Partial<LiveSession>) => Promise<void>;
@@ -664,6 +666,45 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     }));
   };
 
+  const refreshEnrollments = async () => {
+    const { data, error } = await supabase
+      .from('enrollments')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    if (data) {
+      setEnrollments(data.map((e: any) => ({
+        id: e.id,
+        userId: e.user_id,
+        courseId: e.course_id,
+        progress: e.progress,
+        completedLessons: e.completed_lessons || [],
+        status: e.status
+      })));
+    }
+  };
+
+  const refreshExamAttempts = async () => {
+    const { data, error } = await supabase
+      .from('exam_attempts')
+      .select('*')
+      .order('started_at', { ascending: false });
+    if (error) throw error;
+    if (data) {
+      setExamAttempts(data.map((a: any) => ({
+        id: a.id,
+        examId: a.exam_id,
+        userId: a.user_id,
+        startedAt: a.started_at,
+        submittedAt: a.submitted_at,
+        answers: a.answers || {},
+        score: a.score == null ? undefined : Number(a.score),
+        passed: a.passed == null ? undefined : a.passed,
+        status: a.status
+      })));
+    }
+  };
+
   const getCourseProgress = (userId: string, courseId: string) => {
     const enrollment = enrollments.find(e => e.userId === userId && e.courseId === courseId);
     return enrollment ? enrollment.progress : 0;
@@ -810,50 +851,26 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const submitExamAttempt = async (attemptId: string, answers: Record<string, string[]>) => {
-    const attempt = examAttempts.find(a => a.id === attemptId);
-    if (!attempt) return;
-
-    const exam = exams.find(e => e.id === attempt.examId);
-    if (!exam) return;
-
-    let score = 0;
-    let totalPoints = 0;
-
-    exam.questions.forEach(question => {
-      totalPoints += question.points;
-      const userAnswers = answers[question.id] || [];
-      const correctAnswers = question.options.filter(opt => opt.isCorrect).map(opt => opt.id);
-
-      if (question.type === 'single_choice') {
-        if (userAnswers.length === 1 && correctAnswers.includes(userAnswers[0])) {
-          score += question.points;
-        }
-      } else {
-        const isCorrect =
-          userAnswers.length === correctAnswers.length &&
-          userAnswers.every(ans => correctAnswers.includes(ans));
-        if (isCorrect) {
-          score += question.points;
-        }
-      }
+    const { data, error } = await supabase.functions.invoke('submit-exam', {
+      body: { attemptId, answers }
     });
 
-    const percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
-    const passed = percentage >= exam.passingScore;
-    const submittedAt = new Date().toISOString();
+    let errMsg: string | undefined = data?.error;
+    if (!errMsg && error) {
+      const ctx = (error as any).context;
+      if (ctx instanceof Response) {
+        try { const body = await ctx.clone().json(); errMsg = body?.error; }
+        catch { try { errMsg = await ctx.clone().text(); } catch {} }
+      } else if (ctx && typeof ctx === 'object') {
+        errMsg = ctx.error;
+      }
+      if (!errMsg) errMsg = (error as any).message;
+    }
+    if (errMsg) throw new Error(errMsg);
 
-    const { error } = await supabase
-      .from('exam_attempts')
-      .update({
-        submitted_at: submittedAt,
-        answers,
-        score: percentage,
-        passed,
-        status: 'submitted'
-      })
-      .eq('id', attemptId);
-
-    if (error) throw error;
+    const percentage = Number(data?.score ?? 0);
+    const passed = !!data?.passed;
+    const submittedAt = data?.submittedAt || new Date().toISOString();
 
     setExamAttempts(prev => prev.map(a =>
       a.id === attemptId
@@ -878,7 +895,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
       addCourse, updateCourse, deleteCourse,
       addModule, updateModule, deleteModule,
       addLesson, updateLesson, deleteLesson,
-      enrollUser, unenrollUser, updateProgress, getCourseProgress,
+      enrollUser, unenrollUser, updateProgress, getCourseProgress, refreshEnrollments, refreshExamAttempts,
       addLiveSession, updateLiveSession, deleteLiveSession,
       addExam, updateExam, deleteExam, startExamAttempt, submitExamAttempt, getExamAttempts, getExamAttempt
     }}>

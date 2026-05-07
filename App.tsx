@@ -2344,7 +2344,7 @@ const ProtectedRoute = ({ children, role }: { children?: React.ReactNode; role: 
 
 const CoursePlayer = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const { courses, modules, lessons, enrollments, currentUser, updateProgress } = useData();
+  const { courses, modules, lessons, enrollments, currentUser, updateProgress, refreshEnrollments } = useData();
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string[]>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -2428,47 +2428,43 @@ const CoursePlayer = () => {
   };
 
   const handleQuizSubmit = async () => {
-    if (!currentLesson?.questions) return;
+    if (!currentLesson?.questions || !currentUser || !currentLessonId || !courseId) return;
 
-    let score = 0;
-    let totalPoints = 0;
+    try {
+      const { data, error } = await supabase.functions.invoke('score-lesson-quiz', {
+        body: { lessonId: currentLessonId, courseId, answers: quizAnswers }
+      });
 
-    currentLesson.questions.forEach(question => {
-      totalPoints += question.points;
-      const userAnswers = quizAnswers[question.id] || [];
-      const correctAnswers = question.options.filter(opt => opt.isCorrect).map(opt => opt.id);
-
-      if (question.type === 'single_choice') {
-        if (userAnswers.length === 1 && correctAnswers.includes(userAnswers[0])) {
-          score += question.points;
+      let errMsg: string | undefined = data?.error;
+      if (!errMsg && error) {
+        const ctx = (error as any).context;
+        if (ctx instanceof Response) {
+          try { const body = await ctx.clone().json(); errMsg = body?.error; }
+          catch { try { errMsg = await ctx.clone().text(); } catch {} }
+        } else if (ctx && typeof ctx === 'object') {
+          errMsg = ctx.error;
         }
+        if (!errMsg) errMsg = (error as any).message;
+      }
+      if (errMsg) {
+        showToast(errMsg, 'error');
+        return;
+      }
+
+      const percentage = Number(data?.score ?? 0);
+      const passed = !!data?.passed;
+      const passingScore = Number(data?.passingScore ?? currentLesson.passingScore ?? 70);
+      setQuizScore(percentage);
+      setQuizSubmitted(true);
+
+      if (passed) {
+        showToast(`Passed! Score: ${percentage}%`, 'success');
+        await refreshEnrollments();
       } else {
-        // multiple_choice
-        const isCorrect =
-          userAnswers.length === correctAnswers.length &&
-          userAnswers.every(ans => correctAnswers.includes(ans));
-        if (isCorrect) {
-          score += question.points;
-        }
+        showToast(`Score: ${percentage}% - Passing score is ${passingScore}%`, 'error');
       }
-    });
-
-    const percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
-    setQuizScore(percentage);
-    setQuizSubmitted(true);
-
-    const passingScore = currentLesson.passingScore || 70;
-    if (percentage >= passingScore) {
-      showToast(`Passed! Score: ${percentage}%`, 'success');
-      if (currentUser && currentLessonId && courseId) {
-        try {
-          await updateProgress(currentUser.id, currentLessonId, courseId);
-        } catch (error) {
-          showToast('Progress could not be saved. Please try again.', 'error');
-        }
-      }
-    } else {
-      showToast(`Score: ${percentage}% - Passing score is ${passingScore}%`, 'error');
+    } catch (err: any) {
+      showToast(err?.message || 'Unable to submit quiz', 'error');
     }
   };
 
