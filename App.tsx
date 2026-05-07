@@ -4256,7 +4256,7 @@ const AdminCourses = () => {
 
 // Admin Users Management
 const AdminUsers = () => {
-  const { users, courses, enrollments, addUser, updateUser, deleteUser, enrollUser } = useData();
+  const { users, courses, enrollments, registerCreatedUser, updateUser, deleteUser, enrollUser } = useData();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -4284,6 +4284,40 @@ const AdminUsers = () => {
     }
     password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
     return password;
+  };
+
+  const createTraineeAccount = async (
+    userData: Pick<User, 'firstName' | 'lastName' | 'email'> & { source?: string },
+    password: string
+  ) => {
+    const { data, error } = await supabase.functions.invoke('create-trainee', {
+      body: {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        source: userData.source || '',
+        password
+      }
+    });
+
+    if (error) {
+      const response = (error as any).context;
+      if (response && typeof response.json === 'function') {
+        let message = '';
+        try {
+          const details = await response.json();
+          message = details?.error || '';
+        } catch {
+          message = '';
+        }
+        if (message) throw new Error(message);
+      }
+      throw error;
+    }
+    if (data?.error) throw new Error(data.error);
+    if (!data?.user) throw new Error('Failed to create trainee');
+
+    return data.user as User;
   };
 
   // Copy to clipboard helper
@@ -4363,19 +4397,13 @@ const AdminUsers = () => {
     for (const userData of csvData) {
       try {
         const tempPassword = generatePassword();
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: userData.email.toLowerCase(),
-          password: tempPassword,
-        });
-        if (authError) throw authError;
-        if (!authData.user) throw new Error('Failed to create auth user');
-        await addUser({
+        const createdUser = await createTraineeAccount({
           firstName: userData.firstName,
           lastName: userData.lastName,
           email: userData.email,
-          role: 'user',
           source: userData.source || ''
-        }, authData.user.id);
+        }, tempPassword);
+        registerCreatedUser(createdUser);
         successCount++;
       } catch {
         failCount++;
@@ -4494,15 +4522,8 @@ const AdminUsers = () => {
     const tempPassword = generatePassword();
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newUser.email.toLowerCase(),
-        password: tempPassword,
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create auth user');
-
-      await addUser(newUser, authData.user.id);
+      const createdUser = await createTraineeAccount(newUser, tempPassword);
+      registerCreatedUser(createdUser);
 
       setCreatedCredentials({
         email: newUser.email,

@@ -18,6 +18,7 @@ interface DataContextType {
   login: (email: string, password: string) => Promise<string | null>;
   logout: () => void;
   addUser: (user: Omit<User, 'id' | 'status'>, userId: string) => Promise<User>;
+  registerCreatedUser: (user: User) => void;
   updateUser: (id: string, data: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   // Course Actions
@@ -251,6 +252,15 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
     setUsers(prev => [...prev, newUser]);
     return newUser;
+  };
+
+  const registerCreatedUser = (user: User) => {
+    setUsers(prev => {
+      const exists = prev.some(existingUser => existingUser.id === user.id);
+      return exists
+        ? prev.map(existingUser => existingUser.id === user.id ? user : existingUser)
+        : [user, ...prev];
+    });
   };
 
   const updateUser = async (id: string, data: Partial<User>) => {
@@ -678,7 +688,7 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     <DataContext.Provider value={{
       users, courses, modules, lessons, enrollments, liveSessions, exams, examAttempts, currentUser, sessionChecked,
       login, logout,
-      addUser, updateUser, deleteUser,
+      addUser, registerCreatedUser, updateUser, deleteUser,
       addCourse, updateCourse, deleteCourse,
       addModule, updateModule, deleteModule,
       addLesson, updateLesson, deleteLesson,
