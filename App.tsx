@@ -4300,8 +4300,8 @@ const AdminUsers = () => {
       }
     });
 
-    if (data?.error) throw new Error(data.error);
-    if (error) throw new Error((error as any).message || 'Failed to create trainee');
+    const errMsg = data?.error || (error as any)?.context?.error || (error as any)?.message;
+    if (errMsg) throw new Error(errMsg);
     if (!data?.user) throw new Error('Failed to create trainee');
 
     return data.user as User;
