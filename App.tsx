@@ -5322,7 +5322,7 @@ const AdminUsers = () => {
 
               {/* Copy all button */}
               <button
-                onClick={() => copyToClipboard(`Email: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`, 'all')}
+                onClick={() => copyToClipboard(`Flatline Security Training Portal\nhttps://www.fstsolutionsltd.com\n\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`, 'all')}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-900/30 hover:bg-red-900/10 transition-colors text-gray-300 hover:text-white"
               >
                 {copiedField === 'all' ? (
