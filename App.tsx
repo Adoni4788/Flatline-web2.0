@@ -4301,20 +4301,23 @@ const AdminUsers = () => {
     });
 
     let errMsg: string | undefined = data?.error;
+    let rawBody: any = null;
     if (!errMsg && error) {
       const ctx = (error as any).context;
       if (ctx instanceof Response) {
         try {
-          const body = await ctx.clone().json();
-          errMsg = body?.error;
+          rawBody = await ctx.clone().json();
+          errMsg = rawBody?.error;
         } catch {
-          try { errMsg = await ctx.clone().text(); } catch {}
+          try { rawBody = await ctx.clone().text(); errMsg = rawBody; } catch {}
         }
       } else if (ctx && typeof ctx === 'object') {
+        rawBody = ctx;
         errMsg = ctx.error;
       }
       if (!errMsg) errMsg = (error as any).message;
     }
+    console.log('[create-trainee] RAW RESPONSE BODY:', rawBody, '| errMsg:', errMsg);
     if (errMsg) throw new Error(errMsg);
     if (!data?.user) throw new Error('Failed to create trainee');
 
