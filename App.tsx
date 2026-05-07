@@ -3541,16 +3541,17 @@ const ExamTaking = () => {
     if (hasStarted || attemptId) return;
     if (!exam || !currentUser) return;
 
-    // Start exam attempt
-    try {
-      setHasStarted(true);
-      const newAttemptId = startExamAttempt(examId!, currentUser.id);
-      setAttemptId(newAttemptId);
-      setTimeRemaining(exam.totalTimeMinutes * 60);
-    } catch (error: any) {
-      showToast(error.message || 'Unable to start exam', 'error');
-      navigate('/portal/exams');
-    }
+    setHasStarted(true);
+    (async () => {
+      try {
+        const newAttemptId = await startExamAttempt(examId!, currentUser.id);
+        setAttemptId(newAttemptId);
+        setTimeRemaining(exam.totalTimeMinutes * 60);
+      } catch (error: any) {
+        showToast(error.message || 'Unable to start exam', 'error');
+        navigate('/portal/exams');
+      }
+    })();
   }, [examId, currentUser, exam, hasStarted, attemptId]);
 
   useEffect(() => {
@@ -3594,11 +3595,15 @@ const ExamTaking = () => {
     return () => clearInterval(timer);
   }, [questionTimeRemaining, isSubmitted]);
 
-  const handleAutoSubmit = () => {
+  const handleAutoSubmit = async () => {
     if (attemptId && !isSubmitted) {
-      submitExamAttempt(attemptId, answers);
-      setIsSubmitted(true);
-      showToast('Time expired. Exam submitted automatically.', 'info');
+      try {
+        await submitExamAttempt(attemptId, answers);
+        setIsSubmitted(true);
+        showToast('Time expired. Exam submitted automatically.', 'info');
+      } catch (error: any) {
+        showToast(error.message || 'Failed to submit exam', 'error');
+      }
     }
   };
 
@@ -3629,12 +3634,16 @@ const ExamTaking = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!attemptId) return;
     if (window.confirm('Are you sure you want to submit? You cannot change your answers after submission.')) {
-      submitExamAttempt(attemptId, answers);
-      setIsSubmitted(true);
-      showToast('Exam submitted successfully!', 'success');
+      try {
+        await submitExamAttempt(attemptId, answers);
+        setIsSubmitted(true);
+        showToast('Exam submitted successfully!', 'success');
+      } catch (error: any) {
+        showToast(error.message || 'Failed to submit exam', 'error');
+      }
     }
   };
 
@@ -6285,26 +6294,34 @@ const AdminLiveSessions = () => {
     setShowModal(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title || !formData.meetingLink || !formData.scheduledDate || !formData.scheduledTime) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
 
-    if (editingSession) {
-      updateLiveSession(editingSession.id, formData);
-      showToast('Live session updated successfully', 'success');
-    } else {
-      addLiveSession(formData);
-      showToast('Live session created successfully', 'success');
+    try {
+      if (editingSession) {
+        await updateLiveSession(editingSession.id, formData);
+        showToast('Live session updated successfully', 'success');
+      } else {
+        await addLiveSession(formData);
+        showToast('Live session created successfully', 'success');
+      }
+      setShowModal(false);
+    } catch (error: any) {
+      showToast(error.message || 'Failed to save live session', 'error');
     }
-    setShowModal(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this live session?')) {
-      deleteLiveSession(id);
-      showToast('Live session deleted successfully', 'success');
+      try {
+        await deleteLiveSession(id);
+        showToast('Live session deleted successfully', 'success');
+      } catch (error: any) {
+        showToast(error.message || 'Failed to delete live session', 'error');
+      }
     }
   };
 
@@ -6451,10 +6468,14 @@ const AdminExams = () => {
   const navigate = useNavigate();
   const { showToast } = useNotification();
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this exam? All attempts will also be deleted.')) {
-      deleteExam(id);
-      showToast('Exam deleted successfully', 'success');
+      try {
+        await deleteExam(id);
+        showToast('Exam deleted successfully', 'success');
+      } catch (error: any) {
+        showToast(error.message || 'Failed to delete exam', 'error');
+      }
     }
   };
 
@@ -6679,7 +6700,7 @@ const AdminExamCreate = () => {
     setCurrentQuestion({ ...currentQuestion, options: updated });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title.trim()) {
       showToast('Please enter an exam title', 'error');
       return;
@@ -6694,14 +6715,18 @@ const AdminExamCreate = () => {
       questions,
     };
 
-    if (existingExam) {
-      updateExam(existingExam.id, examData);
-      showToast('Exam updated successfully', 'success');
-    } else {
-      addExam(examData);
-      showToast('Exam created successfully', 'success');
+    try {
+      if (existingExam) {
+        await updateExam(existingExam.id, examData);
+        showToast('Exam updated successfully', 'success');
+      } else {
+        await addExam(examData);
+        showToast('Exam created successfully', 'success');
+      }
+      navigate('/admin/exams');
+    } catch (error: any) {
+      showToast(error.message || 'Failed to save exam', 'error');
     }
-    navigate('/admin/exams');
   };
 
   const trainees = users.filter(u => u.role === 'user');

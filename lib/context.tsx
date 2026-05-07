@@ -40,15 +40,15 @@ interface DataContextType {
   updateProgress: (userId: string, lessonId: string, courseId: string) => Promise<void>;
   getCourseProgress: (userId: string, courseId: string) => number;
   // Live Session Actions
-  addLiveSession: (session: Omit<LiveSession, 'id' | 'createdAt'>) => void;
-  updateLiveSession: (id: string, data: Partial<LiveSession>) => void;
-  deleteLiveSession: (id: string) => void;
+  addLiveSession: (session: Omit<LiveSession, 'id' | 'createdAt'>) => Promise<void>;
+  updateLiveSession: (id: string, data: Partial<LiveSession>) => Promise<void>;
+  deleteLiveSession: (id: string) => Promise<void>;
   // Exam Actions
-  addExam: (exam: Omit<Exam, 'id' | 'createdAt'>) => void;
-  updateExam: (id: string, data: Partial<Exam>) => void;
-  deleteExam: (id: string) => void;
-  startExamAttempt: (examId: string, userId: string) => string; // Returns attemptId
-  submitExamAttempt: (attemptId: string, answers: Record<string, string[]>) => void;
+  addExam: (exam: Omit<Exam, 'id' | 'createdAt'>) => Promise<void>;
+  updateExam: (id: string, data: Partial<Exam>) => Promise<void>;
+  deleteExam: (id: string) => Promise<void>;
+  startExamAttempt: (examId: string, userId: string) => Promise<string>;
+  submitExamAttempt: (attemptId: string, answers: Record<string, string[]>) => Promise<void>;
   getExamAttempts: (userId: string) => ExamAttempt[];
   getExamAttempt: (attemptId: string) => ExamAttempt | undefined;
 }
@@ -163,6 +163,69 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
             progress: e.progress,
             completedLessons: e.completed_lessons || [],
             status: e.status
+          })));
+        }
+
+        // Fetch live sessions
+        const { data: liveSessionsData, error: liveSessionsError } = await supabase
+          .from('live_sessions')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (liveSessionsError && liveSessionsError.code !== 'PGRST205' && liveSessionsError.code !== '42P01') throw liveSessionsError;
+        if (liveSessionsData) {
+          setLiveSessions(liveSessionsData.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            description: s.description,
+            meetingLink: s.meeting_link,
+            scheduledDate: s.scheduled_date,
+            scheduledTime: s.scheduled_time,
+            status: s.status,
+            createdAt: s.created_at
+          })));
+        }
+
+        // Fetch exams
+        const { data: examsData, error: examsError } = await supabase
+          .from('exams')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (examsError && examsError.code !== 'PGRST205' && examsError.code !== '42P01') throw examsError;
+        if (examsData) {
+          setExams(examsData.map((e: any) => ({
+            id: e.id,
+            title: e.title,
+            description: e.description,
+            totalTimeMinutes: e.total_time_minutes,
+            timePerQuestionSeconds: e.time_per_question_seconds,
+            passingScore: e.passing_score,
+            maxAttempts: e.max_attempts,
+            randomizeQuestions: e.randomize_questions,
+            randomizeAnswers: e.randomize_answers,
+            showAnswersAfter: e.show_answers_after,
+            questions: e.questions || [],
+            assignedTo: e.assigned_to || [],
+            createdAt: e.created_at
+          })));
+        }
+
+        // Fetch exam attempts
+        const { data: attemptsData, error: attemptsError } = await supabase
+          .from('exam_attempts')
+          .select('*')
+          .order('started_at', { ascending: false });
+        if (attemptsError && attemptsError.code !== 'PGRST205' && attemptsError.code !== '42P01') throw attemptsError;
+        if (attemptsData) {
+          setExamAttempts(attemptsData.map((a: any) => ({
+            id: a.id,
+            examId: a.exam_id,
+            userId: a.user_id,
+            startedAt: a.started_at,
+            submittedAt: a.submitted_at,
+            answers: a.answers || {},
+            score: a.score == null ? undefined : Number(a.score),
+            passed: a.passed == null ? undefined : a.passed,
+            status: a.status
           })));
         }
       } catch (err: any) {
@@ -606,44 +669,112 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
     return enrollment ? enrollment.progress : 0;
   };
 
-  // Live Session Actions
-  const addLiveSession = (sessionData: Omit<LiveSession, 'id' | 'createdAt'>) => {
-    const newSession: LiveSession = {
-      ...sessionData,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString()
-    };
-    setLiveSessions(prev => [...prev, newSession]);
+  const liveSessionToDb = (s: Partial<LiveSession>) => {
+    const out: any = {};
+    if (s.title !== undefined) out.title = s.title;
+    if (s.description !== undefined) out.description = s.description;
+    if (s.meetingLink !== undefined) out.meeting_link = s.meetingLink;
+    if (s.scheduledDate !== undefined) out.scheduled_date = s.scheduledDate;
+    if (s.scheduledTime !== undefined) out.scheduled_time = s.scheduledTime;
+    if (s.status !== undefined) out.status = s.status;
+    return out;
   };
 
-  const updateLiveSession = (id: string, data: Partial<LiveSession>) => {
+  const liveSessionFromDb = (s: any): LiveSession => ({
+    id: s.id,
+    title: s.title,
+    description: s.description,
+    meetingLink: s.meeting_link,
+    scheduledDate: s.scheduled_date,
+    scheduledTime: s.scheduled_time,
+    status: s.status,
+    createdAt: s.created_at
+  });
+
+  const addLiveSession = async (sessionData: Omit<LiveSession, 'id' | 'createdAt'>) => {
+    const { data, error } = await supabase
+      .from('live_sessions')
+      .insert([liveSessionToDb(sessionData)])
+      .select()
+      .single();
+    if (error) throw error;
+    setLiveSessions(prev => [liveSessionFromDb(data), ...prev]);
+  };
+
+  const updateLiveSession = async (id: string, data: Partial<LiveSession>) => {
+    const { error } = await supabase
+      .from('live_sessions')
+      .update(liveSessionToDb(data))
+      .eq('id', id);
+    if (error) throw error;
     setLiveSessions(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
   };
 
-  const deleteLiveSession = (id: string) => {
+  const deleteLiveSession = async (id: string) => {
+    const { error } = await supabase.from('live_sessions').delete().eq('id', id);
+    if (error) throw error;
     setLiveSessions(prev => prev.filter(s => s.id !== id));
   };
 
-  // Exam Actions
-  const addExam = (examData: Omit<Exam, 'id' | 'createdAt'>) => {
-    const newExam: Exam = {
-      ...examData,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString()
-    };
-    setExams(prev => [...prev, newExam]);
+  const examToDb = (e: Partial<Exam>) => {
+    const out: any = {};
+    if (e.title !== undefined) out.title = e.title;
+    if (e.description !== undefined) out.description = e.description;
+    if (e.totalTimeMinutes !== undefined) out.total_time_minutes = e.totalTimeMinutes;
+    if (e.timePerQuestionSeconds !== undefined) out.time_per_question_seconds = e.timePerQuestionSeconds;
+    if (e.passingScore !== undefined) out.passing_score = e.passingScore;
+    if (e.maxAttempts !== undefined) out.max_attempts = e.maxAttempts;
+    if (e.randomizeQuestions !== undefined) out.randomize_questions = e.randomizeQuestions;
+    if (e.randomizeAnswers !== undefined) out.randomize_answers = e.randomizeAnswers;
+    if (e.showAnswersAfter !== undefined) out.show_answers_after = e.showAnswersAfter;
+    if (e.questions !== undefined) out.questions = e.questions;
+    if (e.assignedTo !== undefined) out.assigned_to = e.assignedTo;
+    return out;
   };
 
-  const updateExam = (id: string, data: Partial<Exam>) => {
+  const examFromDb = (e: any): Exam => ({
+    id: e.id,
+    title: e.title,
+    description: e.description,
+    totalTimeMinutes: e.total_time_minutes,
+    timePerQuestionSeconds: e.time_per_question_seconds,
+    passingScore: e.passing_score,
+    maxAttempts: e.max_attempts,
+    randomizeQuestions: e.randomize_questions,
+    randomizeAnswers: e.randomize_answers,
+    showAnswersAfter: e.show_answers_after,
+    questions: e.questions || [],
+    assignedTo: e.assigned_to || [],
+    createdAt: e.created_at
+  });
+
+  const addExam = async (examData: Omit<Exam, 'id' | 'createdAt'>) => {
+    const { data, error } = await supabase
+      .from('exams')
+      .insert([examToDb(examData)])
+      .select()
+      .single();
+    if (error) throw error;
+    setExams(prev => [examFromDb(data), ...prev]);
+  };
+
+  const updateExam = async (id: string, data: Partial<Exam>) => {
+    const { error } = await supabase
+      .from('exams')
+      .update(examToDb(data))
+      .eq('id', id);
+    if (error) throw error;
     setExams(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
   };
 
-  const deleteExam = (id: string) => {
+  const deleteExam = async (id: string) => {
+    const { error } = await supabase.from('exams').delete().eq('id', id);
+    if (error) throw error;
     setExams(prev => prev.filter(e => e.id !== id));
     setExamAttempts(prev => prev.filter(a => a.examId !== id));
   };
 
-  const startExamAttempt = (examId: string, userId: string): string => {
+  const startExamAttempt = async (examId: string, userId: string): Promise<string> => {
     const exam = exams.find(e => e.id === examId);
     if (!exam) throw new Error('Exam not found');
 
@@ -652,20 +783,33 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
       throw new Error('Maximum attempts reached');
     }
 
-    const attemptId = Math.random().toString(36).substr(2, 9);
-    const newAttempt: ExamAttempt = {
-      id: attemptId,
-      examId,
-      userId,
-      startedAt: new Date().toISOString(),
-      answers: {},
-      status: 'in_progress'
-    };
-    setExamAttempts(prev => [...prev, newAttempt]);
-    return attemptId;
+    const { data, error } = await supabase
+      .from('exam_attempts')
+      .insert([{
+        exam_id: examId,
+        user_id: userId,
+        answers: {},
+        status: 'in_progress'
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    setExamAttempts(prev => [{
+      id: data.id,
+      examId: data.exam_id,
+      userId: data.user_id,
+      startedAt: data.started_at,
+      submittedAt: data.submitted_at,
+      answers: data.answers || {},
+      status: data.status
+    }, ...prev]);
+
+    return data.id;
   };
 
-  const submitExamAttempt = (attemptId: string, answers: Record<string, string[]>) => {
+  const submitExamAttempt = async (attemptId: string, answers: Record<string, string[]>) => {
     const attempt = examAttempts.find(a => a.id === attemptId);
     if (!attempt) return;
 
@@ -694,12 +838,26 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
       }
     });
 
-    const percentage = Math.round((score / totalPoints) * 100);
+    const percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
     const passed = percentage >= exam.passingScore;
+    const submittedAt = new Date().toISOString();
+
+    const { error } = await supabase
+      .from('exam_attempts')
+      .update({
+        submitted_at: submittedAt,
+        answers,
+        score: percentage,
+        passed,
+        status: 'submitted'
+      })
+      .eq('id', attemptId);
+
+    if (error) throw error;
 
     setExamAttempts(prev => prev.map(a =>
       a.id === attemptId
-        ? { ...a, submittedAt: new Date().toISOString(), answers, score: percentage, passed, status: 'submitted' }
+        ? { ...a, submittedAt, answers, score: percentage, passed, status: 'submitted' }
         : a
     ));
   };
