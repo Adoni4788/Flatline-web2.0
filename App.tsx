@@ -1978,18 +1978,10 @@ const LoginPage = () => {
 // --- Student Pages ---
 
 const StudentDashboard = () => {
-  const { currentUser, courses, enrollments, getCourseProgress, enrollUser } = useData();
-  const { toast, showToast, closeToast } = useNotification();
+  const { currentUser, courses, enrollments, getCourseProgress } = useData();
+  const { toast, closeToast } = useNotification();
 
   const enrolledCourses = courses.filter(c => enrollments.some(e => e.userId === currentUser?.id && e.courseId === c.id));
-  const availableCourses = courses.filter(c => !enrollments.some(e => e.userId === currentUser?.id && e.courseId === c.id));
-
-  const handleEnroll = (courseId: string, courseTitle: string) => {
-    if (currentUser) {
-      enrollUser(currentUser.id, courseId);
-      showToast(`Successfully enrolled in ${courseTitle}`);
-    }
-  };
 
   const activeCourse = enrolledCourses.find(c => {
     const p = getCourseProgress(currentUser!.id, c.id);
@@ -2135,31 +2127,12 @@ const StudentDashboard = () => {
         </div>
       )}
 
-      {availableCourses.length > 0 && (
-        <div>
-          <div className="flex items-center gap-3 mb-6 mt-12">
-            <span className="h-px w-6 bg-gray-600"></span>
-            <h2 className="text-lg font-archivo font-bold text-gray-300 uppercase tracking-widest">Available Operations</h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableCourses.map(course => (
-              <div key={course.id} className="border border-white/5 bg-transparent hover:bg-[#0f121a] hover:border-white/10 transition-all duration-300 group flex flex-col">
-                <div className="relative h-40 w-full overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10" />
-                  <img src={course.image} alt={course.title} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="font-archivo text-lg font-medium mb-2 text-gray-300 group-hover:text-white transition-colors">{course.title}</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-gray-400 line-clamp-2 mb-6 leading-relaxed">{course.description}</p>
-                  <div className="mt-auto">
-                    <Button onClick={() => handleEnroll(course.id, course.title)} variant="ghost" size="lg" className="w-full border border-gray-800 hover:bg-white/5 text-gray-400 hover:text-white rounded-none uppercase tracking-widest text-xs h-10">
-                      Initialize
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      {enrolledCourses.length === 0 && (
+        <div className="border border-white/5 bg-[#0f121a] p-12 text-center">
+          <h2 className="text-lg font-archivo font-bold text-gray-300 uppercase tracking-widest mb-3">No Training Assigned</h2>
+          <p className="text-gray-500 text-sm leading-relaxed max-w-md mx-auto">
+            You have not been assigned any training yet. Please contact your administrator to be enrolled in a course.
+          </p>
         </div>
       )}
 
