@@ -417,19 +417,24 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const addLesson = async (lessonData: Omit<Lesson, 'id'>) => {
     const databaseLessonType = lessonData.type === 'presentation' ? 'content' : lessonData.type;
+    const insertData: any = {
+      module_id: lessonData.moduleId,
+      title: lessonData.title,
+      type: databaseLessonType,
+      order_number: lessonData.orderNumber
+    };
+
+    if (lessonData.content !== undefined) insertData.content = lessonData.content;
+    if (lessonData.videoUrl !== undefined) insertData.video_url = lessonData.videoUrl;
+
+    if (lessonData.type === 'quiz') {
+      if (lessonData.passingScore !== undefined) insertData.passing_score = lessonData.passingScore;
+      if (lessonData.questions !== undefined) insertData.questions = lessonData.questions;
+    }
 
     const { data, error } = await supabase
       .from('lessons')
-      .insert([{
-        module_id: lessonData.moduleId,
-        title: lessonData.title,
-        type: databaseLessonType,
-        order_number: lessonData.orderNumber,
-        content: lessonData.content,
-        video_url: lessonData.videoUrl,
-        passing_score: lessonData.passingScore,
-        questions: lessonData.questions
-      }])
+      .insert([insertData])
       .select()
       .single();
 
@@ -451,14 +456,21 @@ export const DataProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const updateLesson = async (id: string, data: Partial<Lesson>) => {
+    const existingLesson = lessons.find(l => l.id === id);
+    const nextLessonType = data.type || existingLesson?.type;
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.type !== undefined) updateData.type = data.type === 'presentation' ? 'content' : data.type;
     if (data.orderNumber !== undefined) updateData.order_number = data.orderNumber;
     if (data.content !== undefined) updateData.content = data.content;
     if (data.videoUrl !== undefined) updateData.video_url = data.videoUrl;
-    if (data.passingScore !== undefined) updateData.passing_score = data.passingScore;
-    if (data.questions !== undefined) updateData.questions = data.questions;
+    if (nextLessonType === 'quiz') {
+      if (data.passingScore !== undefined) updateData.passing_score = data.passingScore;
+      if (data.questions !== undefined) updateData.questions = data.questions;
+    } else if (data.type !== undefined) {
+      updateData.passing_score = null;
+      updateData.questions = null;
+    }
     if (data.moduleId !== undefined) updateData.module_id = data.moduleId;
 
     const { error } = await supabase

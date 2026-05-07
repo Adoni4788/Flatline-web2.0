@@ -5373,9 +5373,10 @@ const AdminCourseDetail = () => {
         await updateLesson(editingLesson.id, editingLesson);
         setLessonFormError(null);
         showToast('Lesson updated successfully', 'success');
-      } catch (error) {
-        setLessonFormError('Failed to update lesson.');
-        showToast('Failed to update lesson', 'error');
+      } catch (error: any) {
+        const message = error?.message || 'Failed to update lesson.';
+        setLessonFormError(message);
+        showToast(message, 'error');
         return;
       }
     } else {
@@ -5401,9 +5402,10 @@ const AdminCourseDetail = () => {
         await addLesson({ ...(newLesson as Lesson), moduleId: selectedModuleId! });
         setLessonFormError(null);
         showToast('Lesson created successfully', 'success');
-      } catch (error) {
-        setLessonFormError('Failed to create lesson.');
-        showToast('Failed to create lesson', 'error');
+      } catch (error: any) {
+        const message = error?.message || 'Failed to create lesson.';
+        setLessonFormError(message);
+        showToast(message, 'error');
         return;
       }
     }
