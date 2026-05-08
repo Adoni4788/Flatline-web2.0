@@ -4416,8 +4416,8 @@ const AdminUsers = () => {
   const [showCoursesModal, setShowCoursesModal] = useState(false);
   const [coursesModalUser, setCoursesModalUser] = useState<User | null>(null);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string; name: string } | null>(null);
-  const [copiedField, setCopiedField] = useState<'email' | 'password' | 'all' | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; name: string; setupLink: string | null } | null>(null);
+  const [copiedField, setCopiedField] = useState<'email' | 'link' | 'all' | null>(null);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ firstName: '', lastName: '', email: '', role: 'user' as 'user' | 'admin', status: 'active' as 'active' | 'inactive', source: '' });
@@ -4486,7 +4486,7 @@ const AdminUsers = () => {
     if (errMsg) throw new Error(errMsg);
     if (!data?.user) throw new Error('Failed to create trainee');
 
-    return data.user as User;
+    return { user: data.user as User, setupLink: (data.setupLink as string | null) ?? null };
   };
 
   // Copy to clipboard helper
@@ -4566,7 +4566,7 @@ const AdminUsers = () => {
     for (const userData of csvData) {
       try {
         const tempPassword = generatePassword();
-        const createdUser = await createTraineeAccount({
+        const { user: createdUser } = await createTraineeAccount({
           firstName: userData.firstName,
           lastName: userData.lastName,
           email: userData.email,
@@ -4691,13 +4691,13 @@ const AdminUsers = () => {
     const tempPassword = generatePassword();
 
     try {
-      const createdUser = await createTraineeAccount(newUser, tempPassword);
+      const { user: createdUser, setupLink } = await createTraineeAccount(newUser, tempPassword);
       registerCreatedUser(createdUser);
 
       setCreatedCredentials({
         email: newUser.email,
-        password: tempPassword,
-        name: `${newUser.firstName} ${newUser.lastName}`
+        name: `${newUser.firstName} ${newUser.lastName}`,
+        setupLink,
       });
 
       setShowAddModal(false);
@@ -5275,12 +5275,12 @@ const AdminUsers = () => {
 
             <div className="space-y-4">
               <p className="text-gray-400 text-sm">
-                Share these login credentials with the trainee. They can use these to access the training portal.
+                A setup email has been sent to <span className="text-white font-medium">{createdCredentials.email}</span>. The trainee will click the link in that email to set their own password and sign in.
               </p>
 
               {/* Email field */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Trainee Email</label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-black/40 border border-red-900/20 px-4 py-3 text-white font-mono text-sm">
                     {createdCredentials.email}
@@ -5299,44 +5299,51 @@ const AdminUsers = () => {
                 </div>
               </div>
 
-              {/* Password field */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Temporary Password</label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-black/40 border border-red-900/20 px-4 py-3 text-white font-mono text-sm">
-                    {createdCredentials.password}
+              {/* Setup link fallback */}
+              {createdCredentials.setupLink && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Setup Link (fallback if email isn't received)</label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-black/40 border border-red-900/20 px-4 py-3 text-white font-mono text-xs break-all">
+                      {createdCredentials.setupLink}
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard(createdCredentials.setupLink || '', 'link')}
+                      className="p-3 border border-red-900/20 hover:bg-red-900/10 transition-colors text-gray-400 hover:text-white flex-shrink-0"
+                      title="Copy setup link"
+                    >
+                      {copiedField === 'link' ? (
+                        <Icons.Check className="h-4 w-4 text-green-400" />
+                      ) : (
+                        <Icons.Copy className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => copyToClipboard(createdCredentials.password, 'password')}
-                    className="p-3 border border-red-900/20 hover:bg-red-900/10 transition-colors text-gray-400 hover:text-white"
-                    title="Copy password"
-                  >
-                    {copiedField === 'password' ? (
-                      <Icons.Check className="h-4 w-4 text-green-400" />
-                    ) : (
-                      <Icons.Copy className="h-4 w-4" />
-                    )}
-                  </button>
+                  <p className="text-xs text-gray-500">
+                    This link expires in 1 hour. Share it directly via WhatsApp/SMS only if the email doesn't arrive.
+                  </p>
                 </div>
-              </div>
+              )}
 
               {/* Copy all button */}
-              <button
-                onClick={() => copyToClipboard(`Flatline Security Training Portal\nhttps://www.fstsolutionsltd.com\n\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`, 'all')}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-900/30 hover:bg-red-900/10 transition-colors text-gray-300 hover:text-white"
-              >
-                {copiedField === 'all' ? (
-                  <>
-                    <Icons.Check className="h-4 w-4 text-green-400" />
-                    <span className="text-green-400">Copied to clipboard!</span>
-                  </>
-                ) : (
-                  <>
-                    <Icons.Copy className="h-4 w-4" />
-                    <span>Copy All Credentials</span>
-                  </>
-                )}
-              </button>
+              {createdCredentials.setupLink && (
+                <button
+                  onClick={() => copyToClipboard(`Flatline Security Training Portal\n\nHi ${createdCredentials.name},\n\nYour account is ready. Use the link below to set your password:\n${createdCredentials.setupLink}\n\nThis link expires in 1 hour.\n\nAfter setup, sign in at https://www.fstsolutionsltd.com`, 'all')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-900/30 hover:bg-red-900/10 transition-colors text-gray-300 hover:text-white"
+                >
+                  {copiedField === 'all' ? (
+                    <>
+                      <Icons.Check className="h-4 w-4 text-green-400" />
+                      <span className="text-green-400">Copied to clipboard!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icons.Copy className="h-4 w-4" />
+                      <span>Copy Full Setup Message</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
 
             <div className="pt-4 border-t border-red-900/20">

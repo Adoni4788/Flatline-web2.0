@@ -113,9 +113,25 @@ serve(async (req) => {
       return jsonResponse({ error: profileError.message }, 400);
     }
 
-    // Send welcome email with credentials — non-blocking, don't fail account creation if this errors
+    // Generate a one-time setup link so the trainee can set their own password
+    let setupLink: string | null = null;
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: {
+        redirectTo: 'https://www.fstsolutionsltd.com/reset-password',
+      },
+    });
+
+    if (linkError) {
+      console.error('Failed to generate setup link:', linkError);
+    } else {
+      setupLink = linkData?.properties?.action_link ?? null;
+    }
+
+    // Send welcome email with setup link — non-blocking, don't fail account creation if this errors
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (resendApiKey) {
+    if (resendApiKey && setupLink) {
       try {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -126,38 +142,31 @@ serve(async (req) => {
           body: JSON.stringify({
             from: 'Flatline Security Training <noreply@fstsolutionsltd.com>',
             to: [email],
-            subject: 'Your Flatline Security Training Account',
+            subject: 'Set up your Flatline Security Training account',
+            text: `Hi ${firstName},\n\nYour training portal account has been created. To get started, set your password using the link below:\n\n${setupLink}\n\nThis link expires in 1 hour. Once you've set your password, you can sign in any time at https://www.fstsolutionsltd.com.\n\nIf you didn't expect this email, you can safely ignore it.\n\nFlatline Security Training & Solutions Ltd\ninfo@fstsolutionsltd.com`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #030712; color: #ffffff; padding: 32px; border: 1px solid #1f2937;">
                 <div style="border-left: 4px solid #dc2626; padding-left: 16px; margin-bottom: 24px;">
                   <h1 style="margin: 0; font-size: 24px; color: #ffffff;">Welcome to Flatline Security Training</h1>
-                  <p style="margin: 4px 0 0; color: #9ca3af; font-size: 14px;">Your account is ready</p>
+                  <p style="margin: 4px 0 0; color: #9ca3af; font-size: 14px;">Set up your account to get started</p>
                 </div>
 
                 <p style="color: #d1d5db; line-height: 1.6;">Hi ${firstName},</p>
                 <p style="color: #d1d5db; line-height: 1.6;">
-                  Your training portal account has been created. Use the credentials below to log in and begin your training.
+                  Your training portal account has been created. Click the button below to set your password and access your courses.
                 </p>
 
-                <div style="background: #0a0f1c; border: 1px solid #1f2937; padding: 20px; margin: 24px 0;">
-                  <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; width: 100px;">Portal</td>
-                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937;"><a href="https://www.fstsolutionsltd.com" style="color: #dc2626;">https://www.fstsolutionsltd.com</a></td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Email</td>
-                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937; color: #ffffff;">${email}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px 0; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Password</td>
-                      <td style="padding: 10px 0; color: #ffffff; font-family: monospace; font-size: 15px; letter-spacing: 0.05em;">${password}</td>
-                    </tr>
-                  </table>
+                <div style="text-align: center; margin: 32px 0;">
+                  <a href="${setupLink}" style="display: inline-block; background: #dc2626; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: 600; letter-spacing: 0.05em;">Set Up My Account</a>
                 </div>
 
-                <p style="color: #d1d5db; line-height: 1.6;">
-                  For security, we recommend changing your password after your first login.
+                <p style="color: #9ca3af; font-size: 13px; line-height: 1.6;">
+                  If the button doesn't work, copy and paste this link into your browser:<br />
+                  <span style="color: #d1d5db; word-break: break-all;">${setupLink}</span>
+                </p>
+
+                <p style="color: #9ca3af; font-size: 13px; line-height: 1.6;">
+                  This link will expire in 1 hour. Once your password is set, you can sign in any time at <a href="https://www.fstsolutionsltd.com" style="color: #dc2626;">www.fstsolutionsltd.com</a>.
                 </p>
 
                 <hr style="border: none; border-top: 1px solid #1f2937; margin: 24px 0;" />
@@ -185,6 +194,7 @@ serve(async (req) => {
         status: 'active',
         source,
       },
+      setupLink,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected server error';
