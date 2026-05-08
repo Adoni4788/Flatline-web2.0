@@ -83,40 +83,40 @@ serve(async (req) => {
       return jsonResponse({ error: 'A valid email address is required' }, 400);
     }
 
-    let { data: createdAuthData, error: createAuthError } = await adminClient.auth.admin.createUser({
+    // Pre-flight: clean up any orphans from prior incomplete deletions before creating.
+    // Orphans can exist in auth.users (auth user lingered after delete), in public.users
+    // (profile lingered), or both. A genuine active user has matching rows in both tables.
+    const { data: existingProfile } = await adminClient
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    const { data: usersList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    const existingAuth = usersList?.users.find((u) => u.email?.toLowerCase() === email) ?? null;
+
+    // Both rows exist and reference the same id → real active user, refuse
+    if (existingProfile && existingAuth && existingProfile.id === existingAuth.id) {
+      return jsonResponse({ error: 'A user with this email already exists' }, 400);
+    }
+
+    // Orphaned profile row → delete its dependent rows then the profile itself
+    if (existingProfile) {
+      await adminClient.from('enrollments').delete().eq('user_id', existingProfile.id);
+      await adminClient.from('exam_attempts').delete().eq('user_id', existingProfile.id);
+      await adminClient.from('users').delete().eq('id', existingProfile.id);
+    }
+
+    // Orphaned auth user (or one with a mismatched id) → delete it
+    if (existingAuth && existingAuth.id !== existingProfile?.id) {
+      await adminClient.auth.admin.deleteUser(existingAuth.id);
+    }
+
+    const { data: createdAuthData, error: createAuthError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
-
-    // If the email is already taken at the auth level, check whether it's an orphan
-    // (auth user exists but no profile in public.users — happens if a prior delete
-    // didn't clean up auth). If orphan, remove it and retry. Otherwise, real duplicate.
-    if (createAuthError && /already|registered|exists|duplicate/i.test(createAuthError.message)) {
-      const { data: usersList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-      const existingAuth = usersList?.users.find((u) => u.email?.toLowerCase() === email);
-
-      if (existingAuth) {
-        const { data: existingProfile } = await adminClient
-          .from('users')
-          .select('id')
-          .eq('id', existingAuth.id)
-          .maybeSingle();
-
-        if (!existingProfile) {
-          await adminClient.auth.admin.deleteUser(existingAuth.id);
-          const retry = await adminClient.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-          });
-          createdAuthData = retry.data;
-          createAuthError = retry.error;
-        } else {
-          return jsonResponse({ error: 'A user with this email already exists' }, 400);
-        }
-      }
-    }
 
     if (createAuthError || !createdAuthData?.user) {
       return jsonResponse({ error: createAuthError?.message || 'Failed to create auth user' }, 400);
