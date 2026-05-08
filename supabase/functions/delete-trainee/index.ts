@@ -71,7 +71,9 @@ serve(async (req) => {
       return jsonResponse({ error: 'You cannot delete your own account' }, 400);
     }
 
+    // Clean up child rows first so nothing blocks the auth deletion cascade
     await adminClient.from('enrollments').delete().eq('user_id', userId);
+    await adminClient.from('exam_attempts').delete().eq('user_id', userId);
 
     const { error: profileError } = await adminClient.from('users').delete().eq('id', userId);
     if (profileError) {
@@ -81,7 +83,17 @@ serve(async (req) => {
     const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId);
     if (authDeleteError) {
       return jsonResponse({
-        error: `Profile deleted but auth user cleanup failed: ${authDeleteError.message}`,
+        error: `Profile deleted but auth user cleanup failed: ${authDeleteError.message}. The email may still be locked in auth — please contact support.`,
+        partial: true,
+      }, 207);
+    }
+
+    // Verify the auth user is actually gone (defensive check — sometimes the delete
+    // call returns success but the user lingers due to FK constraints or replication delay)
+    const { data: stillExists } = await adminClient.auth.admin.getUserById(userId);
+    if (stillExists?.user) {
+      return jsonResponse({
+        error: 'Auth user deletion did not complete. Please retry or contact support.',
         partial: true,
       }, 207);
     }

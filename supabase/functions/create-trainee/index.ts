@@ -83,13 +83,42 @@ serve(async (req) => {
       return jsonResponse({ error: 'A valid email address is required' }, 400);
     }
 
-    const { data: createdAuthData, error: createAuthError } = await adminClient.auth.admin.createUser({
+    let { data: createdAuthData, error: createAuthError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
 
-    if (createAuthError || !createdAuthData.user) {
+    // If the email is already taken at the auth level, check whether it's an orphan
+    // (auth user exists but no profile in public.users — happens if a prior delete
+    // didn't clean up auth). If orphan, remove it and retry. Otherwise, real duplicate.
+    if (createAuthError && /already|registered|exists|duplicate/i.test(createAuthError.message)) {
+      const { data: usersList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+      const existingAuth = usersList?.users.find((u) => u.email?.toLowerCase() === email);
+
+      if (existingAuth) {
+        const { data: existingProfile } = await adminClient
+          .from('users')
+          .select('id')
+          .eq('id', existingAuth.id)
+          .maybeSingle();
+
+        if (!existingProfile) {
+          await adminClient.auth.admin.deleteUser(existingAuth.id);
+          const retry = await adminClient.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+          });
+          createdAuthData = retry.data;
+          createAuthError = retry.error;
+        } else {
+          return jsonResponse({ error: 'A user with this email already exists' }, 400);
+        }
+      }
+    }
+
+    if (createAuthError || !createdAuthData?.user) {
       return jsonResponse({ error: createAuthError?.message || 'Failed to create auth user' }, 400);
     }
 
