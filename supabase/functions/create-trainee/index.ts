@@ -113,6 +113,68 @@ serve(async (req) => {
       return jsonResponse({ error: profileError.message }, 400);
     }
 
+    // Send welcome email with credentials — non-blocking, don't fail account creation if this errors
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (resendApiKey) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Flatline Security Training <noreply@fstsolutionsltd.com>',
+            to: [email],
+            subject: 'Your Flatline Security Training Account',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #030712; color: #ffffff; padding: 32px; border: 1px solid #1f2937;">
+                <div style="border-left: 4px solid #dc2626; padding-left: 16px; margin-bottom: 24px;">
+                  <h1 style="margin: 0; font-size: 24px; color: #ffffff;">Welcome to Flatline Security Training</h1>
+                  <p style="margin: 4px 0 0; color: #9ca3af; font-size: 14px;">Your account is ready</p>
+                </div>
+
+                <p style="color: #d1d5db; line-height: 1.6;">Hi ${firstName},</p>
+                <p style="color: #d1d5db; line-height: 1.6;">
+                  Your training portal account has been created. Use the credentials below to log in and begin your training.
+                </p>
+
+                <div style="background: #0a0f1c; border: 1px solid #1f2937; padding: 20px; margin: 24px 0;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; width: 100px;">Portal</td>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937;"><a href="https://www.fstsolutionsltd.com" style="color: #dc2626;">https://www.fstsolutionsltd.com</a></td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Email</td>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #1f2937; color: #ffffff;">${email}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Password</td>
+                      <td style="padding: 10px 0; color: #ffffff; font-family: monospace; font-size: 15px; letter-spacing: 0.05em;">${password}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <p style="color: #d1d5db; line-height: 1.6;">
+                  For security, we recommend changing your password after your first login.
+                </p>
+
+                <hr style="border: none; border-top: 1px solid #1f2937; margin: 24px 0;" />
+
+                <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                  Flatline Security Training &amp; Solutions Ltd<br />
+                  <a href="mailto:info@fstsolutionsltd.com" style="color: #dc2626;">info@fstsolutionsltd.com</a>
+                </p>
+              </div>
+            `,
+          }),
+        });
+      } catch (emailErr) {
+        console.error('Welcome email failed (account still created):', emailErr);
+      }
+    }
+
     return jsonResponse({
       user: {
         id: userId,
