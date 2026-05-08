@@ -148,7 +148,7 @@ serve(async (req) => {
       type: 'recovery',
       email,
       options: {
-        redirectTo: 'https://www.fstsolutionsltd.com/reset-password',
+        redirectTo: 'https://www.fstsolutionsltd.com',
       },
     });
 

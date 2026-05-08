@@ -52,6 +52,23 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Listens for Supabase PASSWORD_RECOVERY and navigates to the reset-password route.
+// Needed because HashRouter uses the URL hash for routing, which conflicts with
+// Supabase's token delivery (also appended as hash fragments). We redirect to the
+// origin-only URL so the root always loads, then this handler forwards the user.
+const AuthRedirectHandler = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        navigate('/reset-password');
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
+  return null;
+};
+
 // --- Notification Hook ---
 const useNotification = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; action?: { label: string; onClick: () => void } } | null>(null);
@@ -1992,7 +2009,7 @@ const ForgotPasswordPage = () => {
       return;
     }
     setStatus('sending');
-    const redirectTo = `${window.location.origin}/reset-password`;
+    const redirectTo = window.location.origin;
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), { redirectTo });
     if (resetError) {
       setStatus('idle');
@@ -7230,6 +7247,7 @@ const App = () => {
     <DataProvider>
       <Router>
         <ScrollToTop />
+        <AuthRedirectHandler />
         <DataLoadErrorBanner />
         <Routes>
           {/* Public */}
