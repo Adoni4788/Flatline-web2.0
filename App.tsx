@@ -2116,7 +2116,7 @@ const ResetPasswordPage = () => {
       return;
     }
     setStatus('done');
-    setTimeout(() => navigate('/login'), 2000);
+    setTimeout(() => navigate('/portal/dashboard'), 2000);
   };
 
   return (
@@ -2137,7 +2137,7 @@ const ResetPasswordPage = () => {
           </div>
         ) : status === 'done' ? (
           <div className="p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-300 text-sm text-center">
-            Password updated. Redirecting to sign in…
+            Password set. Taking you to the portal…
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
