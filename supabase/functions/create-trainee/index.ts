@@ -182,7 +182,7 @@ serve(async (req) => {
             from: 'Flatline Security Training <noreply@fstsolutionsltd.com>',
             to: [email],
             subject: 'Your Flatline Security Training activation code',
-            text: `Hi ${firstName},\n\nYour training portal account is ready. Use the code below to activate it and set your password.\n\nActivation code: ${activationCode}\n\nQuick activation link: https://www.fstsolutionsltd.com/#/activate?email=${encodeURIComponent(email)}&code=${activationCode}\n\nOr go to https://www.fstsolutionsltd.com/#/activate manually and enter your email and the code above.\n\nThis code expires in 24 hours.\n\nIf you didn't expect this email, you can safely ignore it.\n\nFlatline Security Training & Solutions Ltd\ninfo@fstsolutionsltd.com`,
+            text: `Hi ${firstName} ${lastName},\n\nYour training portal account is ready. Use the code below to activate it and set your password.\n\nActivation code: ${activationCode}\n\nQuick activation link: https://www.fstsolutionsltd.com/#/activate?email=${encodeURIComponent(email)}&code=${activationCode}\n\nOr go to https://www.fstsolutionsltd.com/#/activate manually and enter your email and the code above.\n\nThis code expires in 24 hours.\n\nIf you didn't expect this email, you can safely ignore it.\n\nFlatline Security Training & Solutions Ltd\ninfo@fstsolutionsltd.com`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #030712; color: #ffffff; padding: 32px; border: 1px solid #1f2937;">
                 <div style="border-left: 4px solid #dc2626; padding-left: 16px; margin-bottom: 24px;">
@@ -190,7 +190,7 @@ serve(async (req) => {
                   <p style="margin: 4px 0 0; color: #9ca3af; font-size: 14px;">Activate your account to get started</p>
                 </div>
 
-                <p style="color: #d1d5db; line-height: 1.6;">Hi ${firstName},</p>
+                <p style="color: #d1d5db; line-height: 1.6;">Hi ${firstName} ${lastName},</p>
                 <p style="color: #d1d5db; line-height: 1.6;">
                   Your training portal account is ready. Use the activation code below to set your password and access your courses.
                 </p>
