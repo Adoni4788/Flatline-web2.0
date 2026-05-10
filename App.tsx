@@ -59,11 +59,13 @@ const ScrollToTop = () => {
 const AuthRedirectHandler = () => {
   const navigate = useNavigate();
   useEffect(() => {
-    // Supabase processes recovery tokens at client init time — before React mounts —
-    // so PASSWORD_RECOVERY fires before our listener is registered. Check the hash
-    // directly as a fallback: if type=recovery is present, the token was already handled.
-    if (window.location.hash.includes('type=recovery')) {
-      navigate('/reset-password');
+    // Supabase's detectSessionInUrl consumes the URL hash before React mounts, so we
+    // can't read it here. The inline script in index.html captures the recovery flag
+    // before the SDK loads and stores it on window.__pendingAuthRedirect.
+    const pending = (window as unknown as { __pendingAuthRedirect?: string }).__pendingAuthRedirect;
+    if (pending) {
+      (window as unknown as { __pendingAuthRedirect?: string }).__pendingAuthRedirect = undefined;
+      navigate(pending);
       return;
     }
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {

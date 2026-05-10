@@ -8,6 +8,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+      // Capture Supabase auth redirect flags before the SDK loads and clears the URL.
+      // The Supabase client's detectSessionInUrl=true consumes hash tokens on init,
+      // so we record any recovery/signup flow here for the React app to read later.
+      (function () {
+        var hash = window.location.hash || '';
+        if (hash.indexOf('type=recovery') !== -1 || hash.indexOf('type=signup') !== -1 || hash.indexOf('type=invite') !== -1) {
+          window.__pendingAuthRedirect = '/reset-password';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
