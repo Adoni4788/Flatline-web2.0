@@ -15,6 +15,16 @@
       (function () {
         var hash = window.location.hash || '';
         var search = window.location.search || '';
+        // Save snapshot for debugging — we can't easily inspect the URL after
+        // the SDK and HashRouter both rewrite it.
+        try {
+          window.localStorage.setItem('__authLandingUrl', JSON.stringify({
+            href: window.location.href,
+            hash: hash,
+            search: search,
+            ts: new Date().toISOString()
+          }));
+        } catch (e) { /* ignore */ }
         if (
           hash.indexOf('type=recovery') !== -1 ||
           hash.indexOf('type=signup') !== -1 ||
