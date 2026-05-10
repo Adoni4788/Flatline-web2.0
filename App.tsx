@@ -2177,8 +2177,14 @@ const ResetPasswordPage = () => {
 };
 
 const ActivatePage = () => {
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const location = useLocation();
+  // HashRouter exposes the route's query string via location.search.
+  // We pre-fill email + code from query params so a one-click link in the
+  // welcome email skips manual entry. The OTP isn't consumed until the user
+  // clicks the verify button, so email scanners loading this URL are harmless.
+  const initialParams = new URLSearchParams(location.search);
+  const [email, setEmail] = useState(initialParams.get('email') || '');
+  const [code, setCode] = useState(initialParams.get('code') || '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [step, setStep] = useState<'verify' | 'password' | 'done'>('verify');
