@@ -2176,6 +2176,158 @@ const ResetPasswordPage = () => {
   );
 };
 
+const ActivatePage = () => {
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [step, setStep] = useState<'verify' | 'password' | 'done'>('verify');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedCode = code.trim().replace(/\s+/g, '');
+    if (!trimmedEmail || !trimmedCode) {
+      setError('Email and activation code are required');
+      return;
+    }
+    setSubmitting(true);
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: trimmedEmail,
+      token: trimmedCode,
+      type: 'recovery',
+    });
+    setSubmitting(false);
+    if (verifyError) {
+      setError(verifyError.message || 'That code is not valid. Double-check and try again.');
+      return;
+    }
+    setStep('password');
+  };
+
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    setSubmitting(true);
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    setSubmitting(false);
+    if (updateError) {
+      setError(updateError.message || 'Unable to set password');
+      return;
+    }
+    setStep('done');
+    setTimeout(() => navigate('/portal/dashboard'), 1500);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden px-4 py-8">
+      <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
+      <Card className="w-full max-w-md p-6 sm:p-8 relative z-10 border-white/10 bg-[#0a0f1c]/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-900/50">
+            <Icons.Shield className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-h3 font-archivo tracking-tight text-white">
+            {step === 'done' ? 'You’re all set' : 'Activate Your Account'}
+          </h1>
+          <p className="text-body2 text-gray-400 mt-2">
+            {step === 'verify' && 'Enter your email and the activation code from your welcome email.'}
+            {step === 'password' && 'Code accepted. Choose a password for your account.'}
+            {step === 'done' && 'Taking you to the portal…'}
+          </p>
+        </div>
+
+        {step === 'verify' && (
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">Email Address</label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="h-11 rounded-none"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">Activation Code</label>
+              <Input
+                type="text"
+                placeholder="123456"
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                required
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                className="h-11 rounded-none tracking-widest font-mono text-lg text-center"
+              />
+            </div>
+            {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-caption1 font-medium text-center">{error}</div>}
+            <Button type="submit" size="lg" className="w-full h-11 shadow-lg shadow-red-900/20" disabled={submitting}>
+              {submitting ? 'Verifying…' : 'Verify Code'}
+            </Button>
+            <div className="text-center pt-1">
+              <Link to="/login" className="text-caption1 text-gray-400 hover:text-red-400 transition-colors">
+                Back to Sign In
+              </Link>
+            </div>
+          </form>
+        )}
+
+        {step === 'password' && (
+          <form onSubmit={handleSetPassword} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">New Password</label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                required
+                className="h-11 rounded-none"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-caption1 font-medium text-gray-300 ml-1">Confirm Password</label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                required
+                className="h-11 rounded-none"
+              />
+            </div>
+            {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-caption1 font-medium text-center">{error}</div>}
+            <Button type="submit" size="lg" className="w-full h-11 shadow-lg shadow-red-900/20" disabled={submitting}>
+              {submitting ? 'Saving…' : 'Set Password & Sign In'}
+            </Button>
+          </form>
+        )}
+
+        {step === 'done' && (
+          <div className="p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-300 text-sm text-center">
+            Password set. Taking you to the portal…
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};
+
 const AuthErrorPage = () => {
   const errorHash = (window as unknown as { __pendingAuthError?: string }).__pendingAuthError || '';
   const params = new URLSearchParams(errorHash.replace(/^#/, ''));
@@ -7307,6 +7459,7 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/activate" element={<ActivatePage />} />
           <Route path="/auth-error" element={<AuthErrorPage />} />
 
           {/* Student Portal */}
