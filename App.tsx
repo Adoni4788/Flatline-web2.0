@@ -2176,6 +2176,46 @@ const ResetPasswordPage = () => {
   );
 };
 
+const AuthErrorPage = () => {
+  const errorHash = (window as unknown as { __pendingAuthError?: string }).__pendingAuthError || '';
+  const params = new URLSearchParams(errorHash.replace(/^#/, ''));
+  const errorCode = params.get('error_code') || '';
+  const errorDesc = (params.get('error_description') || '').replace(/\+/g, ' ');
+  const isExpired = errorCode === 'otp_expired' || errorDesc.toLowerCase().includes('expired');
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden px-4 py-8">
+      <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
+      <Card className="w-full max-w-md p-6 sm:p-8 relative z-10 border-white/10 bg-[#0a0f1c]/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-amber-900/30 border border-amber-500/30 flex items-center justify-center mx-auto mb-4">
+            <span className="text-amber-400 text-2xl font-bold">!</span>
+          </div>
+          <h1 className="text-h3 font-archivo tracking-tight text-white">
+            {isExpired ? 'Link Expired' : 'Link Invalid'}
+          </h1>
+          <p className="text-body2 text-gray-400 mt-2">
+            {isExpired
+              ? 'This setup link has already been used or has expired.'
+              : (errorDesc || 'This link is no longer valid.')}
+          </p>
+        </div>
+        <div className="space-y-3 text-sm text-gray-400 leading-relaxed">
+          <p>Please contact your administrator and ask them to send you a new setup link.</p>
+          <p className="text-xs text-gray-500">
+            Tip: setup links expire and can only be used once. Some email providers automatically scan links, which can use them up before you click.
+          </p>
+        </div>
+        <div className="mt-6">
+          <Link to="/" className="block text-center text-caption1 text-gray-400 hover:text-red-400 transition-colors">
+            Back to home
+          </Link>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
 // --- Student Pages ---
 
 const StudentDashboard = () => {
@@ -7267,6 +7307,7 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth-error" element={<AuthErrorPage />} />
 
           {/* Student Portal */}
           {/* Course Player - Fullscreen without layout */}

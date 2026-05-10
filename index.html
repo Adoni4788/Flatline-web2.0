@@ -32,6 +32,10 @@
           search.indexOf('code=') !== -1
         ) {
           window.__pendingAuthRedirect = '/reset-password';
+        } else if (hash.indexOf('error=') !== -1 || hash.indexOf('error_code=') !== -1) {
+          // Capture the error so the app can show a useful message
+          window.__pendingAuthError = hash;
+          window.__pendingAuthRedirect = '/auth-error';
         }
       })();
     </script>
