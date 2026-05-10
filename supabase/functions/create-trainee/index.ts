@@ -160,9 +160,15 @@ serve(async (req) => {
 
     // Send welcome email with setup link — non-blocking, don't fail account creation if this errors
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (resendApiKey && setupLink) {
+    let emailSent = false;
+    let emailError: string | null = null;
+    if (!resendApiKey) {
+      emailError = 'RESEND_API_KEY not configured';
+    } else if (!setupLink) {
+      emailError = linkError?.message || 'Setup link could not be generated';
+    } else {
       try {
-        await fetch('https://api.resend.com/emails', {
+        const resendResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${resendApiKey}`,
@@ -208,7 +214,19 @@ serve(async (req) => {
             `,
           }),
         });
+        if (resendResponse.ok) {
+          emailSent = true;
+        } else {
+          let detail = `${resendResponse.status}`;
+          try {
+            const body = await resendResponse.json();
+            detail = body?.message || body?.error || JSON.stringify(body);
+          } catch (_) { /* ignore parse error */ }
+          emailError = `Resend rejected the email: ${detail}`;
+          console.error('Resend rejected the email:', detail);
+        }
       } catch (emailErr) {
+        emailError = emailErr instanceof Error ? emailErr.message : 'Unknown email error';
         console.error('Welcome email failed (account still created):', emailErr);
       }
     }
@@ -224,6 +242,8 @@ serve(async (req) => {
         source,
       },
       setupLink,
+      emailSent,
+      emailError,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected server error';
