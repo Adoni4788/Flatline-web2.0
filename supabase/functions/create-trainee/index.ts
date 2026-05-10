@@ -179,14 +179,14 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Flatline Security Training & Solutions Ltd <noreply@fstsolutionsltd.com>',
+            from: 'Flatline Security and Training Solutions Ltd <noreply@fstsolutionsltd.com>',
             to: [email],
-            subject: 'Your Flatline Security Training & Solutions Ltd activation code',
-            text: `Hi ${firstName} ${lastName},\n\nYour training portal account is ready. Use the code below to activate it and set your password.\n\nActivation code: ${activationCode}\n\nQuick activation link: https://www.fstsolutionsltd.com/#/activate?email=${encodeURIComponent(email)}&code=${activationCode}\n\nOr go to https://www.fstsolutionsltd.com/#/activate manually and enter your email and the code above.\n\nThis code expires in 24 hours.\n\nIf you didn't expect this email, you can safely ignore it.\n\nFlatline Security Training & Solutions Ltd\ninfo@fstsolutionsltd.com`,
+            subject: 'Your Flatline Security and Training Solutions Ltd activation code',
+            text: `Hi ${firstName} ${lastName},\n\nYour training portal account is ready. Use the code below to activate it and set your password.\n\nActivation code: ${activationCode}\n\nQuick activation link: https://www.fstsolutionsltd.com/#/activate?email=${encodeURIComponent(email)}&code=${activationCode}\n\nOr go to https://www.fstsolutionsltd.com/#/activate manually and enter your email and the code above.\n\nThis code expires in 24 hours.\n\nIf you didn't expect this email, you can safely ignore it.\n\nFlatline Security and Training Solutions Ltd\ninfo@fstsolutionsltd.com`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #030712; color: #ffffff; padding: 32px; border: 1px solid #1f2937;">
                 <div style="border-left: 4px solid #dc2626; padding-left: 16px; margin-bottom: 24px;">
-                  <h1 style="margin: 0; font-size: 22px; color: #ffffff;">Welcome to Flatline Security Training &amp; Solutions Ltd</h1>
+                  <h1 style="margin: 0; font-size: 22px; color: #ffffff;">Welcome to Flatline Security and Training Solutions Ltd</h1>
                   <p style="margin: 4px 0 0; color: #9ca3af; font-size: 14px;">Activate your account to get started</p>
                 </div>
 
@@ -224,7 +224,7 @@ serve(async (req) => {
                 <hr style="border: none; border-top: 1px solid #1f2937; margin: 24px 0;" />
 
                 <p style="color: #6b7280; font-size: 12px; margin: 0;">
-                  Flatline Security Training &amp; Solutions Ltd<br />
+                  Flatline Security and Training Solutions Ltd<br />
                   <a href="mailto:info@fstsolutionsltd.com" style="color: #dc2626;">info@fstsolutionsltd.com</a>
                 </p>
               </div>
