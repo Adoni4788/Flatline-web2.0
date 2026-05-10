@@ -4634,7 +4634,7 @@ const AdminUsers = () => {
   const [showCoursesModal, setShowCoursesModal] = useState(false);
   const [coursesModalUser, setCoursesModalUser] = useState<User | null>(null);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; name: string; setupLink: string | null } | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; name: string; activationCode: string | null } | null>(null);
   const [copiedField, setCopiedField] = useState<'email' | 'link' | 'all' | null>(null);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -4704,7 +4704,11 @@ const AdminUsers = () => {
     if (errMsg) throw new Error(errMsg);
     if (!data?.user) throw new Error('Failed to create trainee');
 
-    return { user: data.user as User, setupLink: (data.setupLink as string | null) ?? null };
+    return {
+      user: data.user as User,
+      setupLink: (data.setupLink as string | null) ?? null,
+      activationCode: (data.activationCode as string | null) ?? null,
+    };
   };
 
   // Copy to clipboard helper
@@ -4909,13 +4913,13 @@ const AdminUsers = () => {
     const tempPassword = generatePassword();
 
     try {
-      const { user: createdUser, setupLink } = await createTraineeAccount(newUser, tempPassword);
+      const { user: createdUser, activationCode } = await createTraineeAccount(newUser, tempPassword);
       registerCreatedUser(createdUser);
 
       setCreatedCredentials({
         email: newUser.email,
         name: `${newUser.firstName} ${newUser.lastName}`,
-        setupLink,
+        activationCode,
       });
 
       setShowAddModal(false);
@@ -5493,7 +5497,7 @@ const AdminUsers = () => {
 
             <div className="space-y-4">
               <p className="text-gray-400 text-sm">
-                A setup email has been sent to <span className="text-white font-medium">{createdCredentials.email}</span>. The trainee will click the link in that email to set their own password and sign in.
+                An activation email has been sent to <span className="text-white font-medium">{createdCredentials.email}</span>. The trainee will go to <span className="text-white font-mono text-xs">/activate</span>, enter their email and the code, then set their own password.
               </p>
 
               {/* Email field */}
@@ -5517,18 +5521,18 @@ const AdminUsers = () => {
                 </div>
               </div>
 
-              {/* Setup link fallback */}
-              {createdCredentials.setupLink && (
+              {/* Activation code fallback */}
+              {createdCredentials.activationCode && (
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Setup Link (fallback if email isn't received)</label>
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Activation Code (fallback if email isn't received)</label>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-black/40 border border-red-900/20 px-4 py-3 text-white font-mono text-xs break-all">
-                      {createdCredentials.setupLink}
+                    <div className="flex-1 bg-black/40 border border-red-900/20 px-4 py-3 text-white font-mono text-2xl tracking-[0.3em] text-center">
+                      {createdCredentials.activationCode}
                     </div>
                     <button
-                      onClick={() => copyToClipboard(createdCredentials.setupLink || '', 'link')}
+                      onClick={() => copyToClipboard(createdCredentials.activationCode || '', 'link')}
                       className="p-3 border border-red-900/20 hover:bg-red-900/10 transition-colors text-gray-400 hover:text-white flex-shrink-0"
-                      title="Copy setup link"
+                      title="Copy activation code"
                     >
                       {copiedField === 'link' ? (
                         <Icons.Check className="h-4 w-4 text-green-400" />
@@ -5538,15 +5542,15 @@ const AdminUsers = () => {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    This link expires in 1 hour. Share it directly via WhatsApp/SMS only if the email doesn't arrive.
+                    This code expires in 24 hours. Share it via WhatsApp/SMS only if the email doesn't arrive.
                   </p>
                 </div>
               )}
 
               {/* Copy all button */}
-              {createdCredentials.setupLink && (
+              {createdCredentials.activationCode && (
                 <button
-                  onClick={() => copyToClipboard(`Flatline Security Training Portal\n\nHi ${createdCredentials.name},\n\nYour account is ready. Use the link below to set your password:\n${createdCredentials.setupLink}\n\nThis link expires in 1 hour.\n\nAfter setup, sign in at https://www.fstsolutionsltd.com`, 'all')}
+                  onClick={() => copyToClipboard(`Flatline Security Training Portal\n\nHi ${createdCredentials.name},\n\nYour account is ready. To activate it:\n\n1. Go to https://www.fstsolutionsltd.com/#/activate\n2. Enter your email: ${createdCredentials.email}\n3. Enter your activation code: ${createdCredentials.activationCode}\n4. Choose your password\n\nThis code expires in 24 hours.`, 'all')}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-900/30 hover:bg-red-900/10 transition-colors text-gray-300 hover:text-white"
                 >
                   {copiedField === 'all' ? (
@@ -5557,7 +5561,7 @@ const AdminUsers = () => {
                   ) : (
                     <>
                       <Icons.Copy className="h-4 w-4" />
-                      <span>Copy Full Setup Message</span>
+                      <span>Copy Full Activation Message</span>
                     </>
                   )}
                 </button>
