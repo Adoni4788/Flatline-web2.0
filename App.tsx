@@ -2905,7 +2905,7 @@ const CoursePlayer = () => {
     <div className="flex h-screen overflow-hidden bg-[#030712]">
       {/* Sidebar - Lesson Navigation */}
       <div className="w-80 border-r border-white/5 bg-[#02040a] flex flex-col overflow-hidden">
-        <div className="pr-6 pt-6 pb-6 border-b border-white/5">
+        <div className="px-6 py-6 border-b border-white/5">
           <Button
             variant="ghost"
             size="sm"
@@ -2940,7 +2940,7 @@ const CoursePlayer = () => {
             const moduleLessons = lessons.filter(l => l.moduleId === module.id).sort((a, b) => a.orderNumber - b.orderNumber);
             return (
               <div key={module.id} className="border-b border-white/5">
-                <div className="pr-4 pt-4 pb-4 bg-white/[0.02]">
+                <div className="px-6 py-4 bg-white/[0.02]">
                   <div className="text-caption1 text-gray-500 mb-1">Module {moduleIndex + 1}</div>
                   <div className="text-subtitle2 font-archivo text-white">{module.title}</div>
                 </div>
@@ -2956,7 +2956,7 @@ const CoursePlayer = () => {
                           setQuizAnswers({});
                           setQuizSubmitted(false);
                         }}
-                        className={`w-full text-left pr-6 pt-3 pb-3 pl-0 border-l-4 transition-all ${isCurrent
+                        className={`w-full text-left pr-6 pt-3 pb-3 pl-5 border-l-4 transition-all ${isCurrent
                           ? 'bg-red-500/10 border-l-red-500 text-red-400'
                           : 'border-l-transparent text-gray-400 hover:bg-white/5 hover:text-white'
                           }`}
